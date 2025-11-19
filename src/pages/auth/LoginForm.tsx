@@ -83,7 +83,7 @@ export function LoginForm() {
             >
                 {/* Header */}
                 <div className="text-center">
-                    <div className="mx-auto w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-blue-500/30">
+                    <div className="mx-auto w-14 h-14 bg-gradient-to-br from-red-500 to-red-600  rounded-xl flex items-center justify-center mb-3 shadow-lg shadow-blue-500/30">
                         <LogIn className="w-7 h-7 text-white" />
                     </div>
                     <h1 className="text-2xl font-bold text-slate-900 mb-1">
@@ -160,7 +160,7 @@ export function LoginForm() {
                 <button
                     type="submit"
                     disabled={apiState.status === "loading"}
-                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                    className="w-full bg-gradient-to-r from-red-500 to-red-600  hover:red-blue-600 hover:to-red-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
                 >
                     {apiState.status === "loading" ? (
                         <>

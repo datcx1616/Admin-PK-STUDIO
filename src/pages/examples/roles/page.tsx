@@ -1,4 +1,4 @@
-import { Plus, Users, Crown, Monitor, Edit2, AlertCircle, Edit, Trash2 } from "lucide-react"
+import { Users, Crown, Monitor, Edit2, AlertCircle, Edit, Trash2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +8,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs"
+import { SiteHeader } from "@/pages/examples/roles/components/site-header"
 
 const roleStats = [
     {
@@ -185,31 +186,22 @@ const roleDescriptions = [
 
 export default function PermissionsManagement() {
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-6">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Quản Lý Phân Quyền</h1>
-                    <p className="text-sm text-gray-500 mt-1">Quản lý người dùng và phân quyền truy cập</p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2">
-                        <Plus className="w-4 h-4" />
-                        Thêm Người Dùng
-                    </Button>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="min-h-screen">
+            <SiteHeader />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 px-6 pt-6">
                 {roleStats.map((stat, index) => (
-                    <Card key={index} className="hover:shadow-lg transition-shadow">
+                    <Card
+                        key={index}
+                        className="hover:shadow-lg transition-shadow border rounded-xl"
+                    >
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-600 mb-2">{stat.title}</p>
+                                    <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
                                     <p className="text-3xl font-bold text-gray-900">{stat.count}</p>
                                 </div>
-                                <div className={`${stat.iconBg} p-3 rounded-lg`}>
+
+                                <div className={`${stat.iconBg} p-3 rounded-xl flex items-center justify-center`}>
                                     <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
                                 </div>
                             </div>
@@ -217,89 +209,119 @@ export default function PermissionsManagement() {
                     </Card>
                 ))}
             </div>
-            <div className="mb-6">
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 mr-2">Lọc theo vai trò:</span>
-                    <Tabs defaultValue="all" className="w-auto">
-                        <TabsList className="bg-white">
+
+            <div className="px-6 py-3">
+                <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-700 font-medium">Lọc theo vai trò:</span>
+                    <Tabs defaultValue="all" className="w-fit">
+                        <TabsList className="bg-white shadow-sm border rounded-lg">
                             <TabsTrigger
                                 value="all"
-                                className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-100"
                             >
                                 Tất cả
                             </TabsTrigger>
-                            <TabsTrigger value="admin">Tổng Quản</TabsTrigger>
-                            <TabsTrigger value="leader">Team Leader</TabsTrigger>
-                            <TabsTrigger value="manager">Quản Lý Kênh</TabsTrigger>
-                            <TabsTrigger value="editor">Editor</TabsTrigger>
+
+                            <TabsTrigger
+                                value="admin"
+                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-100"
+                            >
+                                Tổng Quản
+                            </TabsTrigger>
+
+                            <TabsTrigger
+                                value="leader"
+                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-100"
+                            >
+                                Team Leader
+                            </TabsTrigger>
+
+                            <TabsTrigger
+                                value="manager"
+                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-100"
+                            >
+                                Quản Lý Kênh
+                            </TabsTrigger>
+
+                            <TabsTrigger
+                                value="editor"
+                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-100"
+                            >
+                                Editor
+                            </TabsTrigger>
                         </TabsList>
                     </Tabs>
                 </div>
             </div>
-            <Card className="mb-6">
-                <CardContent className="p-0">
-                    <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
-                        <div className="col-span-3">NGƯỜI DÙNG</div>
-                        <div className="col-span-2">VAI TRÒ</div>
-                        <div className="col-span-2">TEAM</div>
-                        <div className="col-span-4">QUYỀN TRUY CẬP</div>
-                        <div className="col-span-1 text-right">THAO TÁC</div>
-                    </div>
 
-                    <div className="divide-y">
-                        {users.map((user) => (
-                            <div
-                                key={user.id}
-                                className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors items-center"
-                            >
-                                <div className="col-span-3 flex items-center gap-3">
-                                    <Avatar className={`${user.avatarColor} h-10 w-10`}>
-                                        <AvatarFallback className="text-white font-semibold">
-                                            {user.avatar}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <p className="font-semibold text-gray-900">{user.name}</p>
-                                        <p className="text-xs text-gray-500">{user.email}</p>
+
+            <div className="pl-6 p-6">
+                <Card>
+                    <CardContent className="p-0">
+                        <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
+                            <div className="col-span-3">NGƯỜI DÙNG</div>
+                            <div className="col-span-2">VAI TRÒ</div>
+                            <div className="col-span-2">TEAM</div>
+                            <div className="col-span-4">QUYỀN TRUY CẬP</div>
+                            <div className="col-span-1 text-right">THAO TÁC</div>
+                        </div>
+
+                        <div className="divide-y">
+                            {users.map((user) => (
+                                <div
+                                    key={user.id}
+                                    className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors items-center"
+                                >
+                                    <div className="col-span-3 flex items-center gap-3">
+                                        <Avatar className={`${user.avatarColor} h-10 w-10`}>
+                                            <AvatarFallback className="text-white font-semibold">
+                                                {user.avatar}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-semibold text-gray-900">{user.name}</p>
+                                            <p className="text-xs text-gray-500">{user.email}</p>
+                                        </div>
+                                    </div>
+
+
+                                    <div className="col-span-2">
+                                        <Badge className={`${user.roleColor} border-0`}>
+                                            {user.role}
+                                        </Badge>
+                                    </div>
+
+                                    <div className="col-span-2">
+                                        <p className="text-sm text-gray-700">{user.team}</p>
+                                    </div>
+
+                                    <div className="col-span-4">
+                                        <p className="text-sm text-gray-600">{user.permissions}</p>
+                                    </div>
+                                    <div className="col-span-1 flex items-center justify-end gap-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                        >
+                                            <Edit className="w-4 h-4 text-gray-600" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                        >
+                                            <Trash2 className="w-4 h-4 text-gray-600" />
+                                        </Button>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
-
-                                <div className="col-span-2">
-                                    <Badge className={`${user.roleColor} border-0`}>
-                                        {user.role}
-                                    </Badge>
-                                </div>
-
-                                <div className="col-span-2">
-                                    <p className="text-sm text-gray-700">{user.team}</p>
-                                </div>
-
-                                <div className="col-span-4">
-                                    <p className="text-sm text-gray-600">{user.permissions}</p>
-                                </div>
-                                <div className="col-span-1 flex items-center justify-end gap-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                    >
-                                        <Edit className="w-4 h-4 text-gray-600" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8"
-                                    >
-                                        <Trash2 className="w-4 h-4 text-gray-600" />
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-            <div>
+            <div className="p-6">
                 <div className="flex items-center gap-2 mb-4">
                     <AlertCircle className="w-5 h-5 text-gray-700" />
                     <h2 className="text-lg font-bold text-gray-900">Mô Tả Quyền Hạn</h2>

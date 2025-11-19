@@ -150,7 +150,7 @@ export function SignupForm() {
             <button
                 type="submit"
                 disabled={apiState.status === "loading"}
-                className="w-full rounded-lg bg-[#0EA5E9] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0284C7] disabled:bg-[#0EA5E9]/60"
+                className="w-full rounded-lg from-red-500 to-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0284C7] disabled:bg-[#0EA5E9]/60"
             >
                 {apiState.status === "loading"
                     ? (t("auth.creatingAccount") || "Creating account...")

@@ -15,6 +15,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
+import { SiteHeader } from "@/pages/examples/analytics/components/site-header"
 
 const statsCards = [
     {
@@ -87,15 +88,15 @@ const audienceMetrics = [
 
 export default function DetailedAnalytics() {
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-6">
-            <div className="flex items-center justify-between mb-6">
+        <div className="min-h-screen ">
+            {/* <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Phân Tích Chi Tiết</h1>
                     <p className="text-sm text-gray-500 mt-1">Thống kê và insights cho kênh YouTube</p>
                 </div>
-            </div>
-
-            <div className="mb-6">
+            </div> */}
+            <SiteHeader />
+            <div className="mb-6 pt-4 pl-6">
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                     Chọn kênh:
                 </label>
@@ -112,7 +113,7 @@ export default function DetailedAnalytics() {
                 </Select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 pl-6">
                 {statsCards.map((stat, index) => (
                     <Card key={index} className="hover:shadow-lg transition-shadow mb-6 ">
                         <CardContent className="p-6">
@@ -138,77 +139,80 @@ export default function DetailedAnalytics() {
                     </Card>
                 ))}
             </div>
+            <div className=" pl-6 ">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <DollarSign className="w-5 h-5 text-green-600" />
+                            <CardTitle className="text-lg">Doanh Thu</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <Card className="bg-green-500 text-white border-0">
+                                <CardContent className="p-6">
+                                    <p className="text-sm opacity-90 mb-2">Doanh thu 30 ngày</p>
+                                    <p className="text-3xl font-bold mb-2">6.125.000 ₫</p>
+                                    <div className="flex items-center gap-1 text-sm">
+                                        <TrendingUp className="w-4 h-4" />
+                                        <span>+17% so với tháng trước</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardContent className="p-6">
+                                    <p className="text-sm text-gray-600 mb-2">CPM Trung Bình</p>
+                                    <p className="text-3xl font-bold text-gray-900 mb-2">$5.00</p>
+                                    <p className="text-xs text-gray-500">Cost per 1000 impressions</p>
+                                </CardContent>
+                            </Card>
 
-            <Card className="mb-6">
-                <CardHeader>
-                    <div className="flex items-center gap-2">
-                        <DollarSign className="w-5 h-5 text-green-600" />
-                        <CardTitle className="text-lg">Doanh Thu</CardTitle>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Card className="bg-green-500 text-white border-0">
-                            <CardContent className="p-6">
-                                <p className="text-sm opacity-90 mb-2">Doanh thu 30 ngày</p>
-                                <p className="text-3xl font-bold mb-2">6.125.000 ₫</p>
-                                <div className="flex items-center gap-1 text-sm">
-                                    <TrendingUp className="w-4 h-4" />
-                                    <span>+17% so với tháng trước</span>
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardContent className="p-6">
-                                <p className="text-sm text-gray-600 mb-2">CPM Trung Bình</p>
-                                <p className="text-3xl font-bold text-gray-900 mb-2">$5.00</p>
-                                <p className="text-xs text-gray-500">Cost per 1000 impressions</p>
-                            </CardContent>
-                        </Card>
+                            <Card>
+                                <CardContent className="p-6">
+                                    <p className="text-sm text-gray-600 mb-2">Estimated Revenue/Day</p>
+                                    <p className="text-3xl font-bold text-gray-900 mb-2">204.167 ₫</p>
+                                    <p className="text-xs text-gray-500">Based on 30 day average</p>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
-                        <Card>
-                            <CardContent className="p-6">
-                                <p className="text-sm text-gray-600 mb-2">Estimated Revenue/Day</p>
-                                <p className="text-3xl font-bold text-gray-900 mb-2">204.167 ₫</p>
-                                <p className="text-xs text-gray-500">Based on 30 day average</p>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="p-6 pl-6 ">
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center gap-2">
+                            <Video className="w-5 h-5 text-gray-700" />
+                            <CardTitle className="text-lg">Videos Hiệu Suất Cao</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            {topVideos.map((video) => (
+                                <div
+                                    key={video.rank}
+                                    className="flex items-center gap-4 p-4 rounded-lg border hover:bg-gray-50 transition-colors"
+                                >
+                                    <div className={`${video.color} w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold`}>
+                                        {video.rank}
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-gray-900">{video.title}</h4>
+                                        <p className="text-sm text-gray-500">{video.views}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-lg font-bold text-green-600">{video.revenue}</p>
+                                        <p className="text-xs text-gray-500">Revenue</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
-            <Card className="mb-6">
-                <CardHeader>
-                    <div className="flex items-center gap-2">
-                        <Video className="w-5 h-5 text-gray-700" />
-                        <CardTitle className="text-lg">Videos Hiệu Suất Cao</CardTitle>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-3">
-                        {topVideos.map((video) => (
-                            <div
-                                key={video.rank}
-                                className="flex items-center gap-4 p-4 rounded-lg border hover:bg-gray-50 transition-colors"
-                            >
-                                <div className={`${video.color} w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold`}>
-                                    {video.rank}
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className="font-semibold text-gray-900">{video.title}</h4>
-                                    <p className="text-sm text-gray-500">{video.views}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-lg font-bold text-green-600">{video.revenue}</p>
-                                    <p className="text-xs text-gray-500">Revenue</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 pl-6 ">
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-lg">Engagement Rate</CardTitle>

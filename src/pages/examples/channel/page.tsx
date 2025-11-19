@@ -1,7 +1,8 @@
-import { Plus, List, Eye, TrendingUp } from "lucide-react"
+import { List, Eye, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { SiteHeader } from "@/pages/examples/channel/components/site-header"
 import {
     Tabs,
     TabsList,
@@ -109,34 +110,36 @@ const channels = [
 
 export default function ChannelManagement() {
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-6">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Quản Lý Kênh YouTube</h1>
-                    <p className="text-sm text-gray-500 mt-1">Theo dõi và theo dõi tất cả các kênh YouTube</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2">
-                        <Plus className="w-4 h-4" />
-                        Kết Nối Kênh Mới
-                    </Button>
-                </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <Tabs defaultValue="all" className="w-auto">
-                    <TabsList className="bg-white">
-                        <TabsTrigger value="all" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+        <div className="min-h-screen">
+            <SiteHeader />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 px-6 py-4 gap-4">
+                <Tabs defaultValue="all" className="w-fit">
+                    <TabsList className="bg-white shadow-sm border rounded-lg">
+                        <TabsTrigger
+                            value="all"
+                            className="data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-100"
+                        >
                             Tất cả
                         </TabsTrigger>
-                        <TabsTrigger value="active">Hoạt động</TabsTrigger>
-                        <TabsTrigger value="warning">Cảnh báo</TabsTrigger>
+
+                        <TabsTrigger
+                            value="active"
+                            className="data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-100"
+                        >
+                            Hoạt động
+                        </TabsTrigger>
+
+                        <TabsTrigger
+                            value="warning"
+                            className="data-[state=active]:bg-red-500 data-[state=active]:text-white hover:bg-red-100"
+                        >
+                            Cảnh báo
+                        </TabsTrigger>
                     </TabsList>
                 </Tabs>
-                {/* <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>6 kênh</span>
-                </div> */}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                 {channels.map((channel) => (
                     <Card key={channel.id} className="hover:shadow-lg transition-shadow">
                         <CardContent className="p-6">
@@ -197,7 +200,6 @@ export default function ChannelManagement() {
                                     ))}
                                 </div>
                             </div>
-
                             <div className="flex gap-2">
                                 <Button
                                     variant="outline"
