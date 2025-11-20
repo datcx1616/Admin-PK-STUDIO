@@ -1,6 +1,7 @@
 // import AuthenticationPage from "@/pages/examples/authentication/page"
 // import PlaygroundPage from "@/pages/examples/playground/page"
 // import TaskPage from "@/pages/examples/tasks/page"
+import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Routes, Route, Navigate } from "react-router-dom";
 import PermissionsManagement from "@/pages/examples/roles/page";
@@ -12,6 +13,10 @@ import { AppSidebar } from "@/pages/examples/dashboard/components/app-sidebar"
 import TeamsManagement from "@/pages/examples/teams/page"
 import ChannelManagement from "@/pages/examples/channel/page"
 import DetailedAnalytics from "@/pages/examples/analytics/page"
+import CreateVideoPage from "@/pages/examples/videos/create/page"
+import MyVideosPage from "@/pages/examples/videos/my/page"
+import AllVideosPage from "@/pages/examples/videos/all/page"
+import MyChannelsPage from "@/pages/examples/channels/my/page";
 import './i18n';
 import "./style/App.css"
 
@@ -88,6 +93,46 @@ export default function App() {
           <PrivateRoute>
             <AdminLayout>
               <PermissionsManagement />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/videos/create"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <CreateVideoPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/videos/my"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <MyVideosPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/videos/all"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <AllVideosPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/channels/my"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <MyChannelsPage />
             </AdminLayout>
           </PrivateRoute>
         }

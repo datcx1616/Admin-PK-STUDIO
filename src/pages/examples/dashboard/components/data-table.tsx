@@ -21,7 +21,6 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import {
-    IconChevronDown,
     IconChevronLeft,
     IconChevronRight,
     IconChevronsLeft,
@@ -29,9 +28,7 @@ import {
     IconCircleCheckFilled,
     IconDotsVertical,
     IconGripVertical,
-    IconLayoutColumns,
     IconLoader,
-    IconPlus,
     IconTrendingUp,
 } from "@tabler/icons-react"
 import {
@@ -78,7 +75,6 @@ import {
 } from "@/components/ui/drawer"
 import {
     DropdownMenu,
-    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
@@ -105,8 +101,6 @@ import {
 import {
     Tabs,
     TabsContent,
-    TabsList,
-    TabsTrigger,
 } from "@/components/ui/tabs"
 
 
@@ -174,7 +168,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     },
     {
         accessorKey: "header",
-        header: "Header",
+        header: "Tên chi nhánh",
         cell: ({ row }) => {
             return <TableCellViewer item={row.original} />
         },
@@ -182,7 +176,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     },
     {
         accessorKey: "type",
-        header: "Section Type",
+        header: "Giám đốc",
         cell: ({ row }) => (
             <div className="w-32">
                 <Badge variant="outline" className="text-muted-foreground px-1.5">
@@ -193,7 +187,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     },
     {
         accessorKey: "status",
-        header: "Status",
+        header: "Số kênh",
         cell: ({ row }) => (
             <Badge variant="outline" className="text-muted-foreground px-1.5">
                 {row.original.status === "Done" ? (
@@ -207,7 +201,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     },
     {
         accessorKey: "target",
-        header: () => <div className="w-full text-right">Target</div>,
+        header: () => <div className="w-full text-right">Đăng ký</div>,
         cell: ({ row }) => (
             <form
                 onSubmit={(e) => {
@@ -219,9 +213,9 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
                     })
                 }}
             >
-                <Label htmlFor={`${row.original.id}-target`} className="sr-only">
+                {/* <Label htmlFor={`${row.original.id}-target`} className="sr-only">
                     Target
-                </Label>
+                </Label> */}
                 <Input
                     className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
                     defaultValue={row.original.target}
@@ -232,7 +226,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     },
     {
         accessorKey: "limit",
-        header: () => <div className="w-full text-right">Limit</div>,
+        header: () => <div className="w-full text-right">Lượt xem</div>,
         cell: ({ row }) => (
             <form
                 onSubmit={(e) => {
@@ -244,9 +238,9 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
                     })
                 }}
             >
-                <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
+                {/* <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
                     Limit
-                </Label>
+                </Label> */}
                 <Input
                     className="hover:bg-input/30 focus-visible:bg-background dark:hover:bg-input/30 dark:focus-visible:bg-input/30 h-8 w-16 border-transparent bg-transparent text-right shadow-none focus-visible:border dark:bg-transparent"
                     defaultValue={row.original.limit}
@@ -257,7 +251,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     },
     {
         accessorKey: "reviewer",
-        header: "Reviewer",
+        header: "Hành động",
         cell: ({ row }) => {
             const isAssigned = row.original.reviewer !== "Assign reviewer"
 
@@ -410,7 +404,7 @@ export function DataTable({
             defaultValue="outline"
             className="w-full flex-col justify-start gap-6"
         >
-            <div className="flex items-center justify-between px-4 lg:px-6">
+            {/* <div className="flex items-center justify-between px-4 lg:px-6">
                 <Label htmlFor="view-selector" className="sr-only">
                     View
                 </Label>
@@ -422,63 +416,13 @@ export function DataTable({
                     >
                         <SelectValue placeholder="Select a view" />
                     </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="outline">Outline</SelectItem>
-                        <SelectItem value="past-performance">Past Performance</SelectItem>
-                        <SelectItem value="key-personnel">Key Personnel</SelectItem>
-                        <SelectItem value="focus-documents">Focus Documents</SelectItem>
-                    </SelectContent>
                 </Select>
-                <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 @4xl/main:flex">
-                    <TabsTrigger value="outline">Outline</TabsTrigger>
-                    <TabsTrigger value="past-performance">
-                        Past Performance <Badge variant="secondary">3</Badge>
-                    </TabsTrigger>
-                    <TabsTrigger value="key-personnel">
-                        Key Personnel <Badge variant="secondary">2</Badge>
-                    </TabsTrigger>
-                    <TabsTrigger value="focus-documents">Focus Documents</TabsTrigger>
-                </TabsList>
-                <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                                <IconLayoutColumns />
-                                <span className="hidden lg:inline">Customize Columns</span>
-                                <span className="lg:hidden">Columns</span>
-                                <IconChevronDown />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
-                            {table
-                                .getAllColumns()
-                                .filter(
-                                    (column) =>
-                                        typeof column.accessorFn !== "undefined" &&
-                                        column.getCanHide()
-                                )
-                                .map((column) => {
-                                    return (
-                                        <DropdownMenuCheckboxItem
-                                            key={column.id}
-                                            className="capitalize"
-                                            checked={column.getIsVisible()}
-                                            onCheckedChange={(value) =>
-                                                column.toggleVisibility(!!value)
-                                            }
-                                        >
-                                            {column.id}
-                                        </DropdownMenuCheckboxItem>
-                                    )
-                                })}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <Button variant="outline" size="sm">
-                        <IconPlus />
-                        <span className="hidden lg:inline">Add Section</span>
-                    </Button>
-                </div>
-            </div>
+            </div> */}
+
+
+
+
+
             <TabsContent
                 value="outline"
                 className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
@@ -534,6 +478,16 @@ export function DataTable({
                         </Table>
                     </DndContext>
                 </div>
+
+
+
+
+
+
+
+
+
+
                 <div className="flex items-center justify-between px-4">
                     <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
                         {table.getFilteredSelectedRowModel().rows.length} of{" "}
@@ -612,6 +566,26 @@ export function DataTable({
                     </div>
                 </div>
             </TabsContent>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <TabsContent
                 value="past-performance"
                 className="flex flex-col px-4 lg:px-6"

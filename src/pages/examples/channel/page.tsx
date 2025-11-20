@@ -9,6 +9,8 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs"
 
+import { YouTubeChannelsList } from "@/pages/examples/channel/components/youtube-channels-list"
+
 const channels = [
     {
         id: 1,
@@ -113,7 +115,7 @@ export default function ChannelManagement() {
         <div className="min-h-screen">
             <SiteHeader />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 px-6 py-4 gap-4">
-                <Tabs defaultValue="all" className="w-fit">
+                {/* <Tabs defaultValue="all" className="w-fit">
                     <TabsList className="bg-white shadow-sm border rounded-lg">
                         <TabsTrigger
                             value="all"
@@ -136,7 +138,8 @@ export default function ChannelManagement() {
                             Cảnh báo
                         </TabsTrigger>
                     </TabsList>
-                </Tabs>
+                </Tabs> */}
+                <YouTubeChannelsList />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">

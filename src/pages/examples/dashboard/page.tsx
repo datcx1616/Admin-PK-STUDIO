@@ -3,12 +3,13 @@ import {
     SidebarInset,
     SidebarProvider,
 } from "@/components/ui/sidebar"
-import { ChartAreaInteractive } from "@/pages/examples/dashboard/components/chart-area-interactive"
-import { DataTable } from "@/pages/examples/dashboard/components/data-table"
-import { SectionCards } from "@/pages/examples/dashboard/components/section-cards"
 import { SiteHeader } from "@/pages/examples/dashboard/components/site-header"
 import { apiClient } from "@/lib/api-client"
 import { toast } from "sonner"
+import { AdminView } from "@/pages/examples/dashboard/views/AdminView"
+import { BranchView } from "@/pages/examples/dashboard/views/BranchView"
+import { ManagerView } from "@/pages/examples/dashboard/views/ManagerView"
+import { EditorView } from "@/pages/examples/dashboard/views/EditorView"
 
 export default function Page() {
     const [data, setData] = useState<any>(null);
@@ -32,6 +33,32 @@ export default function Page() {
     if (loading) {
         return <div className="flex items-center justify-center h-screen">Loading...</div>;
     }
+
+    const role = data?.user?.role;
+    console.log("Dashboard Page - Role form API:", role);
+    console.log("Dashboard Page - Data:", data);
+
+    const renderView = () => {
+        switch (role) {
+            case 'admin':
+            case 'director':
+                return <AdminView data={data} />;
+            case 'branch_director':
+                return <BranchView data={data} />;
+            case 'manager':
+                return <ManagerView data={data} />;
+            case 'editor':
+                return <EditorView data={data} />;
+            default:
+                return (
+                    <div className="p-4">
+                        <h1 className="text-xl font-bold text-red-600">Role Error</h1>
+                        <p>Detected role: {role || "None"}</p>
+                        <p>Please contact administrator.</p>
+                    </div>
+                );
+        }
+    };
 
     return (
         <>
@@ -64,36 +91,11 @@ export default function Page() {
                     <SiteHeader />
                     <div className="flex flex-1 flex-col">
                         <div className="@container/main flex flex-1 flex-col gap-2">
-                            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                                <SectionCards stats={data?.stats} />
-                                <div className="px-4 lg:px-6">
-                                    <ChartAreaInteractive />
-                                </div>
-                                <DataTable data={mapDataToTable(data)} />
-                            </div>
+                            {renderView()}
                         </div>
                     </div>
                 </SidebarInset>
             </SidebarProvider>
         </>
     )
-}
-
-function mapDataToTable(data: any): any[] {
-    if (!data) return [];
-
-    const items = data.branches || data.teams || data.channels || [];
-
-    return items.map((item: any, index: number) => {
-        const stats = item.stats || {};
-        return {
-            id: index + 1,
-            header: item.name || "Unknown",
-            type: data.branches ? "Branch" : data.teams ? "Team" : "Channel",
-            status: item.isActive ? "Done" : "In Progress",
-            target: (stats.channels || item.subscriberCount || 0).toString(),
-            limit: (stats.teams || item.viewCount || 0).toString(),
-            reviewer: item.director?.name || item.leader?.name || "Unassigned",
-        };
-    });
 }

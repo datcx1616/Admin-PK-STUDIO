@@ -3,12 +3,9 @@
 import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import {
-    IconCamera,
     IconChartBar,
     IconDashboard,
     IconDatabase,
-    IconFileAi,
-    IconFileDescription,
     IconFileWord,
     IconFolder,
     IconHelp,
@@ -17,6 +14,8 @@ import {
     IconSearch,
     IconSettings,
     IconUsers,
+    IconMovie,
+    IconVideoPlus,
 } from "@tabler/icons-react"
 
 import {
@@ -38,126 +37,117 @@ import { NavSecondary } from "@/pages/examples/dashboard/components/nav-secondar
 import { NavUser } from "@/pages/examples/dashboard/components/nav-user"
 import { Button } from "@/components/ui/button"
 
-const data = {
-    user: {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
-    navMain: [
-        {
+// Helper to get user from storage
+const getUser = () => {
+    try {
+        const userStr = localStorage.getItem("user");
+        return userStr ? JSON.parse(userStr) : null;
+    } catch (e) {
+        return null;
+    }
+};
+
+const getNavItems = (role: string) => {
+    const items = [];
+
+    // Dashboard link for everyone except Editor
+    if (role !== 'editor') {
+        items.push({
             title: "Thống Kê",
             url: "/dashboard",
             icon: IconDashboard,
-        },
-        {
+        });
+    }
+
+    if (['admin', 'director', 'branch_director'].includes(role)) {
+        items.push({
             title: "Quản Lý Nhóm",
             url: "/tasks",
             icon: IconListDetails,
-        },
-        {
+        });
+    } else if (role === 'manager') {
+        items.push({
+            title: "Nhóm Của Tôi",
+            url: "/tasks",
+            icon: IconListDetails,
+        });
+    }
+
+    // Channel management for non-editors
+    if (['admin', 'director', 'branch_director', 'manager'].includes(role)) {
+        items.push({
             title: "Quản Lý Kênh",
             url: "/channels",
             icon: IconChartBar,
-        },
-        {
-            title: "Phân Tích",
-            url: "/analytics",
-            icon: IconFolder,
-        },
-        {
+        });
+    }
+
+    // Editor specific items
+    if (role === 'editor') {
+        items.push({
+            title: "Kênh Của Tôi",
+            url: "/channels/my",
+            icon: IconMovie,
+        });
+        items.push({
+            title: "Tạo Video Mới",
+            url: "/videos/create",
+            icon: IconVideoPlus,
+        });
+    }
+
+    // Analytics for everyone
+    items.push({
+        title: "Phân Tích",
+        url: "/analytics",
+        icon: IconFolder,
+    });
+
+    if (['admin', 'director'].includes(role)) {
+        items.push({
             title: "Phân Quyền",
             url: "/roles",
             icon: IconUsers,
-        },
-    ],
-    navClouds: [
-        {
-            title: "Capture",
-            icon: IconCamera,
-            isActive: true,
-            url: "#",
-            items: [
-                {
-                    title: "Active Proposals",
-                    url: "#",
-                },
-                {
-                    title: "Archived",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Proposal",
-            icon: IconFileDescription,
-            url: "#",
-            items: [
-                {
-                    title: "Active Proposals",
-                    url: "#",
-                },
-                {
-                    title: "Archived",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Prompts",
-            icon: IconFileAi,
-            url: "#",
-            items: [
-                {
-                    title: "Active Proposals",
-                    url: "#",
-                },
-                {
-                    title: "Archived",
-                    url: "#",
-                },
-            ],
-        },
-    ],
-    navSecondary: [
-        {
-            title: "Settings",
-            url: "#",
-            icon: IconSettings,
-        },
-        {
-            title: "Get Help",
-            url: "#",
-            icon: IconHelp,
-        },
-        {
-            title: "Search",
-            url: "#",
-            icon: IconSearch,
-        },
-    ],
-    documents: [
-        {
-            name: "Thư viện dữ liệu",
-            url: "#",
-            icon: IconDatabase,
-        },
-        {
-            name: "Báo cáo",
-            url: "#",
-            icon: IconReport,
-        },
-        {
-            name: "Trợ lý",
-            url: "#",
-            icon: IconFileWord,
-        },
-    ],
-}
+        });
+    }
+
+    return items;
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const navigate = useNavigate();
+    const [user, setUser] = React.useState<any>(getUser());
+    const [navMain, setNavMain] = React.useState<any[]>([]);
 
-    const navigate = useNavigate()
+    React.useEffect(() => {
+        const currentUser = getUser();
+        setUser(currentUser);
+        if (currentUser && currentUser.role) {
+            setNavMain(getNavItems(currentUser.role));
+        } else {
+            // Default fallback
+            setNavMain(getNavItems('guest'));
+        }
+    }, []);
+
+    const navSecondary = [
+        { title: "Cài đặt", url: "#", icon: IconSettings },
+        { title: "Trợ giúp", url: "#", icon: IconHelp },
+        { title: "Tìm kiếm", url: "#", icon: IconSearch },
+    ];
+
+    const documents = [
+        { name: "Thư viện dữ liệu", url: "#", icon: IconDatabase },
+        { name: "Báo cáo", url: "#", icon: IconReport },
+        { name: "Trợ lý", url: "#", icon: IconFileWord },
+    ];
+
+    const userData = {
+        name: user?.name || "User",
+        email: user?.email || "user@example.com",
+        avatar: "/avatars/shadcn.jpg", // Placeholder
+    };
+
     return (
         <Sidebar collapsible="none" className="h-screen border-r flex flex-col" {...props}>
             <SidebarHeader className="border-b">
@@ -169,7 +159,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         >
                             <Button
                                 className="w-full gap-3 h-auto bg-transparent hover:bg-transparent justify-start px-4 py-3"
-                                onClick={() => navigate('/dashboard')} // ✅ Thêm onClick
+                                onClick={() => navigate('/dashboard')}
                             >
                                 <div className="w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center">
                                     <Youtube className="w-6 h-6 text-white" />
@@ -183,13 +173,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent>
-                <NavMain items={data.navMain} />
-                <NavDocuments items={data.documents} />
-                <NavSecondary items={data.navSecondary} className="mt-auto" />
+            <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <NavMain items={navMain} />
+                <NavDocuments items={documents} />
+                <NavSecondary items={navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser user={userData} />
             </SidebarFooter>
         </Sidebar>
     )

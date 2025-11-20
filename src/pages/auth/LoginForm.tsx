@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
@@ -23,6 +23,14 @@ export function LoginForm() {
         status: "idle",
         message: null,
     });
+
+    // Redirect if already logged in
+    useEffect(() => {
+        const token = localStorage.getItem("authToken");
+        if (token) {
+            navigate("/dashboard", { replace: true });
+        }
+    }, [navigate]);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
