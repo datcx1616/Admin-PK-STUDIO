@@ -19,12 +19,12 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full overflow-hidden">
-        <div className="h-screen overflow-y flex-shrink-0">
+        <div className="h-screen overflow-y">
           <AppSidebar />
         </div>
 
         <div className="flex-1 flex flex-col h-screen overflow-hidden">
-          <div className="bg-white border-b border-gray-200 flex-shrink-0">
+          <div className="bg-white border-b border-gray-200">
             {/* <UserAccountSelector /> */}
           </div>
           <main className="flex-1 overflow-y-auto">

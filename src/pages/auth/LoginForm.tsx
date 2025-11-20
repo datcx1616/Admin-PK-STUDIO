@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
+import { apiClient } from "@/lib/api-client";
 
 type LoginState = {
     email: string;
@@ -33,34 +34,14 @@ export function LoginForm() {
         setApiState({ status: "loading", message: null });
 
         try {
-            const validUsers = [
-                { email: "jane@example.com", password: "password123", name: "Jane Doe", role: "admin" },
-                { email: "john@example.com", password: "secret456", name: "John Smith", role: "user" },
-                { email: "sara@example.com", password: "welcome789", name: "Sara Wilson", role: "editor" },
-            ];
+            const response = await apiClient.login(form.email, form.password);
 
-            const user = validUsers.find(
-                (u) => u.email === form.email && u.password === form.password
-            );
-
-            await new Promise((resolve) => setTimeout(resolve, 800));
-
-            if (!user) {
-                throw new Error(t("auth.loginFailed") || "Invalid email or password");
-            }
-
-            const token = btoa(JSON.stringify({ email: user.email, timestamp: Date.now() }));
-
-            localStorage.setItem("authToken", token);
-            localStorage.setItem("user", JSON.stringify({
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }));
+            localStorage.setItem("authToken", response.token);
+            localStorage.setItem("user", JSON.stringify(response.user));
 
             setApiState({
                 status: "success",
-                message: t("auth.welcomeBack", { name: user.name }) || `Welcome back, ${user.name}!`,
+                message: t("auth.welcomeBack", { name: response.user.name }) || `Welcome back, ${response.user.name}!`,
             });
 
             setTimeout(() => {
@@ -98,9 +79,9 @@ export function LoginForm() {
                 <details className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
                     <summary className="text-xs font-semibold text-blue-900 cursor-pointer">🔑 Demo Accounts</summary>
                     <div className="mt-2 space-y-0.5 text-xs text-blue-700">
-                        <div className="bg-white/60 px-2 py-0.5 rounded text-[10px]">jane@example.com • password123</div>
-                        <div className="bg-white/60 px-2 py-0.5 rounded text-[10px]">john@example.com • secret456</div>
-                        <div className="bg-white/60 px-2 py-0.5 rounded text-[10px]">sara@example.com • welcome789</div>
+                        <div className="bg-white/60 px-2 py-0.5 rounded text-[10px]">admin@youtube.com • Admin@123</div>
+                        <div className="bg-white/60 px-2 py-0.5 rounded text-[10px]">director@youtube.com • Admin@123</div>
+                        <div className="bg-white/60 px-2 py-0.5 rounded text-[10px]">manager1.test@youtube.com • Admin@123</div>
                     </div>
                 </details>
 
