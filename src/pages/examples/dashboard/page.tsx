@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState, type CSSProperties } from "react"
 import {
     SidebarInset,
     SidebarProvider,
@@ -48,7 +48,7 @@ export default function Page() {
             case 'manager':
                 return <ManagerView data={data} />;
             case 'editor':
-                return <EditorView data={data} />;
+                return <EditorView />;
             default:
                 return (
                     <div className="p-4">
@@ -84,7 +84,7 @@ export default function Page() {
                     {
                         "--sidebar-width": "calc(var(--spacing) * 64)",
                         "--header-height": "calc(var(--spacing) * 12 + 1px)",
-                    } as React.CSSProperties
+                    } as CSSProperties
                 }
             >
                 <SidebarInset>

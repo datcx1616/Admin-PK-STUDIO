@@ -3,11 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { SiteHeader } from "@/pages/examples/channel/components/site-header"
-import {
-    Tabs,
-    TabsList,
-    TabsTrigger,
-} from "@/components/ui/tabs"
+
 
 import { YouTubeChannelsList } from "@/pages/examples/channel/components/youtube-channels-list"
 
