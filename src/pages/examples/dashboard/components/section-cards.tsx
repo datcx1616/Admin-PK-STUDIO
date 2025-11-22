@@ -19,8 +19,28 @@ interface SectionCardsProps {
         totalSubscribers?: number;
         totalViews?: number;
         totalVideos?: number;
+        isConnected?: boolean;
         [key: string]: any;
     }
+}
+
+// Hàm format số với dấu phẩy
+const formatNumber = (num: number): string => {
+    return new Intl.NumberFormat('vi-VN').format(num);
+}
+
+// Hàm format số dạng rút gọn (K, M, B)
+const formatCompactNumber = (num: number): string => {
+    if (num >= 1000000000) {
+        return (num / 1000000000).toFixed(1) + 'B';
+    }
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
 }
 
 export function SectionCards({ stats }: SectionCardsProps) {
@@ -30,7 +50,7 @@ export function SectionCards({ stats }: SectionCardsProps) {
                 <CardHeader>
                     <CardDescription>Tổng Kênh</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        {stats?.totalBranches || 0}
+                        {formatNumber(stats?.totalChannels || 0)}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
@@ -40,7 +60,7 @@ export function SectionCards({ stats }: SectionCardsProps) {
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        Đã kết nối: 0 <IconTrendingUp className="size-4" />
+                        Đã kết nối:  {stats?.isConnected || 0} <IconTrendingUp className="size-4" />
                     </div>
                 </CardFooter>
             </Card>
@@ -48,7 +68,7 @@ export function SectionCards({ stats }: SectionCardsProps) {
                 <CardHeader>
                     <CardDescription>Người đăng ký</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        {stats?.totalSubscribers || 0}
+                        {formatCompactNumber(stats?.totalSubscribers || 0)}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
@@ -66,7 +86,7 @@ export function SectionCards({ stats }: SectionCardsProps) {
                 <CardHeader>
                     <CardDescription>Lượt xem</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        {stats?.totalViews || 0}
+                        {formatCompactNumber(stats?.totalViews || 0)}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
@@ -84,7 +104,7 @@ export function SectionCards({ stats }: SectionCardsProps) {
                 <CardHeader>
                     <CardDescription>Videos</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        {stats?.totalVideos || 0}
+                        {formatNumber(stats?.totalVideos || 0)}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">

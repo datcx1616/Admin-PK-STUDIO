@@ -1,19 +1,72 @@
-import { IconCirclePlusFilled } from "@tabler/icons-react"
-
+// src/pages/examples/team/components/site-header.tsx
+import { Plus } from 'lucide-react'
 import { Button } from "@/components/ui/button"
+import { useState } from 'react'
+import { AddBranchModal } from './add-branch-modal'
+import { AddTeamModal } from './add-team-modal'
 
-export function SiteHeader() {
+interface SiteHeaderProps {
+    onBranchAdded?: () => void
+    onTeamAdded?: () => void
+}
+
+export function SiteHeader({ onBranchAdded, onTeamAdded }: SiteHeaderProps) {
+    const [showAddBranchModal, setShowAddBranchModal] = useState(false)
+    const [showAddTeamModal, setShowAddTeamModal] = useState(false)
+
+    const handleBranchSuccess = () => {
+        setShowAddBranchModal(false)
+        onBranchAdded?.()
+    }
+
+    const handleTeamSuccess = () => {
+        setShowAddTeamModal(false)
+        onTeamAdded?.()
+    }
+
     return (
-        <header className="bg-background/90 pb-3 sticky top-0 z-10 flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
-            <div className="flex w-full pt-2 items-center gap-1 px-4 lg:gap-2 lg:px-6">
-                <h1 className="text-base font-medium">Quản lý nhóm</h1>
-                <div className="ml-auto flex items-center gap-2">
-                    <Button size="sm" className="hidden h-7 sm:flex bg-red-600">
-                        <IconCirclePlusFilled />
-                        <span>Thêm nhóm</span>
-                    </Button>
+        <>
+            <header className="bg-white border-b sticky top-0 z-10 shadow-sm">
+                <div className="flex items-center justify-between px-6 py-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-900">Quản Lý Nhóm</h1>
+                        <p className="text-sm text-slate-500 mt-1">
+                            Quản lý chi nhánh, nhóm và thành viên
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            className="gap-2"
+                            onClick={() => setShowAddBranchModal(true)}
+                        >
+                            <Plus className="w-4 h-4" />
+                            Thêm Chi Nhánh
+                        </Button>
+                        <Button
+                            className="bg-red-600 hover:bg-red-700 gap-2"
+                            onClick={() => setShowAddTeamModal(true)}
+                        >
+                            <Plus className="w-4 h-4" />
+                            Thêm Nhóm
+                        </Button>
+                    </div>
                 </div>
-            </div>
-        </header>
+            </header>
+
+            {/* Add Branch Modal */}
+            <AddBranchModal
+                open={showAddBranchModal}
+                onClose={() => setShowAddBranchModal(false)}
+                onSuccess={handleBranchSuccess}
+            />
+
+            {/* Add Team Modal */}
+            <AddTeamModal
+                open={showAddTeamModal}
+                onClose={() => setShowAddTeamModal(false)}
+                onSuccess={handleTeamSuccess}
+            />
+        </>
     )
 }
