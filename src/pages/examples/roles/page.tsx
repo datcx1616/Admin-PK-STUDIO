@@ -1,10 +1,18 @@
 // src/pages/examples/roles/permissions-management.tsx
 import { useEffect, useState } from 'react'
-import { Users, Crown, Monitor, Edit2, AlertCircle, Edit, Trash2, Plus } from "lucide-react"
+import { Users, Crown, Monitor, Edit2, AlertCircle, Edit, Trash2, Plus, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import {
     Tabs,
     TabsList,
@@ -13,20 +21,24 @@ import {
 import { SiteHeader } from "@/pages/examples/roles/components/site-header"
 import axios from 'axios'
 
+interface Branch {
+    _id: string
+    name: string
+    code: string
+}
+
+interface Team {
+    _id: string
+    name: string
+}
+
 interface User {
     _id: string
     name: string
     email: string
     role: 'admin' | 'director' | 'branch_director' | 'manager' | 'editor'
-    branch?: {
-        _id: string
-        name: string
-        code: string
-    }
-    team?: {
-        _id: string
-        name: string
-    }
+    branch?: Branch | string
+    team?: Team | string
     isActive: boolean
     createdAt: string
 }
@@ -115,6 +127,13 @@ export default function PermissionsManagement() {
     const [filteredUsers, setFilteredUsers] = useState<User[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedRole, setSelectedRole] = useState<string>('all')
+    const [searchQuery, setSearchQuery] = useState('')
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const [totalPages, setTotalPages] = useState(1)
+
     const [stats, setStats] = useState({
         total: 0,
         admin: 0,
@@ -130,20 +149,31 @@ export default function PermissionsManagement() {
 
     useEffect(() => {
         filterUsers()
-    }, [selectedRole, users])
+    }, [selectedRole, searchQuery, users, currentPage, pageSize])
 
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('authToken')
 
-            // Call API to get users
             const response = await axios.get('http://localhost:3000/api/users', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
 
-            console.log('✅ Users loaded:', response.data)
+            console.log('✅ Raw API Response:', response.data)
 
-            const usersData = response.data.users || []
+            // Xử lý nhiều format response khác nhau
+            let usersData: User[] = []
+
+            if (response.data.users) {
+                usersData = response.data.users
+            } else if (response.data.data) {
+                usersData = response.data.data
+            } else if (Array.isArray(response.data)) {
+                usersData = response.data
+            }
+
+            console.log('✅ Processed users:', usersData)
+
             setUsers(usersData)
 
             // Calculate stats
@@ -159,9 +189,14 @@ export default function PermissionsManagement() {
 
         } catch (error: any) {
             console.error('❌ Error fetching users:', error)
+            console.error('Error details:', error.response?.data)
 
             if (error.response?.status === 404) {
-                alert('⚠️ API endpoint /api/users chưa được tạo. Vui lòng tạo backend endpoint này.')
+                alert('⚠️ API endpoint /api/users chưa được tạo hoặc không tồn tại.')
+            } else if (error.response?.status === 401) {
+                alert('⚠️ Token hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.')
+            } else {
+                alert('❌ Lỗi khi tải dữ liệu người dùng: ' + (error.response?.data?.message || error.message))
             }
         } finally {
             setLoading(false)
@@ -169,19 +204,63 @@ export default function PermissionsManagement() {
     }
 
     const filterUsers = () => {
-        if (selectedRole === 'all') {
-            setFilteredUsers(users)
-        } else {
-            setFilteredUsers(users.filter(u => u.role === selectedRole))
+        let filtered = [...users]
+
+        // Filter by role
+        if (selectedRole !== 'all') {
+            filtered = filtered.filter(u => u.role === selectedRole)
         }
+
+        // Filter by search query
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase()
+            filtered = filtered.filter(u =>
+                u.name.toLowerCase().includes(query) ||
+                u.email.toLowerCase().includes(query) ||
+                (typeof u.branch === 'object' && u.branch?.name.toLowerCase().includes(query)) ||
+                (typeof u.team === 'object' && u.team?.name.toLowerCase().includes(query))
+            )
+        }
+
+        // Calculate pagination
+        const total = Math.ceil(filtered.length / pageSize)
+        setTotalPages(total)
+
+        // Apply pagination
+        const startIndex = (currentPage - 1) * pageSize
+        const endIndex = startIndex + pageSize
+        const paginated = filtered.slice(startIndex, endIndex)
+
+        setFilteredUsers(paginated)
+    }
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page)
     }
 
     const getInitials = (name: string) => {
+        if (!name) return '??'
         const parts = name.split(' ')
         if (parts.length >= 2) {
             return parts[0][0] + parts[parts.length - 1][0]
         }
         return name.substring(0, 2)
+    }
+
+    const getBranchName = (branch: Branch | string | undefined): string => {
+        if (!branch) return '-'
+        if (typeof branch === 'object' && branch.name) {
+            return branch.name
+        }
+        return '-'
+    }
+
+    const getTeamName = (team: Team | string | undefined): string => {
+        if (!team) return '-'
+        if (typeof team === 'object' && team.name) {
+            return team.name
+        }
+        return '-'
     }
 
     const getPermissionsText = (user: User) => {
@@ -190,11 +269,11 @@ export default function PermissionsManagement() {
             case 'director':
                 return 'Toàn bộ hệ thống'
             case 'branch_director':
-                return user.branch ? `Chi nhánh: ${user.branch.name}` : 'Chưa có chi nhánh'
+                return typeof user.branch === 'object' && user.branch ? `Chi nhánh: ${user.branch.name}` : 'Chưa có chi nhánh'
             case 'manager':
-                return user.team ? `Team: ${user.team.name}` : 'Chưa có team'
+                return typeof user.team === 'object' && user.team ? `Team: ${user.team.name}` : 'Chưa có team'
             case 'editor':
-                return user.team ? `Team: ${user.team.name} (Xem only)` : 'Chưa có team'
+                return typeof user.team === 'object' && user.team ? `Team: ${user.team.name} (Xem only)` : 'Chưa có team'
             default:
                 return '-'
         }
@@ -219,12 +298,12 @@ export default function PermissionsManagement() {
 
     if (loading) {
         return (
-            <div className="min-h-screen">
+            <div className="min-h-screen bg-slate-50">
                 <SiteHeader />
                 <div className="p-6">
                     <div className="animate-pulse space-y-4">
-                        <div className="grid grid-cols-4 gap-4">
-                            {[1, 2, 3, 4].map(i => (
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            {[1, 2, 3, 4, 5].map(i => (
                                 <div key={i} className="h-24 bg-slate-200 rounded"></div>
                             ))}
                         </div>
@@ -274,7 +353,7 @@ export default function PermissionsManagement() {
     ]
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-slate-50">
             <SiteHeader onUserAdded={fetchUsers} />
 
             {/* Stats Cards */}
@@ -287,8 +366,8 @@ export default function PermissionsManagement() {
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
-                                    <p className="text-3xl font-bold text-gray-900">{stat.count}</p>
+                                    <p className="text-sm text-slate-600 mb-1">{stat.title}</p>
+                                    <p className="text-3xl font-bold text-slate-900">{stat.count}</p>
                                 </div>
                                 <div className={`${stat.iconBg} p-3 rounded-xl flex items-center justify-center`}>
                                     <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
@@ -299,58 +378,79 @@ export default function PermissionsManagement() {
                 ))}
             </div>
 
-            {/* Filter Tabs */}
+            {/* Filters */}
             <div className="px-6 py-3">
-                <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-700 font-medium">Lọc theo vai trò:</span>
-                    <Tabs value={selectedRole} onValueChange={setSelectedRole} className="w-fit">
-                        <TabsList className="bg-white shadow-sm border rounded-lg">
-                            <TabsTrigger
-                                value="all"
-                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
-                            >
-                                Tất cả ({stats.total})
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="admin"
-                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
-                            >
-                                Admin ({stats.admin})
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="director"
-                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
-                            >
-                                Director ({stats.director})
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="branch_director"
-                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
-                            >
-                                Branch Dir ({stats.branch_director})
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="manager"
-                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
-                            >
-                                Manager ({stats.manager})
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="editor"
-                                className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
-                            >
-                                Editor ({stats.editor})
-                            </TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                </div>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="flex flex-col gap-4">
+                            {/* Search */}
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                <Input
+                                    placeholder="Tìm kiếm theo tên, email, chi nhánh, team..."
+                                    value={searchQuery}
+                                    onChange={(e) => {
+                                        setSearchQuery(e.target.value)
+                                        setCurrentPage(1)
+                                    }}
+                                    className="pl-9 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-blue-500"
+                                />
+                            </div>
+
+                            {/* Role Filter Tabs */}
+                            <Tabs value={selectedRole} onValueChange={(value) => {
+                                setSelectedRole(value)
+                                setCurrentPage(1)
+                            }} className="w-full">
+                                <TabsList className="bg-slate-100 border rounded-lg grid grid-cols-3 md:grid-cols-6 p-1 gap-1 h-auto">
+                                    <TabsTrigger
+                                        value="all"
+                                        className="data-[state=active]:bg-red-700 data-[state=active]:text-white text-xs rounded-md py-2"
+                                    >
+                                        Tất cả
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="admin"
+                                        className="data-[state=active]:bg-red-500 data-[state=active]:text-white text-xs rounded-md py-2"
+                                    >
+                                        Admin
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="director"
+                                        className="data-[state=active]:bg-red-500 data-[state=active]:text-white text-xs rounded-md py-2"
+                                    >
+                                        Director
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="branch_director"
+                                        className="data-[state=active]:bg-red-500 data-[state=active]:text-white text-xs rounded-md py-2"
+                                    >
+                                        Branch Dir
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="manager"
+                                        className="data-[state=active]:bg-red-500 data-[state=active]:text-white text-xs rounded-md py-2"
+                                    >
+                                        Manager
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="editor"
+                                        className="data-[state=active]:bg-red-500 data-[state=active]:text-white text-xs rounded-md py-2"
+                                    >
+                                        Editor
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Users Table */}
             <div className="px-6 pb-6">
                 <Card>
                     <CardContent className="p-0">
-                        <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b text-sm font-medium text-gray-600">
+                        <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-slate-50 border-b text-sm font-medium text-slate-600">
                             <div className="col-span-3">NGƯỜI DÙNG</div>
                             <div className="col-span-2">VAI TRÒ</div>
                             <div className="col-span-2">CHI NHÁNH / TEAM</div>
@@ -360,17 +460,20 @@ export default function PermissionsManagement() {
 
                         <div className="divide-y">
                             {filteredUsers.length === 0 ? (
-                                <div className="text-center py-12 text-gray-500">
-                                    <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                                    <p>Không có người dùng nào</p>
+                                <div className="text-center py-12 text-slate-500">
+                                    <Users className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                                    <p className="font-medium">Không có người dùng nào</p>
+                                    {searchQuery && (
+                                        <p className="text-sm mt-2">Thử tìm kiếm với từ khóa khác</p>
+                                    )}
                                 </div>
                             ) : (
                                 filteredUsers.map((user) => {
-                                    const config = roleConfig[user.role]
+                                    const config = roleConfig[user.role] || roleConfig.editor
                                     return (
                                         <div
                                             key={user._id}
-                                            className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors items-center"
+                                            className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-slate-50 transition-colors items-center"
                                         >
                                             {/* User Info */}
                                             <div className="col-span-3 flex items-center gap-3">
@@ -379,9 +482,9 @@ export default function PermissionsManagement() {
                                                         {getInitials(user.name).toUpperCase()}
                                                     </AvatarFallback>
                                                 </Avatar>
-                                                <div>
-                                                    <p className="font-semibold text-gray-900">{user.name}</p>
-                                                    <p className="text-xs text-gray-500">{user.email}</p>
+                                                <div className="min-w-0">
+                                                    <p className="font-semibold text-slate-900 truncate">{user.name}</p>
+                                                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
                                                 </div>
                                             </div>
 
@@ -394,14 +497,17 @@ export default function PermissionsManagement() {
 
                                             {/* Branch/Team */}
                                             <div className="col-span-2">
-                                                <p className="text-sm text-gray-700">
-                                                    {user.branch ? user.branch.name : user.team ? user.team.name : '-'}
+                                                <p className="text-sm text-slate-700 truncate">
+                                                    {getBranchName(user.branch) !== '-'
+                                                        ? getBranchName(user.branch)
+                                                        : getTeamName(user.team)
+                                                    }
                                                 </p>
                                             </div>
 
                                             {/* Permissions */}
                                             <div className="col-span-4">
-                                                <p className="text-sm text-gray-600">
+                                                <p className="text-sm text-slate-600 truncate">
                                                     {getPermissionsText(user)}
                                                 </p>
                                             </div>
@@ -414,7 +520,7 @@ export default function PermissionsManagement() {
                                                     className="h-8 w-8"
                                                     onClick={() => alert('Edit user: ' + user.name)}
                                                 >
-                                                    <Edit className="w-4 h-4 text-gray-600" />
+                                                    <Edit className="w-4 h-4 text-slate-600" />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
@@ -433,13 +539,87 @@ export default function PermissionsManagement() {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Pagination */}
+                {filteredUsers.length > 0 && totalPages > 1 && (
+                    <Card className="mt-4">
+                        <CardContent className="py-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-slate-600">Hiển thị</span>
+                                    <Select value={pageSize.toString()} onValueChange={(value) => {
+                                        setPageSize(parseInt(value))
+                                        setCurrentPage(1)
+                                    }}>
+                                        <SelectTrigger className="w-[70px] h-8">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="5">5</SelectItem>
+                                            <SelectItem value="10">10</SelectItem>
+                                            <SelectItem value="25">25</SelectItem>
+                                            <SelectItem value="50">50</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <span className="text-sm text-slate-600">
+                                        trên {users.length} người dùng
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <span className="text-sm text-slate-600">
+                                        Trang {currentPage} / {totalPages}
+                                    </span>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            onClick={() => handlePageChange(1)}
+                                            disabled={currentPage === 1}
+                                        >
+                                            <ChevronsLeft className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                        >
+                                            <ChevronLeft className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            onClick={() => handlePageChange(totalPages)}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            <ChevronsRight className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
 
             {/* Role Descriptions */}
             <div className="p-6">
                 <div className="flex items-center gap-2 mb-4">
-                    <AlertCircle className="w-5 h-5 text-gray-700" />
-                    <h2 className="text-lg font-bold text-gray-900">Mô Tả Quyền Hạn</h2>
+                    <AlertCircle className="w-5 h-5 text-slate-700" />
+                    <h2 className="text-lg font-bold text-slate-900">Mô Tả Quyền Hạn</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -448,11 +628,11 @@ export default function PermissionsManagement() {
                             <CardContent className="p-6">
                                 <div className="flex items-center gap-2 mb-4">
                                     <role.icon className={`w-5 h-5 ${role.iconColor}`} />
-                                    <h3 className="font-bold text-gray-900">{role.title}</h3>
+                                    <h3 className="font-bold text-slate-900">{role.title}</h3>
                                 </div>
                                 <ul className="space-y-2">
                                     {role.permissions.map((permission, idx) => (
-                                        <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                                        <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
                                             <span className={`${role.iconColor} mt-1`}>•</span>
                                             <span>{permission}</span>
                                         </li>

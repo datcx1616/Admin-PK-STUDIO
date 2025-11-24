@@ -5,282 +5,610 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import { youtubeApi } from '@/lib/youtubeApi'
-import { Eye, Users, Video, ExternalLink, BarChart3 } from 'lucide-react'
+import {
+    Eye, Users, Video, Edit, Trash2, UserPlus,
+    Search, Filter, ChevronLeft, ChevronRight,
+    ChevronsLeft, ChevronsRight, Building2, Users2
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 interface Channel {
+    _id: string
     id: string
     channelId: string
+    name: string
     channelTitle: string
     thumbnail: string
+    thumbnailUrl?: string
     connectedAt: string
     subscriberCount?: number
     viewCount?: number
     videoCount?: number
     customUrl?: string
+    team?: {
+        _id: string
+        name: string
+        branch?: {
+            _id: string
+            name: string
+            code: string
+        }
+    }
+    assignedTo?: Array<{
+        user: {
+            _id: string
+            name: string
+            email: string
+            role: string
+        }
+        role: string
+        assignedAt: string
+    }>
+    isConnected?: boolean
+}
+
+interface ApiResponse {
+    success: boolean
+    data: Channel[]
+    count: number
+    message: string
+}
+
+interface Branch {
+    _id: string
+    name: string
+    code: string
+}
+
+interface Team {
+    _id: string
+    name: string
+    branch: Branch
 }
 
 export function YouTubeChannelsList() {
     const [channels, setChannels] = useState<Channel[]>([])
+    const [filteredChannels, setFilteredChannels] = useState<Channel[]>([])
     const [loading, setLoading] = useState(true)
     const [fetchingStats, setFetchingStats] = useState(false)
     const navigate = useNavigate()
+
+    // Filters
+    const [searchQuery, setSearchQuery] = useState('')
+    const [selectedBranch, setSelectedBranch] = useState<string>('all')
+    const [selectedTeam, setSelectedTeam] = useState<string>('all')
+    const [branches, setBranches] = useState<Branch[]>([])
+    const [teams, setTeams] = useState<Team[]>([])
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const [totalPages, setTotalPages] = useState(1)
 
     useEffect(() => {
         fetchChannels()
     }, [])
 
+    useEffect(() => {
+        applyFilters()
+    }, [channels, searchQuery, selectedBranch, selectedTeam, currentPage, pageSize])
+
     const fetchChannels = async () => {
         try {
-            // 1. Lấy danh sách channels đã kết nối
-            const statusData = await youtubeApi.getStatus()
+            const token = localStorage.getItem('authToken')
+            if (!token) {
+                console.error('No auth token found')
+                setLoading(false)
+                return
+            }
 
-            if (statusData.success && statusData.connected && statusData.channels.length > 0) {
-                setChannels(statusData.channels)
+            // Sử dụng API mới: GET /api/channels/my-channels
+            const response = await axios.get<ApiResponse>(
+                'http://localhost:3000/api/channels/my-channels',
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            )
 
-                // 2. Fetch stats cho từng channel
-                setFetchingStats(true)
-                await fetchChannelStats(statusData.channels)
+            if (response.data.success && response.data.data) {
+                setChannels(response.data.data)
+
+                // Extract unique branches and teams
+                const uniqueBranches = new Map<string, Branch>()
+                const uniqueTeams = new Map<string, Team>()
+
+                response.data.data.forEach(channel => {
+                    if (channel.team?.branch) {
+                        uniqueBranches.set(channel.team.branch._id, channel.team.branch)
+                        uniqueTeams.set(channel.team._id, {
+                            _id: channel.team._id,
+                            name: channel.team.name,
+                            branch: channel.team.branch
+                        })
+                    }
+                })
+
+                setBranches(Array.from(uniqueBranches.values()))
+                setTeams(Array.from(uniqueTeams.values()))
             }
         } catch (error) {
             console.error('Error fetching channels:', error)
         } finally {
             setLoading(false)
-            setFetchingStats(false)
         }
     }
 
-    const fetchChannelStats = async (channelsList: Channel[]) => {
-        const token = localStorage.getItem('authToken')
-        if (!token) return
+    const applyFilters = () => {
+        let filtered = [...channels]
 
-        try {
-            // Fetch stats cho tất cả channels
-            const updatedChannels = await Promise.all(
-                channelsList.map(async (channel) => {
-                    try {
-                        const response = await fetch(
-                            `http://localhost:3000/api/youtube/channel-stats?channelId=${channel.id}`,
-                            {
-                                headers: {
-                                    'Authorization': `Bearer ${token}`
-                                }
-                            }
-                        )
+        // Search filter
+        if (searchQuery) {
+            filtered = filtered.filter(channel => {
+                const channelName = (channel.name || channel.channelTitle).toLowerCase()
+                const teamName = channel.team?.name.toLowerCase() || ''
+                const branchName = channel.team?.branch?.name.toLowerCase() || ''
+                const query = searchQuery.toLowerCase()
 
-                        if (response.ok) {
-                            const data = await response.json()
-                            return {
-                                ...channel,
-                                subscriberCount: data.stats?.subscriberCount,
-                                viewCount: data.stats?.viewCount,
-                                videoCount: data.stats?.videoCount,
-                                customUrl: data.stats?.customUrl
-                            }
-                        }
-                    } catch (error) {
-                        console.error(`Error fetching stats for ${channel.channelTitle}:`, error)
-                    }
-                    return channel
-                })
+                return channelName.includes(query) ||
+                    teamName.includes(query) ||
+                    branchName.includes(query)
+            })
+        }
+
+        // Branch filter
+        if (selectedBranch !== 'all') {
+            filtered = filtered.filter(channel =>
+                channel.team?.branch?._id === selectedBranch
             )
-
-            setChannels(updatedChannels)
-        } catch (error) {
-            console.error('Error fetching channel stats:', error)
         }
+
+        // Team filter
+        if (selectedTeam !== 'all') {
+            filtered = filtered.filter(channel =>
+                channel.team?._id === selectedTeam
+            )
+        }
+
+        // Calculate pagination
+        const total = Math.ceil(filtered.length / pageSize)
+        setTotalPages(total)
+
+        // Apply pagination
+        const startIndex = (currentPage - 1) * pageSize
+        const endIndex = startIndex + pageSize
+        const paginated = filtered.slice(startIndex, endIndex)
+
+        setFilteredChannels(paginated)
     }
 
-    const handleViewAnalytics = (channelId: string) => {
-        // Navigate to analytics page
-        navigate(`/channel-analytics/${channelId}`)
+    const handleManageEditors = (channelId: string) => {
+        console.log('Manage editors for channel:', channelId)
     }
+
+    const handleEditChannel = (channelId: string) => {
+        console.log('Edit channel:', channelId)
+    }
+
+    const handleDeleteChannel = (channelId: string) => {
+        console.log('Delete channel:', channelId)
+    }
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page)
+    }
+
+    const handlePageSizeChange = (size: string) => {
+        setPageSize(parseInt(size))
+        setCurrentPage(1)
+    }
+
+    // Get teams filtered by selected branch
+    const filteredTeams = selectedBranch === 'all'
+        ? teams
+        : teams.filter(team => team.branch._id === selectedBranch)
 
     if (loading) {
         return (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 col-span-full">
-                {[1, 2, 3].map((i) => (
-                    <Card key={i} className="overflow-hidden">
-                        <CardHeader className="pb-3">
-                            <div className="flex items-start gap-4">
-                                <Skeleton className="h-16 w-16 rounded-full" />
-                                <div className="space-y-2 flex-1">
-                                    <Skeleton className="h-5 w-full" />
-                                    <Skeleton className="h-3 w-24" />
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-3 gap-2">
-                                <Skeleton className="h-16 rounded-lg" />
-                                <Skeleton className="h-16 rounded-lg" />
-                                <Skeleton className="h-16 rounded-lg" />
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+            <Card className="w-full">
+                <CardHeader>
+                    <Skeleton className="h-6 w-48" />
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-3">
+                        {[1, 2, 3, 4, 5].map((i) => (
+                            <Skeleton key={i} className="h-16 w-full" />
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
         )
     }
 
     if (channels.length === 0) {
         return (
-            <div className="col-span-full text-center py-12 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                        <Video className="w-8 h-8 text-red-600" />
+            <Card className="w-full">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-green-600">
+                        <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
+                            ✓
+                        </div>
+                        Kênh đã gán team (0)
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-center py-12 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                                <Video className="w-8 h-8 text-red-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-slate-900 mb-1">
+                                    Chưa có kênh nào được gán
+                                </h3>
+                                <p className="text-sm text-slate-500">
+                                    Kết nối YouTube hoặc được phân công kênh từ quản lý
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-semibold text-slate-900 mb-1">
-                            Chưa có kênh nào được kết nối
-                        </h3>
-                        <p className="text-sm text-slate-500">
-                            Nhấn "Đăng nhập YouTube" để bắt đầu
-                        </p>
-                    </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         )
     }
 
     return (
-        <>
-            {channels.map((channel) => (
-                <Card key={channel.id} className="hover:shadow-xl transition-all duration-300 overflow-hidden border-slate-200">
-                    {/* Header with gradient */}
-                    <div className="h-2 bg-gradient-to-r from-red-500 via-red-600 to-pink-500" />
+        <div className="w-full space-y-4">
+            {/* Header with Stats */}
+            <Card>
+                <CardHeader className="border-b bg-gradient-to-r from-green-50 to-emerald-50">
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2 text-green-600">
+                            <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
+                                <span className="text-white text-sm font-bold">✓</span>
+                            </div>
+                            Quản lý Kênh YouTube
+                        </CardTitle>
+                        <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4 text-blue-600" />
+                                <span className="font-medium">{branches.length} Chi nhánh</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Users2 className="h-4 w-4 text-purple-600" />
+                                <span className="font-medium">{teams.length} Teams</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Video className="h-4 w-4 text-red-600" />
+                                <span className="font-medium">{channels.length} Kênh</span>
+                            </div>
+                        </div>
+                    </div>
+                </CardHeader>
 
-                    <CardHeader className="pb-3">
-                        <div className="flex items-start gap-4">
-                            {/* Avatar */}
-                            <Avatar className="h-16 w-16 border-2 border-red-500 shadow-md ring-2 ring-red-100">
-                                <AvatarImage
-                                    src={channel.thumbnail}
-                                    alt={channel.channelTitle}
-                                />
-                                <AvatarFallback className="bg-gradient-to-br from-red-500 to-red-600 text-white font-bold text-lg">
-                                    {channel.channelTitle.substring(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
+                {/* Filters */}
+                <CardContent className="pt-6">
+                    <div className="grid gap-4 md:grid-cols-4">
+                        {/* Search */}
+                        <div className="relative md:col-span-2">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Input
+                                placeholder="Tìm kiếm kênh, team, chi nhánh..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9"
+                            />
+                        </div>
 
-                            {/* Channel Info */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2 mb-1">
-                                    <CardTitle className="text-base font-bold text-slate-900 truncate">
-                                        {channel.channelTitle}
-                                    </CardTitle>
-                                    <Badge
+                        {/* Branch Filter */}
+                        <Select value={selectedBranch} onValueChange={(value) => {
+                            setSelectedBranch(value)
+                            setSelectedTeam('all')
+                            setCurrentPage(1)
+                        }}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Chọn chi nhánh" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tất cả chi nhánh</SelectItem>
+                                {branches.map(branch => (
+                                    <SelectItem key={branch._id} value={branch._id}>
+                                        {branch.code} - {branch.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        {/* Team Filter */}
+                        <Select
+                            value={selectedTeam}
+                            onValueChange={(value) => {
+                                setSelectedTeam(value)
+                                setCurrentPage(1)
+                            }}
+                            disabled={selectedBranch !== 'all' && filteredTeams.length === 0}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Chọn team" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tất cả teams</SelectItem>
+                                {filteredTeams.map(team => (
+                                    <SelectItem key={team._id} value={team._id}>
+                                        {team.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Table */}
+            <Card>
+                <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="bg-slate-50 hover:bg-slate-50">
+                                    <TableHead className="font-semibold text-slate-700 w-[250px]">Kênh</TableHead>
+                                    <TableHead className="font-semibold text-slate-700 w-[150px]">Chi nhánh</TableHead>
+                                    <TableHead className="font-semibold text-slate-700 w-[150px]">Team</TableHead>
+                                    <TableHead className="font-semibold text-slate-700 w-[130px]">Editors</TableHead>
+                                    <TableHead className="font-semibold text-slate-700 w-[120px]">Subscribers</TableHead>
+                                    <TableHead className="font-semibold text-slate-700 w-[100px]">Videos</TableHead>
+                                    <TableHead className="font-semibold text-slate-700 text-right w-[100px]">Hành động</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredChannels.map((channel) => {
+                                    const channelName = channel.name || channel.channelTitle
+                                    const channelThumbnail = channel.thumbnailUrl || channel.thumbnail
+                                    const channelHandle = channel.customUrl
+                                    const editorCount = channel.assignedTo?.filter(a => a.role === 'editor').length || 0
+
+                                    return (
+                                        <TableRow key={channel._id || channel.id} className="hover:bg-slate-50">
+                                            {/* Kênh */}
+                                            <TableCell className="py-3">
+                                                <div className="flex items-center gap-3">
+                                                    <Avatar className="h-10 w-10 border-2 border-slate-200 flex-shrink-0">
+                                                        <AvatarImage src={channelThumbnail} alt={channelName} />
+                                                        <AvatarFallback className="bg-gradient-to-br from-red-500 to-red-600 text-white font-bold text-xs">
+                                                            {channelName.substring(0, 2).toUpperCase()}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="font-semibold text-slate-900 truncate text-sm">
+                                                            {channelName}
+                                                        </p>
+                                                        {channelHandle && (
+                                                            <p className="text-xs text-slate-500 truncate">
+                                                                {channelHandle}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+
+                                            {/* Chi nhánh */}
+                                            <TableCell>
+                                                {channel.team?.branch ? (
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="bg-blue-50 text-blue-700 border-blue-200 font-medium text-xs w-fit"
+                                                        >
+                                                            {channel.team.branch.code}
+                                                        </Badge>
+                                                        <span className="text-xs text-slate-600 truncate">
+                                                            {channel.team.branch.name}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-slate-400 italic">N/A</span>
+                                                )}
+                                            </TableCell>
+
+                                            {/* Team */}
+                                            <TableCell>
+                                                {channel.team ? (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="bg-purple-50 text-purple-700 border-purple-200 font-medium text-xs"
+                                                    >
+                                                        {channel.team.name}
+                                                    </Badge>
+                                                ) : (
+                                                    <span className="text-xs text-slate-400 italic">Chưa gán</span>
+                                                )}
+                                            </TableCell>
+
+                                            {/* Editors */}
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer text-xs"
+                                                        onClick={() => handleManageEditors(channel._id || channel.id)}
+                                                    >
+                                                        {editorCount} editor{editorCount !== 1 ? 's' : ''}
+                                                    </Badge>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 w-6 p-0"
+                                                        onClick={() => handleManageEditors(channel._id || channel.id)}
+                                                    >
+                                                        <UserPlus className="h-3 w-3 text-slate-600" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+
+                                            {/* Subscribers */}
+                                            <TableCell>
+                                                {fetchingStats && !channel.subscriberCount ? (
+                                                    <Skeleton className="h-4 w-16" />
+                                                ) : (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Users className="h-3.5 w-3.5 text-slate-400" />
+                                                        <span className="font-semibold text-slate-900 text-sm">
+                                                            {channel.subscriberCount !== undefined
+                                                                ? formatNumber(channel.subscriberCount)
+                                                                : '—'
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </TableCell>
+
+                                            {/* Videos */}
+                                            <TableCell>
+                                                <div className="flex items-center gap-1.5">
+                                                    <Video className="h-3.5 w-3.5 text-slate-400" />
+                                                    <span className="font-semibold text-slate-900 text-sm">
+                                                        {channel.videoCount !== undefined
+                                                            ? formatNumber(channel.videoCount)
+                                                            : '—'
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+
+                                            {/* Hành động */}
+                                            <TableCell className="text-right">
+                                                <div className="flex items-center justify-end gap-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-7 w-7 p-0 hover:bg-blue-50 hover:text-blue-600"
+                                                        onClick={() => handleEditChannel(channel._id || channel.id)}
+                                                        title="Chỉnh sửa"
+                                                    >
+                                                        <Edit className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-7 w-7 p-0 hover:bg-red-50 hover:text-red-600"
+                                                        onClick={() => handleDeleteChannel(channel._id || channel.id)}
+                                                        title="Xóa"
+                                                    >
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {filteredChannels.length > 0 && (
+                        <div className="flex items-center justify-between px-6 py-4 border-t">
+                            {/* Rows per page */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-slate-600">Hiển thị</span>
+                                <Select value={pageSize.toString()} onValueChange={handlePageSizeChange}>
+                                    <SelectTrigger className="w-[70px] h-8">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="10">10</SelectItem>
+                                        <SelectItem value="25">25</SelectItem>
+                                        <SelectItem value="50">50</SelectItem>
+                                        <SelectItem value="100">100</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <span className="text-sm text-slate-600">
+                                    trên {channels.length} kênh
+                                </span>
+                            </div>
+
+                            {/* Page info and controls */}
+                            <div className="flex items-center gap-4">
+                                <span className="text-sm text-slate-600">
+                                    Trang {currentPage} / {totalPages}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                    <Button
                                         variant="outline"
-                                        className="bg-green-50 text-green-700 border-green-200 text-xs flex-shrink-0"
+                                        size="sm"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() => handlePageChange(1)}
+                                        disabled={currentPage === 1}
                                     >
-                                        ✓ Active
-                                    </Badge>
+                                        <ChevronsLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 w-8 p-0"
+                                        onClick={() => handlePageChange(totalPages)}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        <ChevronsRight className="h-4 w-4" />
+                                    </Button>
                                 </div>
-
-                                {/* Custom URL */}
-                                {channel.customUrl && (
-                                    <p className="text-xs text-slate-500 mb-1">
-                                        {channel.customUrl}
-                                    </p>
-                                )}
-
-                                {/* Connected Date */}
-                                <p className="text-xs text-slate-400 flex items-center gap-1">
-                                    <span className="inline-block w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                                    Kết nối: {new Date(channel.connectedAt).toLocaleDateString('vi-VN', {
-                                        day: '2-digit',
-                                        month: '2-digit',
-                                        year: 'numeric'
-                                    })}
-                                </p>
                             </div>
                         </div>
-                    </CardHeader>
+                    )}
 
-                    <CardContent className="pt-0 space-y-3">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-3 gap-2">
-                            {/* Subscribers */}
-                            <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg p-3 border border-red-100 hover:shadow-md transition-shadow">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <Users className="w-3.5 h-3.5 text-red-600" />
-                                    <p className="text-xs font-medium text-red-900">Subscribers</p>
-                                </div>
-                                {fetchingStats && !channel.subscriberCount ? (
-                                    <Skeleton className="h-6 w-full" />
-                                ) : (
-                                    <p className="text-lg font-bold text-red-600">
-                                        {channel.subscriberCount !== undefined
-                                            ? formatNumber(channel.subscriberCount)
-                                            : '—'
-                                        }
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Views */}
-                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100 hover:shadow-md transition-shadow">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <Eye className="w-3.5 h-3.5 text-blue-600" />
-                                    <p className="text-xs font-medium text-blue-900">Views</p>
-                                </div>
-                                {fetchingStats && !channel.viewCount ? (
-                                    <Skeleton className="h-6 w-full" />
-                                ) : (
-                                    <p className="text-lg font-bold text-blue-600">
-                                        {channel.viewCount !== undefined
-                                            ? formatNumber(channel.viewCount)
-                                            : '—'
-                                        }
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Videos */}
-                            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100 hover:shadow-md transition-shadow">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <Video className="w-3.5 h-3.5 text-green-600" />
-                                    <p className="text-xs font-medium text-green-900">Videos</p>
-                                </div>
-                                {fetchingStats && !channel.videoCount ? (
-                                    <Skeleton className="h-6 w-full" />
-                                ) : (
-                                    <p className="text-lg font-bold text-green-600">
-                                        {channel.videoCount !== undefined
-                                            ? formatNumber(channel.videoCount)
-                                            : '—'
-                                        }
-                                    </p>
-                                )}
-                            </div>
+                    {/* No results */}
+                    {filteredChannels.length === 0 && channels.length > 0 && (
+                        <div className="text-center py-12">
+                            <Filter className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                            <h3 className="font-semibold text-slate-900 mb-1">
+                                Không tìm thấy kết quả
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                                Thử thay đổi bộ lọc hoặc tìm kiếm
+                            </p>
                         </div>
+                    )}
+                </CardContent>
+            </Card>
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 gap-1.5"
-                                onClick={() => window.open(`https://studio.youtube.com/channel/${channel.channelId}`, '_blank')}
-                            >
-                                <ExternalLink className="w-3.5 h-3.5" />
-                                <span className="text-xs">Studio</span>
-                            </Button>
-
-                            <Button
-                                size="sm"
-                                className="flex-1 gap-1.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
-                                onClick={() => handleViewAnalytics(channel.id)}
-                            >
-                                <BarChart3 className="w-3.5 h-3.5" />
-                                <span className="text-xs">Analytics</span>
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
-        </>
+        </div>
     )
 }
 
