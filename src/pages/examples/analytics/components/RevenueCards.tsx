@@ -10,17 +10,19 @@ interface RevenueCardsProps {
 }
 
 export function RevenueCards({ analytics, dateRange }: RevenueCardsProps) {
-    console.log(analytics)
-    if (!analytics.revenue) {
+
+    if (!analytics.revenue || !analytics.revenue.totals || analytics.revenue.monetizationStatus === 'disabled') {
         return (
             <Card>
                 <CardContent className="p-12 text-center">
                     <DollarSign className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                     <p className="text-gray-500 font-medium">Dữ liệu revenue không khả dụng</p>
                     <p className="text-sm text-gray-400 mt-2">
-                        {analytics.meta?.dataUnavailable?.includes('revenue')
+                        {analytics.revenue?.monetizationStatus === 'disabled'
                             ? 'Channel chưa monetize hoặc không có quyền revenue metrics'
-                            : 'Chọn include=all hoặc include=revenue để xem metrics này'}
+                            : analytics.meta?.dataUnavailable?.includes('revenue')
+                                ? 'Backend không thể lấy revenue data - có thể thiếu OAuth scope'
+                                : 'Chọn include=all hoặc include=revenue để xem metrics này'}
                     </p>
                 </CardContent>
             </Card>

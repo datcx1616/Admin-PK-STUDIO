@@ -54,7 +54,7 @@ export default function DetailedAnalytics() {
                 setSelectedChannel(response.data.data[0]._id)
             }
         } catch (error) {
-            console.error('❌ Error fetching channels:', error)
+            console.error('Error fetching channels:', error)
         } finally {
             setChannelsLoading(false)
         }
@@ -83,12 +83,6 @@ export default function DetailedAnalytics() {
 
             const formatDate = (date: Date) => date.toISOString().split('T')[0]
 
-            console.log('📊 Fetching analytics:', {
-                channelId: selectedChannel,
-                startDate: formatDate(startDate),
-                endDate: formatDate(endDate)
-            })
-
             const response = await axios.get<AnalyticsResponse>(
                 'http://localhost:3000/api/youtube/analytics',
                 {
@@ -96,32 +90,17 @@ export default function DetailedAnalytics() {
                         channelId: selectedChannel,
                         startDate: formatDate(startDate),
                         endDate: formatDate(endDate),
-                        include: 'revenue'
+                        include: 'all'
                     },
                     headers: { 'Authorization': `Bearer ${token}` }
                 }
             )
 
-            console.log('🔍 ===== RAW BACKEND RESPONSE =====')
-            console.log('Full response:', response.data)
-            console.log('Response keys:', Object.keys(response.data))
-            console.log('Has revenue?', 'revenue' in response.data)
-            if ('revenue' in response.data) {
-                console.log('Revenue object:', response.data.revenue)
-                console.log('Revenue keys:', Object.keys(response.data.revenue || {}))
-            }
-            console.log('Meta dataAvailable:', response.data.meta?.dataAvailable)
-            console.log('Meta dataUnavailable:', response.data.meta?.dataUnavailable)
-            console.log('=====================================')
-
             if (response.data.success) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let transformedData: any = response.data
 
-                // Check if data is flat (no basic object)
                 if (transformedData.totals && !transformedData.basic) {
-                    console.log('⚙️ Transforming flat response to nested structure...')
-
                     transformedData = {
                         ...transformedData,
                         basic: {
@@ -129,37 +108,17 @@ export default function DetailedAnalytics() {
                             dailyData: transformedData.dailyData || []
                         }
                     }
-
                     delete transformedData.totals
                     delete transformedData.dailyData
                 }
 
-                // Kiểm tra và log chi tiết về revenue
-                if (transformedData.revenue) {
-                    console.log('✅ ===== REVENUE DATA FROM BACKEND =====')
-                    console.log('Revenue totals:', transformedData.revenue.totals)
-                    console.log('Monetization status:', transformedData.revenue.monetizationStatus)
-                    console.log('Currency:', transformedData.revenue.currency)
-                    console.log('Daily data length:', transformedData.revenue.dailyData?.length || 0)
-
-                    // Kiểm tra xem có giá trị thực tế không
-                    const hasActualRevenue = transformedData.revenue.totals?.estimatedRevenue > 0
-                    console.log('Has actual revenue?', hasActualRevenue)
-                    console.log('Estimated Revenue:', transformedData.revenue.totals?.estimatedRevenue)
-                    console.log('==========================================')
-                } else {
-                    console.log('⚠️ ===== NO REVENUE DATA =====')
-                    console.log('Backend did not return revenue object')
-                    console.log('Check meta.dataUnavailable:', transformedData.meta?.dataUnavailable)
-                    console.log('==============================')
-                }
-
+                // Generate mock data if backend doesn't provide it
                 if (transformedData.basic) {
                     const totalViews = transformedData.basic.totals.totalViews || 0
+                    const totalWatchTimeMinutes = transformedData.basic.totals.totalWatchTimeMinutes || 0
 
-                    // Generate engagement metrics nếu backend không có
+                    // Engagement metrics
                     if (!transformedData.engagement && totalViews > 0) {
-                        console.log('⚙️ Generating mock engagement data...')
                         const totalLikes = Math.floor(totalViews * 0.046)
                         const totalComments = Math.floor(totalViews * 0.01)
                         const totalShares = Math.floor(totalViews * 0.0025)
@@ -178,9 +137,8 @@ export default function DetailedAnalytics() {
                         }
                     }
 
-                    // Generate retention metrics nếu backend không có
+                    // Retention metrics
                     if (!transformedData.retention && totalViews > 0) {
-                        console.log('⚙️ Generating mock retention data...')
                         transformedData.retention = {
                             averageViewPercentage: 42.5,
                             ctr: 8.2,
@@ -193,39 +151,36 @@ export default function DetailedAnalytics() {
                         }
                     }
 
-                    // ❌ KHÔNG GENERATE MOCK REVENUE - chỉ dùng từ backend
-
-                    // Generate traffic sources nếu backend không có
+                    // Traffic sources
                     if (!transformedData.traffic && totalViews > 0) {
-                        console.log('⚙️ Generating mock traffic data...')
                         transformedData.traffic = {
                             sources: [
-                                { sourceType: 'YT_SEARCH', views: Math.floor(totalViews * 0.35), percentage: 35.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.35) },
-                                { sourceType: 'YT_SUGGESTED', views: Math.floor(totalViews * 0.28), percentage: 28.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.28) },
-                                { sourceType: 'EXT_URL', views: Math.floor(totalViews * 0.16), percentage: 16.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.16) },
-                                { sourceType: 'DIRECT', views: Math.floor(totalViews * 0.12), percentage: 12.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.12) },
-                                { sourceType: 'YT_CHANNEL', views: Math.floor(totalViews * 0.06), percentage: 6.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.06) },
-                                { sourceType: 'NO_LINK_OTHER', views: Math.floor(totalViews * 0.03), percentage: 3.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.03) }
+                                { sourceType: 'YT_SEARCH', views: Math.floor(totalViews * 0.35), percentage: 35.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.35) },
+                                { sourceType: 'YT_SUGGESTED', views: Math.floor(totalViews * 0.28), percentage: 28.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.28) },
+                                { sourceType: 'EXT_URL', views: Math.floor(totalViews * 0.16), percentage: 16.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.16) },
+                                { sourceType: 'DIRECT', views: Math.floor(totalViews * 0.12), percentage: 12.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.12) },
+                                { sourceType: 'YT_CHANNEL', views: Math.floor(totalViews * 0.06), percentage: 6.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.06) },
+                                { sourceType: 'NO_LINK_OTHER', views: Math.floor(totalViews * 0.03), percentage: 3.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.03) }
                             ],
                             topSource: 'YT_SEARCH'
                         }
                     }
 
+                    // Device types
                     if (!transformedData.devices && totalViews > 0) {
-                        console.log('⚙️ Generating mock device data...')
                         transformedData.devices = {
                             types: [
-                                { deviceType: 'MOBILE', views: Math.floor(totalViews * 0.60), percentage: 60.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.60) },
-                                { deviceType: 'DESKTOP', views: Math.floor(totalViews * 0.30), percentage: 30.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.30) },
-                                { deviceType: 'TABLET', views: Math.floor(totalViews * 0.07), percentage: 7.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.07) },
-                                { deviceType: 'TV', views: Math.floor(totalViews * 0.03), percentage: 3.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.03) }
+                                { deviceType: 'MOBILE', views: Math.floor(totalViews * 0.60), percentage: 60.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.60) },
+                                { deviceType: 'DESKTOP', views: Math.floor(totalViews * 0.30), percentage: 30.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.30) },
+                                { deviceType: 'TABLET', views: Math.floor(totalViews * 0.07), percentage: 7.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.07) },
+                                { deviceType: 'TV', views: Math.floor(totalViews * 0.03), percentage: 3.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.03) }
                             ],
                             topDevice: 'MOBILE'
                         }
                     }
 
+                    // Demographics
                     if (!transformedData.demographics && totalViews > 0) {
-                        console.log('⚙️ Generating mock demographics data...')
                         transformedData.demographics = {
                             ageGroups: [
                                 { ageGroup: 'age18-24', viewsPercentage: 25.5 },
@@ -240,17 +195,17 @@ export default function DetailedAnalytics() {
                                 female: 37.5
                             },
                             topCountries: [
-                                { country: 'VN', countryName: 'Vietnam', views: Math.floor(totalViews * 0.52), percentage: 52.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.52) },
-                                { country: 'US', countryName: 'United States', views: Math.floor(totalViews * 0.20), percentage: 20.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.20) },
-                                { country: 'TH', countryName: 'Thailand', views: Math.floor(totalViews * 0.10), percentage: 10.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.10) },
-                                { country: 'PH', countryName: 'Philippines', views: Math.floor(totalViews * 0.08), percentage: 8.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.08) },
-                                { country: 'ID', countryName: 'Indonesia', views: Math.floor(totalViews * 0.10), percentage: 10.0, watchTimeMinutes: Math.floor(transformedData.basic.totals.totalWatchTimeMinutes * 0.10) }
+                                { country: 'VN', countryName: 'Vietnam', views: Math.floor(totalViews * 0.52), percentage: 52.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.52) },
+                                { country: 'US', countryName: 'United States', views: Math.floor(totalViews * 0.20), percentage: 20.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.20) },
+                                { country: 'TH', countryName: 'Thailand', views: Math.floor(totalViews * 0.10), percentage: 10.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.10) },
+                                { country: 'PH', countryName: 'Philippines', views: Math.floor(totalViews * 0.08), percentage: 8.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.08) },
+                                { country: 'ID', countryName: 'Indonesia', views: Math.floor(totalViews * 0.10), percentage: 10.0, watchTimeMinutes: Math.floor(totalWatchTimeMinutes * 0.10) }
                             ]
                         }
                     }
 
-                    if (!transformedData.videos && transformedData.basic.dailyData && transformedData.basic.dailyData.length > 0) {
-                        console.log('⚙️ Generating mock videos data...')
+                    // Top videos
+                    if (!transformedData.videos && transformedData.basic.dailyData?.length > 0) {
                         const topDays = [...transformedData.basic.dailyData]
                             .sort((a, b) => b.views - a.views)
                             .slice(0, 10)
@@ -277,40 +232,24 @@ export default function DetailedAnalytics() {
                     }
                 }
 
-                // Auto-generate meta if backend doesn't provide it
+                // Generate meta if not provided
                 if (!transformedData.meta) {
                     transformedData.meta = {
                         queriedAt: new Date().toISOString(),
                         cacheExpiry: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
                         quotaUsed: 0,
                         dataAvailable: Object.keys(transformedData).filter(k =>
-                            k !== 'success' &&
-                            k !== 'channelId' &&
-                            k !== 'dateRange' &&
-                            k !== 'meta' &&
-                            transformedData[k]
+                            k !== 'success' && k !== 'channelId' && k !== 'dateRange' && k !== 'meta' && transformedData[k]
                         ),
                         dataUnavailable: [],
                         processingTimeMs: 0
                     }
                 }
 
-                console.log('✅ ===== FINAL DATA BEFORE setState =====')
-                console.log('Has revenue in final data?', !!transformedData.revenue)
-                if (transformedData.revenue) {
-                    console.log('Revenue totals in final:', transformedData.revenue.totals)
-                }
-                console.log('Available metrics:', transformedData.meta.dataAvailable)
-                console.log('========================================')
-
                 setAnalytics(transformedData)
             }
         } catch (error) {
-            console.error('❌ Error fetching analytics:', error)
-            if (axios.isAxiosError(error)) {
-                console.error('Response data:', error.response?.data)
-                console.error('Response status:', error.response?.status)
-            }
+            console.error('Error fetching analytics:', error)
         } finally {
             setLoading(false)
         }
@@ -370,7 +309,7 @@ export default function DetailedAnalytics() {
                         <TabsTrigger value="audience">Khán giả</TabsTrigger>
                         <TabsTrigger value="content">Nội dung</TabsTrigger>
                     </TabsList>
-                    x
+
                     <TabsContent value="overview" className="space-y-6 mt-6">
                         <OverviewCards analytics={analytics} />
                         <SubscriberGrowth analytics={analytics} />
@@ -386,12 +325,10 @@ export default function DetailedAnalytics() {
 
                     <TabsContent value="audience" className="space-y-6 mt-6">
                         <AudienceCards analytics={analytics} />
-
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <TrafficSources analytics={analytics} />
                             <DeviceTypes analytics={analytics} />
                         </div>
-
                         <Demographics analytics={analytics} />
                     </TabsContent>
 
