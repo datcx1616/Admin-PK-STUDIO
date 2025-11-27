@@ -29,32 +29,70 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
-import { IconCloudUpload, IconMovie, IconX } from "@tabler/icons-react"
+import {
+    IconCloudUpload,
+    IconMovie,
+    IconX,
+    IconHash,
+    IconAlertCircle,
+} from "@tabler/icons-react"
+
+const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024; // 2GB
+const ACCEPTED_VIDEO_TYPES = [
+    "video/mp4",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/x-matroska",
+    "video/webm"
+];
 
 const formSchema = z.object({
-    title: z.string().min(2, {
-        message: "Tiêu đề phải có ít nhất 2 ký tự.",
-    }),
-    description: z.string().optional(),
-    videoFile: z.any().optional(),
+    title: z.string()
+        .min(2, "Tiêu đề phải có ít nhất 2 ký tự.")
+        .max(100, "Tiêu đề không được vượt quá 100 ký tự."),
+    description: z.string()
+        .max(5000, "Mô tả không được vượt quá 5000 ký tự.")
+        .optional(),
+    videoFile: z
+        .any()
+        .refine((file) => file?.length > 0, "Vui lòng chọn file video.")
+        .refine(
+            (file) => file?.[0]?.size <= MAX_FILE_SIZE,
+            "File video không được vượt quá 2GB."
+        )
+        .refine(
+            (file) => ACCEPTED_VIDEO_TYPES.includes(file?.[0]?.type),
+            "Chỉ chấp nhận file video định dạng MP4, MOV, AVI, MKV, WEBM."
+        ),
     privacy: z.string().min(1, "Vui lòng chọn chế độ hiển thị."),
     channelId: z.string().min(1, "Vui lòng chọn kênh."),
+    tags: z.array(z.string()).optional(),
 })
 
-export default function CreateVideoPage() {
+type FormValues = z.infer<typeof formSchema>
+
+export default function VideoUploadPage() {
     const navigate = useNavigate();
     const [channels, setChannels] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [fileName, setFileName] = useState<string | null>(null);
+    const [fileSize, setFileSize] = useState<number>(0);
+    const [videoDuration, setVideoDuration] = useState<string | null>(null);
+    const [tags, setTags] = useState<string[]>([]);
+    const [tagInput, setTagInput] = useState("");
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: "",
             description: "",
             privacy: "public",
+            tags: [],
         },
     })
 
@@ -62,87 +100,171 @@ export default function CreateVideoPage() {
         const fetchChannels = async () => {
             try {
                 console.log('🔄 Fetching channels for video upload...');
-                // Use getChannels which filters by user role automatically
                 const response = await apiClient.getChannels();
-                console.log('✅ Channels response:', response);
+                console.log('✅ Channels API response:', response);
 
-                let channelsList: any[] = [];
+                const channelsList = response?.data?.channels || response?.channels || response?.data || [];
+                console.log('📊 Extracted channels:', channelsList);
 
-                // Extract channels from response
-                if (response?.data && Array.isArray(response.data)) {
-                    channelsList = response.data;
-                } else if (Array.isArray(response)) {
-                    channelsList = response;
-                } else if (response?.channels && Array.isArray(response.channels)) {
-                    channelsList = response.channels;
+                const connectedChannels = Array.isArray(channelsList)
+                    ? channelsList.filter((ch) => ch.isConnected)
+                    : [];
+
+                console.log('✅ Connected channels:', connectedChannels.length);
+                setChannels(connectedChannels);
+
+                if (connectedChannels.length === 1) {
+                    form.setValue("channelId", connectedChannels[0]._id);
+                    console.log('✅ Auto-selected channel:', connectedChannels[0].name);
+                } else if (connectedChannels.length === 0) {
+                    console.warn('⚠️ No connected channels found');
+                    toast.warning("Bạn chưa có kênh nào được kết nối để tải video.");
                 }
-
-                console.log(`📺 Found ${channelsList.length} channels for upload`);
-
-                // Filter only connected channels
-                const connectedChannels = channelsList.filter(ch => ch.isConnected);
-                console.log(`✓ ${connectedChannels.length} connected channels`);
-
-                if (connectedChannels.length === 0 && channelsList.length > 0) {
-                    toast.warning("Các kênh chưa được kết nối với YouTube. Vui lòng kết nối trước khi upload.");
-                }
-
-                setChannels(connectedChannels.length > 0 ? connectedChannels : channelsList);
-
-                // Auto-select first channel if available
-                if (channelsList.length > 0) {
-                    const firstChannel = connectedChannels[0] || channelsList[0];
-                    form.setValue("channelId", firstChannel._id);
-                    console.log(`✓ Auto-selected channel: ${firstChannel.name}`);
-                }
-
-                if (channelsList.length === 0) {
-                    toast.error("Bạn chưa được phân công quản lý kênh nào. Vui lòng liên hệ Manager/Admin.");
-                }
-            } catch (error: any) {
-                console.error("❌ Failed to fetch channels", error);
-                if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-                    toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
-                    setTimeout(() => navigate('/login'), 2000);
-                } else {
-                    toast.error("Không thể tải danh sách kênh: " + error.message);
-                }
+            } catch (error) {
+                console.error("❌ Failed to fetch channels:", error);
+                const errorMessage = error instanceof Error ? error.message : "Không thể tải danh sách kênh.";
+                toast.error(errorMessage);
             }
         };
         fetchChannels();
-    }, [form, navigate]);
+    }, [form]); const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setFileName(file.name);
+            setFileSize(file.size);
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+            if (!form.getValues("title")) {
+                const titleFromFile = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+                form.setValue("title", titleFromFile);
+            }
+
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = function () {
+                const duration = video.duration;
+                const minutes = Math.floor(duration / 60);
+                const seconds = Math.floor(duration % 60);
+                setVideoDuration(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+            }
+            video.src = URL.createObjectURL(file);
+        }
+    };
+
+    const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && tagInput.trim()) {
+            e.preventDefault();
+            if (!tags.includes(tagInput.trim())) {
+                const newTags = [...tags, tagInput.trim()];
+                setTags(newTags);
+                form.setValue('tags', newTags);
+            }
+            setTagInput("");
+        }
+    };
+
+    const handleRemoveTag = (tagToRemove: string) => {
+        const newTags = tags.filter(tag => tag !== tagToRemove);
+        setTags(newTags);
+        form.setValue('tags', newTags);
+    };
+
+    async function onSubmit(values: FormValues) {
         setLoading(true);
-        try {
-            const payload = {
-                title: values.title,
-                description: values.description,
-                channelId: values.channelId,
-                // privacy: values.privacy, 
-            };
+        setUploadProgress(0);
 
-            await apiClient.createVideo(payload);
-            toast.success("Video đã được tạo thành công!");
-            navigate("/dashboard");
-        } catch (error: any) {
-            console.error("Create video error", error);
-            toast.error(error.message || "Có lỗi xảy ra khi tạo video.");
+        try {
+            console.log('🎬 Starting video upload process...');
+            console.log('📋 Upload data:', {
+                title: values.title,
+                channelId: values.channelId,
+                privacy: values.privacy,
+                tags: tags,
+                fileSize: values.videoFile[0].size,
+                fileName: values.videoFile[0].name
+            });
+
+            const formData = new FormData();
+            formData.append('file', values.videoFile[0]);
+            formData.append('title', values.title);
+            formData.append('description', values.description || '');
+            formData.append('channelId', values.channelId);
+            formData.append('tags', JSON.stringify(tags));
+            formData.append('privacy', values.privacy);
+
+            // Simulate upload progress
+            const progressInterval = setInterval(() => {
+                setUploadProgress(prev => {
+                    if (prev >= 90) {
+                        clearInterval(progressInterval);
+                        return prev;
+                    }
+                    return prev + 10;
+                });
+            }, 500);
+
+
+            console.log('📤 Calling upload API...');
+            const result = await apiClient.uploadVideo(formData);
+            console.log('✅ Upload API response:', result);
+
+            clearInterval(progressInterval);
+            setUploadProgress(100);
+
+            toast.success("Video đã được tải lên thành công!");
+
+            setTimeout(() => {
+                navigate("/videos/my");
+            }, 1500);
+
+        } catch (error) {
+            console.error("❌ Upload video error:", error);
+            let errorMessage = "Có lỗi xảy ra khi tải video lên.";
+
+            if (error instanceof Error) {
+                errorMessage = error.message;
+
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    errorMessage = "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng hoặc liên hệ quản trị viên.";
+                } else if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+                    errorMessage = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+                } else if (error.message.includes('413') || error.message.includes('too large')) {
+                    errorMessage = "File video quá lớn. Vui lòng chọn file nhỏ hơn 2GB.";
+                } else if (error.message.includes('400') || error.message.includes('Bad Request')) {
+                    errorMessage = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.";
+                }
+            }
+
+            toast.error(errorMessage, {
+                duration: 5000,
+            });
+            setUploadProgress(0);
         } finally {
             setLoading(false);
         }
     }
 
+    const formatFileSize = (bytes: number) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
     return (
-        <div className="container mx-auto py-8 max-w-5xl">
+        <div className="container mx-auto py-8 max-w-6xl">
             <div className="mb-8 flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Tải lên video</h1>
                     <p className="text-muted-foreground mt-1">
-                        Đăng tải video mới lên kênh của bạn để chia sẻ với mọi người.
+                        Đăng tải video mới lên kênh YouTube của bạn
                     </p>
                 </div>
-                <Button variant="outline" onClick={() => navigate("/channels/my")}>
+                <Button
+                    variant="outline"
+                    onClick={() => navigate("/videos/my")}
+                    disabled={loading}
+                >
                     <IconX className="mr-2 h-4 w-4" />
                     Hủy bỏ
                 </Button>
@@ -156,14 +278,14 @@ export default function CreateVideoPage() {
                             <CardHeader>
                                 <CardTitle>File Video</CardTitle>
                                 <CardDescription>
-                                    Chọn file video từ máy tính của bạn.
+                                    Chọn file video từ máy tính của bạn
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <FormField
                                     control={form.control}
                                     name="videoFile"
-                                    render={({ field }) => (
+                                    render={({ field: { onChange, ref } }) => (
                                         <FormItem>
                                             <FormControl>
                                                 <div className="flex flex-col items-center justify-center w-full">
@@ -174,43 +296,38 @@ export default function CreateVideoPage() {
                                                         <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
                                                             {fileName ? (
                                                                 <>
-                                                                    <IconMovie className="w-12 h-12 mb-4 text-red-600" />
-                                                                    <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-white">
-                                                                        {fileName}
+                                                                    <IconMovie className="w-10 h-10 mb-3 text-gray-400" />
+                                                                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                                                        <span className="font-semibold">{fileName}</span>
                                                                     </p>
                                                                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                        Click để thay đổi file
+                                                                        {formatFileSize(fileSize)}
+                                                                        {videoDuration && ` • ${videoDuration}`}
                                                                     </p>
                                                                 </>
                                                             ) : (
                                                                 <>
-                                                                    <IconCloudUpload className="w-12 h-12 mb-4 text-gray-400" />
+                                                                    <IconCloudUpload className="w-10 h-10 mb-3 text-gray-400" />
                                                                     <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                                                        <span className="font-semibold">Click để tải lên</span> hoặc kéo thả
+                                                                        <span className="font-semibold">Click để chọn</span> hoặc kéo thả
                                                                     </p>
                                                                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                                        MP4, MOV, AVI (Max 2GB)
+                                                                        MP4, MOV, AVI, MKV, WEBM (tối đa 2GB)
                                                                     </p>
                                                                 </>
                                                             )}
                                                         </div>
-                                                        <Input
+                                                        <input
                                                             id="dropzone-file"
                                                             type="file"
-                                                            accept="video/*"
                                                             className="hidden"
+                                                            accept="video/*"
                                                             onChange={(e) => {
-                                                                const file = e.target.files?.[0];
-                                                                if (file) {
-                                                                    field.onChange(e.target.files);
-                                                                    setFileName(file.name);
-                                                                    // Auto-fill title if empty
-                                                                    if (!form.getValues("title")) {
-                                                                        form.setValue("title", file.name.replace(/\.[^/.]+$/, ""));
-                                                                    }
-                                                                }
+                                                                onChange(e.target.files);
+                                                                handleFileSelect(e);
                                                             }}
-                                                            ref={field.ref}
+                                                            ref={ref}
+                                                            disabled={loading}
                                                         />
                                                     </label>
                                                 </div>
@@ -222,13 +339,34 @@ export default function CreateVideoPage() {
                             </CardContent>
                         </Card>
 
+                        {uploadProgress > 0 && (
+                            <Card>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-sm">Tiến trình tải lên</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Progress value={uploadProgress} className="mb-2" />
+                                    <p className="text-sm text-center text-muted-foreground">
+                                        {uploadProgress}%
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        )}
+
                         <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800">
-                            <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">Lưu ý quan trọng</h4>
-                            <ul className="text-xs text-blue-700 dark:text-blue-400 list-disc list-inside space-y-1">
-                                <li>Không vi phạm bản quyền nội dung.</li>
-                                <li>Tuân thủ Nguyên tắc cộng đồng.</li>
-                                <li>Đảm bảo chất lượng video tốt nhất.</li>
-                            </ul>
+                            <div className="flex items-start gap-2">
+                                <IconAlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
+                                <div>
+                                    <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1">
+                                        Lưu ý quan trọng
+                                    </h4>
+                                    <ul className="text-xs text-blue-700 dark:text-blue-400 list-disc list-inside space-y-1">
+                                        <li>Không vi phạm bản quyền nội dung</li>
+                                        <li>Tuân thủ Nguyên tắc cộng đồng YouTube</li>
+                                        <li>Video sẽ được Manager duyệt trước khi xuất bản</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -238,78 +376,81 @@ export default function CreateVideoPage() {
                             <CardHeader>
                                 <CardTitle>Thông tin chi tiết</CardTitle>
                                 <CardDescription>
-                                    Cập nhật tiêu đề, mô tả và các cài đặt khác cho video.
+                                    Cập nhật tiêu đề, mô tả và các cài đặt khác cho video
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
+                                {/* Channel Selection */}
                                 <FormField
                                     control={form.control}
                                     name="channelId"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Đăng lên kênh *</FormLabel>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
-                                                value={field.value}
-                                                disabled={channels.length === 0}
-                                            >
+                                            <FormLabel>Kênh YouTube</FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl>
-                                                    <SelectTrigger className={channels.length === 0 ? "opacity-50" : ""}>
-                                                        <SelectValue placeholder={
-                                                            channels.length === 0
-                                                                ? "Không có kênh khả dụng"
-                                                                : "Chọn kênh..."
-                                                        } />
+                                                    <SelectTrigger className="text-gray-900">
+                                                        <SelectValue placeholder="Chọn kênh để đăng video" />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent>
-                                                    {channels.length === 0 ? (
-                                                        <SelectItem value="no-channel" disabled>
-                                                            Bạn chưa có quyền upload lên kênh nào
+                                                <SelectContent className=" dark:bg-gray-800">
+                                                    {channels.map((channel) => (
+                                                        <SelectItem
+                                                            key={channel._id}
+                                                            value={channel._id}
+                                                            className="text-gray-900 cursor-pointer dark:hover:bg-gray-700"
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <img
+                                                                    src={channel.snippet?.thumbnails?.default?.url}
+                                                                    alt={channel.snippet?.title}
+                                                                    className="w-6 h-6 rounded-full"
+                                                                />
+                                                                <span>{channel.snippet?.title}</span>
+                                                            </div>
                                                         </SelectItem>
-                                                    ) : (
-                                                        channels.map((channel) => (
-                                                            <SelectItem key={channel._id} value={channel._id}>
-                                                                <div className="flex items-center gap-2">
-                                                                    <span>{channel.name}</span>
-                                                                    {!channel.isConnected && (
-                                                                        <span className="text-xs text-orange-600">(Chưa kết nối)</span>
-                                                                    )}
-                                                                </div>
-                                                            </SelectItem>
-                                                        ))
-                                                    )}
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                             <FormDescription>
-                                                {channels.length === 0
-                                                    ? "Vui lòng liên hệ Manager/Admin để được phân công quản lý kênh."
-                                                    : "Chọn kênh YouTube mà bạn muốn đăng video lên."
-                                                }
+                                                Chọn kênh YouTube để đăng video này
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
 
+                                {/* Title */}
                                 <FormField
                                     control={form.control}
                                     name="title"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Tiêu đề (bắt buộc)</FormLabel>
+                                            <FormLabel>
+                                                Tiêu đề <span className="text-red-500">*</span>
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Nhập tiêu đề video hấp dẫn..." {...field} />
+                                                <Input
+                                                    placeholder="Nhập tiêu đề cho video của bạn"
+                                                    {...field}
+                                                    disabled={loading}
+                                                    maxLength={100}
+                                                />
                                             </FormControl>
-                                            <FormDescription>
-                                                Tiêu đề giúp người xem tìm thấy video của bạn.
-                                            </FormDescription>
+                                            <div className="flex justify-between">
+                                                <FormDescription>
+                                                    Tiêu đề hấp dẫn giúp người xem tìm thấy video của bạn
+                                                </FormDescription>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {field.value?.length || 0}/100
+                                                </span>
+                                            </div>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
 
+                                {/* Description */}
                                 <FormField
                                     control={form.control}
                                     name="description"
@@ -318,48 +459,116 @@ export default function CreateVideoPage() {
                                             <FormLabel>Mô tả</FormLabel>
                                             <FormControl>
                                                 <Textarea
-                                                    placeholder="Giới thiệu về video của bạn..."
-                                                    className="min-h-[150px] resize-y"
+                                                    placeholder="Mô tả nội dung video của bạn"
+                                                    className="resize-none min-h-[120px]"
                                                     {...field}
+                                                    disabled={loading}
+                                                    maxLength={5000}
                                                 />
                                             </FormControl>
-                                            <FormDescription>
-                                                Mô tả giúp người xem hiểu rõ hơn về nội dung video.
-                                            </FormDescription>
+                                            <div className="flex justify-between">
+                                                <FormDescription>
+                                                    Mô tả chi tiết giúp video được tìm thấy dễ dàng hơn
+                                                </FormDescription>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {field.value?.length || 0}/5000
+                                                </span>
+                                            </div>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
 
+                                {/* Tags */}
+                                <div className="space-y-2">
+                                    <FormLabel>Thẻ (Tags)</FormLabel>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            placeholder="Nhập thẻ và nhấn Enter"
+                                            value={tagInput}
+                                            onChange={(e) => setTagInput(e.target.value)}
+                                            onKeyDown={handleAddTag}
+                                            disabled={loading || tags.length >= 10}
+                                        />
+                                        {tags.length < 10 && (
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+                                                        const newTags = [...tags, tagInput.trim()];
+                                                        setTags(newTags);
+                                                        form.setValue('tags', newTags);
+                                                        setTagInput("");
+                                                    }
+                                                }}
+                                                disabled={!tagInput.trim()}
+                                            >
+                                                Thêm
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {tags.map((tag, index) => (
+                                            <Badge
+                                                key={index}
+                                                variant="secondary"
+                                                className="pl-2 pr-1 py-1"
+                                            >
+                                                <IconHash className="h-3 w-3 mr-1" />
+                                                {tag}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveTag(tag)}
+                                                    className="ml-2 hover:text-destructive"
+                                                    disabled={loading}
+                                                >
+                                                    <IconX className="h-3 w-3" />
+                                                </button>
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                    <FormDescription>
+                                        Thêm thẻ để giúp người xem tìm thấy video của bạn (tối đa 10 thẻ)
+                                    </FormDescription>
+                                </div>
+
+                                {/* Privacy */}
                                 <FormField
                                     control={form.control}
                                     name="privacy"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Chế độ hiển thị</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Chọn chế độ..." />
+                                                    <SelectTrigger className="text-gray-900 dark:text-gray-100">
+                                                        <SelectValue />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="public">
+                                                <SelectContent className="bg-white dark:bg-gray-800">
+                                                    <SelectItem value="public" className="text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
                                                         <div className="flex items-center">
                                                             <span className="font-medium">Công khai</span>
-                                                            <span className="ml-2 text-muted-foreground text-xs">- Mọi người đều có thể xem</span>
+                                                            <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">
+                                                                - Mọi người đều có thể xem
+                                                            </span>
                                                         </div>
                                                     </SelectItem>
-                                                    <SelectItem value="private">
+                                                    <SelectItem value="private" className="text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
                                                         <div className="flex items-center">
                                                             <span className="font-medium">Riêng tư</span>
-                                                            <span className="ml-2 text-muted-foreground text-xs">- Chỉ mình bạn xem được</span>
+                                                            <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">
+                                                                - Chỉ bạn và người được mời
+                                                            </span>
                                                         </div>
                                                     </SelectItem>
-                                                    <SelectItem value="unlisted">
+                                                    <SelectItem value="unlisted" className="text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
                                                         <div className="flex items-center">
                                                             <span className="font-medium">Không công khai</span>
-                                                            <span className="ml-2 text-muted-foreground text-xs">- Chỉ người có link mới xem được</span>
+                                                            <span className="ml-2 text-gray-500 dark:text-gray-400 text-xs">
+                                                                - Chỉ người có link mới xem được
+                                                            </span>
                                                         </div>
                                                     </SelectItem>
                                                 </SelectContent>
@@ -372,46 +581,32 @@ export default function CreateVideoPage() {
                         </Card>
 
                         <div className="flex justify-end gap-4">
-                            <Button type="button" variant="outline" onClick={() => navigate("/channels/my")}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => navigate("/videos/my")}
+                                disabled={loading}
+                            >
                                 Hủy bỏ
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={loading || channels.length === 0}
+                                disabled={loading || !fileName}
                                 className="bg-red-600 hover:bg-red-700 min-w-[150px]"
-                                title={channels.length === 0 ? "Bạn chưa có quyền upload video" : ""}
                             >
                                 {loading ? (
                                     <>
-                                        <span className="animate-spin mr-2">⏳</span> Đang xử lý...
+                                        <span className="animate-spin mr-2">⏳</span>
+                                        Đang tải lên... {uploadProgress}%
                                     </>
                                 ) : (
                                     <>
-                                        <IconCloudUpload className="mr-2 h-4 w-4" /> Đăng Video
+                                        <IconCloudUpload className="mr-2 h-4 w-4" />
+                                        Tải lên video
                                     </>
                                 )}
                             </Button>
                         </div>
-
-                        {channels.length === 0 && (
-                            <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
-                                <div className="flex gap-3">
-                                    <div className="flex-shrink-0">
-                                        <svg className="h-5 w-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-sm font-medium text-amber-800">
-                                            Chưa có quyền upload video
-                                        </h3>
-                                        <p className="mt-1 text-sm text-amber-700">
-                                            Bạn chưa được phân công quản lý kênh nào. Vui lòng liên hệ Manager hoặc Admin để được giao quyền upload video.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </form>
             </Form>
