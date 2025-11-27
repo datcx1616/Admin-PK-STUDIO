@@ -26,33 +26,48 @@ export default function MyChannelsPage() {
     const navigate = useNavigate();
     const [channels, setChannels] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [userInfo, setUserInfo] = useState<any>(null);
 
     useEffect(() => {
+        // Get user info from localStorage
+        const token = localStorage.getItem('authToken');
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            setUserInfo(JSON.parse(userStr));
+        }
+
         const fetchChannels = async () => {
             try {
-                // Use getChannels to fetch full channel details
+                console.log('🔄 Fetching channels for current user...');
+                // Use getChannels which already filters by user role in backend
                 const response = await apiClient.getChannels();
+                console.log('✅ Channels response:', response);
+
                 if (response?.data) {
                     setChannels(response.data);
+                    console.log(`📺 Found ${response.data.length} channels`);
+                } else if (Array.isArray(response)) {
+                    setChannels(response);
+                    console.log(`📺 Found ${response.length} channels`);
                 }
-            } catch (error) {
-                console.error("Failed to fetch channels", error);
-                toast.error("Không thể tải danh sách kênh.");
+            } catch (error: any) {
+                console.error("❌ Failed to fetch channels", error);
+                if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+                    toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+                    setTimeout(() => navigate('/login'), 2000);
+                } else {
+                    toast.error("Không thể tải danh sách kênh: " + error.message);
+                }
             } finally {
                 setLoading(false);
             }
         };
         fetchChannels();
-    }, []);
+    }, [navigate]);
 
     function formatNumber(num: number | undefined): string {
         if (num === undefined) return "0";
         return new Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(num);
-    }
-
-    function formatDate(dateString: string | undefined): string {
-        if (!dateString) return "N/A";
-        return new Date(dateString).toLocaleDateString('vi-VN');
     }
 
     if (loading) {
@@ -63,14 +78,51 @@ export default function MyChannelsPage() {
         <div className="flex flex-col gap-6 p-6">
 
             <SiteHeader />
+
+            {/* User Info Banner */}
+            {userInfo && (
+                <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                    <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-lg">
+                                {userInfo.name?.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-lg">{userInfo.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {userInfo.email} • <Badge variant="outline" className="ml-1">{userInfo.role}</Badge>
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {channels.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 border rounded-lg bg-muted/10">
-                    <p className="text-muted-foreground">Bạn chưa được phân công quản lý kênh nào.</p>
-                </div>
+                <Card className="border-dashed">
+                    <CardContent className="flex flex-col items-center justify-center py-16">
+                        <div className="rounded-full bg-muted p-6 mb-4">
+                            <IconUsers className="h-12 w-12 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-xl font-semibold mb-2">Chưa có kênh được phân công</h3>
+                        <p className="text-muted-foreground text-center max-w-md mb-4">
+                            {userInfo?.role === 'editor'
+                                ? 'Bạn chưa được quản lý (Manager) phân công quản lý kênh nào. Vui lòng liên hệ Manager hoặc Admin để được giao kênh.'
+                                : 'Bạn chưa có kênh nào trong hệ thống. Vui lòng liên hệ Admin để được hỗ trợ.'
+                            }
+                        </p>
+                        {userInfo?.role === 'admin' && (
+                            <Button onClick={() => navigate('/youtube/connect')}>
+                                <IconLink className="mr-2 h-4 w-4" />
+                                Kết nối kênh YouTube
+                            </Button>
+                        )}
+                    </CardContent>
+                </Card>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {channels.map((channel: any) => (
-                        <Card key={channel._id} className="flex flex-col">
+                        <Card key={channel._id} className="flex flex-col hover:shadow-lg transition-shadow">
                             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                                 <div className="flex flex-col gap-1 w-full">
                                     <div className="flex justify-between items-start w-full">
@@ -78,18 +130,24 @@ export default function MyChannelsPage() {
                                             {channel.name}
                                         </CardTitle>
                                         <Badge variant={channel.isConnected ? "default" : "secondary"} className="shrink-0">
-                                            {channel.isConnected ? "Connected" : "Disconnected"}
+                                            {channel.isConnected ? "✓ Kết nối" : "○ Chưa kết nối"}
                                         </Badge>
                                     </div>
                                     <CardDescription className="line-clamp-2 text-xs mt-1">
                                         {channel.description || "Chưa có mô tả"}
                                     </CardDescription>
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                                        <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100">
+                                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-2">
+                                        <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100 font-medium">
                                             {channel.team?.name || "No Team"}
                                         </span>
-                                        <span>•</span>
-                                        <span>Tham gia: {formatDate(channel.createdAt)}</span>
+                                        {channel.team?.branch?.name && (
+                                            <>
+                                                <span>•</span>
+                                                <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded border border-green-100">
+                                                    {channel.team.branch.name}
+                                                </span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </CardHeader>
@@ -135,11 +193,11 @@ export default function MyChannelsPage() {
                             </CardContent>
                             <CardFooter className="flex gap-2 pt-4 border-t">
                                 <Button
-                                    className="flex-1"
+                                    className="flex-1 bg-red-600"
                                     onClick={() => navigate("/videos/create")}
                                 >
                                     <IconVideoPlus className="mr-2 h-4 w-4" />
-                                    Upload Video
+                                    Tải video lên
                                 </Button>
                                 {channel.youtubeChannelId && (
                                     <Button variant="outline" size="icon" asChild>

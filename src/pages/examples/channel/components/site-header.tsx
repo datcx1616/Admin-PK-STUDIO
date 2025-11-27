@@ -19,33 +19,35 @@ export function SiteHeader() {
     };
 
     const fetchAnalytics = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const data = await youtubeApi.getChannelAnalytics('2024-01-01', '2024-12-31');
-            setAnalytics(data);
-            console.log('Analytics data:', data);
-        } catch (err: any) {
-            console.error('Error fetching analytics:', err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
+        // TODO: Fix analytics - need channelId parameter
+        // setLoading(true);
+        // setError(null);
+        // try {
+        //     const data = await youtubeApi.getChannelAnalytics(channelId, '2024-01-01', '2024-12-31');
+        //     setAnalytics(data);
+        //     console.log('Analytics data:', data);
+        // } catch (err: any) {
+        //     console.error('Error fetching analytics:', err);
+        //     setError(err.message);
+        // } finally {
+        //     setLoading(false);
+        // }
     };
 
     useEffect(() => {
-        const checkAndFetch = async () => {
-            try {
-                const status = await youtubeApi.getStatus();
-                if (status.connected) {
-                    fetchAnalytics();
-                }
-            } catch (error) {
-                console.log('Chưa kết nối YouTube');
-            }
-        };
+        // Temporarily disabled - analytics needs channelId
+        // const checkAndFetch = async () => {
+        //     try {
+        //         const status = await youtubeApi.getStatus();
+        //         if (status.connected) {
+        //             fetchAnalytics();
+        //         }
+        //     } catch (error) {
+        //         console.log('Chưa kết nối YouTube');
+        //     }
+        // };
 
-        checkAndFetch();
+        // checkAndFetch();
     }, []);
 
     return (

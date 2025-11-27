@@ -11,15 +11,18 @@ interface AudienceCardsProps {
 export function AudienceCards({ analytics }: AudienceCardsProps) {
     if (!analytics.retention) return null
 
+    // Debug: Log retention data
+    console.log('🎯 AudienceCards retention data:', analytics.retention)
+
     const audienceCards = [
         {
             label: "CTR (Click-through Rate)",
-            value: analytics.retention.ctr,
-            formatted: formatPercent(analytics.retention.ctr),
+            value: analytics.retention.impressionClickThroughRate || analytics.retention.ctr || 0,
+            formatted: formatPercent(analytics.retention.impressionClickThroughRate || analytics.retention.ctr || 0),
             icon: MousePointer,
             iconBg: "bg-blue-100",
             iconColor: "text-blue-600",
-            progress: analytics.retention.ctr * 10,
+            progress: (analytics.retention.impressionClickThroughRate || analytics.retention.ctr || 0) * 10,
             subtitle: "Tỷ lệ click vào video"
         },
         {
@@ -40,27 +43,27 @@ export function AudienceCards({ analytics }: AudienceCardsProps) {
             iconBg: "bg-purple-100",
             iconColor: "text-purple-600",
             progress: 80,
-            subtitle: `CTR: ${formatPercent(analytics.retention.impressionClickThroughRate)}`
+            subtitle: `CTR: ${formatPercent(analytics.retention.impressionClickThroughRate || 0)}`
         },
         {
             label: "Card Click Rate",
-            value: analytics.retention.cardClickRate,
-            formatted: formatPercent(analytics.retention.cardClickRate),
+            value: analytics.retention.cardClickRate || 0,
+            formatted: formatPercent(analytics.retention.cardClickRate || 0),
             icon: MousePointer,
             iconBg: "bg-orange-100",
             iconColor: "text-orange-600",
-            progress: analytics.retention.cardClickRate * 10,
-            subtitle: `Teaser: ${formatPercent(analytics.retention.cardTeaserClickRate)}`
+            progress: (analytics.retention.cardClickRate || 0) * 10,
+            subtitle: `Teaser: ${formatPercent(analytics.retention.cardTeaserClickRate || 0)}`
         },
         {
             label: "Annotation CTR",
-            value: analytics.retention.annotationClickThroughRate,
-            formatted: formatPercent(analytics.retention.annotationClickThroughRate),
+            value: analytics.retention.annotationClickThroughRate || 0,
+            formatted: formatPercent(analytics.retention.annotationClickThroughRate || 0),
             icon: Target,
             iconBg: "bg-pink-100",
             iconColor: "text-pink-600",
-            progress: analytics.retention.annotationClickThroughRate * 10,
-            subtitle: `Close: ${formatPercent(analytics.retention.annotationCloseRate)}`
+            progress: (analytics.retention.annotationClickThroughRate || 0) * 10,
+            subtitle: `Close: ${formatPercent(analytics.retention.annotationCloseRate || 0)}`
         },
     ]
 

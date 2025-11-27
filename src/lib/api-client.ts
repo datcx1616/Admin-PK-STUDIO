@@ -119,6 +119,79 @@ class ApiClient {
     });
   }
 
+  // ===== ANALYTICS METHODS =====
+
+  async getBranches(): Promise<any> {
+    return this.request<any>("/branches");
+  }
+
+  async getTeams(params: any = {}): Promise<any> {
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `/teams?${queryString}` : "/teams";
+    return this.request<any>(url);
+  }
+
+  async getUsers(params: any = {}): Promise<any> {
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `/users?${queryString}` : "/users";
+    return this.request<any>(url);
+  }
+
+  async getChannelsForAnalytics(params: any = {}): Promise<any> {
+    const queryString = new URLSearchParams(params).toString();
+    const url = queryString ? `/channels?${queryString}` : "/channels";
+    return this.request<any>(url);
+  }
+
+  async getYouTubeAnalytics(params: {
+    channelId?: string;
+    teamId?: string;
+    branchId?: string;
+    startDate: string;
+    endDate: string;
+    include?: string;
+  }): Promise<any> {
+    const queryString = new URLSearchParams(params as any).toString();
+    return this.request<any>(`/youtube/analytics?${queryString}`);
+  }
+
+  async getChannelStats(channelId: string): Promise<any> {
+    return this.request<any>(`/youtube/channel-stats?channelId=${channelId}`);
+  }
+
+  async getAggregatedAnalytics(params: {
+    channelIds: string[];
+    startDate: string;
+    endDate: string;
+  }): Promise<any> {
+    const queryString = new URLSearchParams({
+      channelIds: params.channelIds.join(','),
+      startDate: params.startDate,
+      endDate: params.endDate,
+    }).toString();
+    return this.request<any>(`/youtube/analytics/aggregate?${queryString}`);
+  }
+
+  async getTeamAnalytics(teamId: string, params: {
+    startDate: string;
+    endDate: string;
+  }): Promise<any> {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request<any>(`/youtube/analytics/team/${teamId}?${queryString}`);
+  }
+
+  async getBranchAnalytics(branchId: string, params: {
+    startDate: string;
+    endDate: string;
+  }): Promise<any> {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request<any>(`/youtube/analytics/branch/${branchId}?${queryString}`);
+  }
+
+  async getAdminStats(): Promise<any> {
+    return this.request<any>("/dashboard/admin-stats");
+  }
+
   // ===== YOUTUBE METHODS =====
   
   async getYouTubeAuthUrl(): Promise<YouTubeAuthResponse> {

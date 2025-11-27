@@ -27,8 +27,21 @@ export function LoginForm() {
     // Redirect if already logged in
     useEffect(() => {
         const token = localStorage.getItem("authToken");
-        if (token) {
-            navigate("/dashboard", { replace: true });
+        const userStr = localStorage.getItem("user");
+
+        if (token && userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                // Redirect based on role
+                if (user.role === 'editor') {
+                    navigate("/channels/my", { replace: true });
+                } else {
+                    navigate("/dashboard", { replace: true });
+                }
+            } catch (error) {
+                // If parsing fails, redirect to dashboard
+                navigate("/dashboard", { replace: true });
+            }
         }
     }, [navigate]);
 
@@ -53,7 +66,12 @@ export function LoginForm() {
             });
 
             setTimeout(() => {
-                navigate("/dashboard");
+                // Redirect based on user role
+                if (response.user.role === 'editor') {
+                    navigate("/channels/my");
+                } else {
+                    navigate("/dashboard");
+                }
             }, 500);
         } catch (error) {
             setApiState({

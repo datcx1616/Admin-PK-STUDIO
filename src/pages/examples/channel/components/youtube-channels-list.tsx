@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { ChannelAssignment } from '../../analytics/components/channel-assignment'
 
 interface Channel {
     _id: string
@@ -103,6 +104,10 @@ export function YouTubeChannelsList() {
     const [pageSize, setPageSize] = useState(10)
     const [totalPages, setTotalPages] = useState(1)
 
+    // Assignment Dialog
+    const [selectedChannel, setSelectedChannel] = useState<any>(null)
+    const [isAssignmentOpen, setIsAssignmentOpen] = useState(false)
+
     useEffect(() => {
         fetchChannels()
     }, [])
@@ -131,6 +136,14 @@ export function YouTubeChannelsList() {
             )
 
             if (response.data.success && response.data.data) {
+                console.log('📊 Fetched channels:', response.data.data)
+                console.log('📋 Channel assignments:', response.data.data.map((c: Channel) => ({
+                    _id: c._id || c.id,
+                    name: c.name || c.channelTitle,
+                    assignedCount: c.assignedTo?.length || 0,
+                    editorCount: c.assignedTo?.filter(a => a.role === 'editor').length || 0,
+                    assignedTo: c.assignedTo
+                })))
                 setChannels(response.data.data)
 
                 // Extract unique branches and teams
@@ -202,7 +215,25 @@ export function YouTubeChannelsList() {
     }
 
     const handleManageEditors = (channelId: string) => {
-        console.log('Manage editors for channel:', channelId)
+        const channel = channels.find(c => (c._id || c.id) === channelId)
+        if (channel) {
+            // Convert channel to match ChannelAssignment interface
+            const assignmentChannel: any = {
+                _id: channel._id || channel.id,
+                name: channel.name || channel.channelTitle,
+                youtubeChannelId: channel.channelId,
+                customUrl: channel.customUrl,
+                thumbnailUrl: channel.thumbnailUrl || channel.thumbnail,
+                subscriberCount: channel.subscriberCount || 0,
+                viewCount: channel.viewCount || 0,
+                videoCount: channel.videoCount || 0,
+                isConnected: channel.isConnected || false,
+                team: channel.team,
+                assignedTo: channel.assignedTo
+            }
+            setSelectedChannel(assignmentChannel)
+            setIsAssignmentOpen(true)
+        }
     }
 
     const handleEditChannel = (channelId: string) => {
@@ -447,17 +478,24 @@ export function YouTubeChannelsList() {
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
                                                     <Badge
-                                                        variant="secondary"
-                                                        className="bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer text-xs"
+                                                        variant={editorCount > 0 ? "default" : "outline"}
+                                                        className={`${editorCount > 0
+                                                            ? "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
+                                                            : "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100"
+                                                            } cursor-pointer text-xs font-medium`}
                                                         onClick={() => handleManageEditors(channel._id || channel.id)}
                                                     >
-                                                        {editorCount} editor{editorCount !== 1 ? 's' : ''}
+                                                        {editorCount > 0
+                                                            ? `${editorCount} editor${editorCount !== 1 ? 's' : ''}`
+                                                            : 'Chưa gán'
+                                                        }
                                                     </Badge>
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
-                                                        className="h-6 w-6 p-0"
+                                                        className="h-6 w-6 p-0 hover:bg-slate-100"
                                                         onClick={() => handleManageEditors(channel._id || channel.id)}
+                                                        title="Phân công editor"
                                                     >
                                                         <UserPlus className="h-3 w-3 text-slate-600" />
                                                     </Button>
@@ -608,6 +646,18 @@ export function YouTubeChannelsList() {
                 </CardContent>
             </Card>
 
+            {/* Assignment Dialog */}
+            <ChannelAssignment
+                channel={selectedChannel}
+                isOpen={isAssignmentOpen}
+                onClose={() => {
+                    setIsAssignmentOpen(false)
+                    setSelectedChannel(null)
+                }}
+                onUpdate={() => {
+                    fetchChannels()
+                }}
+            />
         </div>
     )
 }

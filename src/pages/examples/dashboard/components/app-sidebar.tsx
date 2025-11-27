@@ -148,6 +148,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         avatar: "/avatars/shadcn.jpg", // Placeholder
     };
 
+    const homeRoute = user?.role === 'editor' ? '/channels/my' : '/dashboard';
+
     return (
         <Sidebar collapsible="none" className="h-screen border-r flex flex-col" {...props}>
             <SidebarHeader className="border-b">
@@ -159,14 +161,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         >
                             <Button
                                 className="w-full gap-3 h-auto bg-transparent hover:bg-transparent justify-start px-4 py-3"
-                                onClick={() => navigate('/dashboard')}
+                                onClick={() => navigate(homeRoute)}
                             >
                                 <div className="w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center">
                                     <Youtube className="w-6 h-6 text-white" />
                                 </div>
                                 <div className="flex flex-col items-start gap-0.5">
                                     <span className="text-gray-900 font-bold text-sm">YT Manager</span>
-                                    <span className="text-gray-500 text-sm">Thống Kê</span>
+                                    <span className="text-gray-500 text-sm">
+                                        {user?.role === 'editor' ? 'Kênh của tôi' : 'Thống Kê'}
+                                    </span>
                                 </div>
                             </Button>
                         </SidebarMenuButton>

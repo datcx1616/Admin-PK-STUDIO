@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react"
+import { useNavigate } from "react-router-dom"
 import {
     SidebarInset,
     SidebarProvider,
@@ -12,6 +13,7 @@ import { ManagerView } from "@/pages/examples/dashboard/views/ManagerView"
 import { EditorView } from "@/pages/examples/dashboard/views/EditorView"
 
 export default function Page() {
+    const navigate = useNavigate();
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -20,6 +22,12 @@ export default function Page() {
             try {
                 const dashboardData = await apiClient.getDashboardOverview();
                 setData(dashboardData);
+
+                // Redirect editor to their channels page
+                if (dashboardData?.user?.role === 'editor') {
+                    navigate('/channels/my', { replace: true });
+                    return;
+                }
             } catch (error) {
                 toast.error("Failed to load dashboard data");
             } finally {
@@ -28,7 +36,7 @@ export default function Page() {
         };
 
         fetchData();
-    }, []);
+    }, [navigate]);
 
     if (loading) {
         return <div className="flex items-center justify-center h-screen">Loading...</div>;

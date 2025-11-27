@@ -61,21 +61,56 @@ export default function CreateVideoPage() {
     useEffect(() => {
         const fetchChannels = async () => {
             try {
-                const dashboardData = await apiClient.getDashboardOverview();
-                if (dashboardData?.channels) {
-                    setChannels(dashboardData.channels);
-                    // Auto-select first channel if available
-                    if (dashboardData.channels.length > 0) {
-                        form.setValue("channelId", dashboardData.channels[0]._id);
-                    }
+                console.log('🔄 Fetching channels for video upload...');
+                // Use getChannels which filters by user role automatically
+                const response = await apiClient.getChannels();
+                console.log('✅ Channels response:', response);
+
+                let channelsList: any[] = [];
+
+                // Extract channels from response
+                if (response?.data && Array.isArray(response.data)) {
+                    channelsList = response.data;
+                } else if (Array.isArray(response)) {
+                    channelsList = response;
+                } else if (response?.channels && Array.isArray(response.channels)) {
+                    channelsList = response.channels;
                 }
-            } catch (error) {
-                console.error("Failed to fetch channels", error);
-                toast.error("Không thể tải danh sách kênh.");
+
+                console.log(`📺 Found ${channelsList.length} channels for upload`);
+
+                // Filter only connected channels
+                const connectedChannels = channelsList.filter(ch => ch.isConnected);
+                console.log(`✓ ${connectedChannels.length} connected channels`);
+
+                if (connectedChannels.length === 0 && channelsList.length > 0) {
+                    toast.warning("Các kênh chưa được kết nối với YouTube. Vui lòng kết nối trước khi upload.");
+                }
+
+                setChannels(connectedChannels.length > 0 ? connectedChannels : channelsList);
+
+                // Auto-select first channel if available
+                if (channelsList.length > 0) {
+                    const firstChannel = connectedChannels[0] || channelsList[0];
+                    form.setValue("channelId", firstChannel._id);
+                    console.log(`✓ Auto-selected channel: ${firstChannel.name}`);
+                }
+
+                if (channelsList.length === 0) {
+                    toast.error("Bạn chưa được phân công quản lý kênh nào. Vui lòng liên hệ Manager/Admin.");
+                }
+            } catch (error: any) {
+                console.error("❌ Failed to fetch channels", error);
+                if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+                    toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+                    setTimeout(() => navigate('/login'), 2000);
+                } else {
+                    toast.error("Không thể tải danh sách kênh: " + error.message);
+                }
             }
         };
         fetchChannels();
-    }, [form]);
+    }, [form, navigate]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true);
@@ -107,7 +142,7 @@ export default function CreateVideoPage() {
                         Đăng tải video mới lên kênh của bạn để chia sẻ với mọi người.
                     </p>
                 </div>
-                <Button variant="outline" onClick={() => navigate("/dashboard")}>
+                <Button variant="outline" onClick={() => navigate("/channels/my")}>
                     <IconX className="mr-2 h-4 w-4" />
                     Hủy bỏ
                 </Button>
@@ -212,21 +247,47 @@ export default function CreateVideoPage() {
                                     name="channelId"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Đăng lên kênh</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                            <FormLabel>Đăng lên kênh *</FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                                value={field.value}
+                                                disabled={channels.length === 0}
+                                            >
                                                 <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Chọn kênh..." />
+                                                    <SelectTrigger className={channels.length === 0 ? "opacity-50" : ""}>
+                                                        <SelectValue placeholder={
+                                                            channels.length === 0
+                                                                ? "Không có kênh khả dụng"
+                                                                : "Chọn kênh..."
+                                                        } />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    {channels.map((channel) => (
-                                                        <SelectItem key={channel._id} value={channel._id}>
-                                                            {channel.name}
+                                                    {channels.length === 0 ? (
+                                                        <SelectItem value="no-channel" disabled>
+                                                            Bạn chưa có quyền upload lên kênh nào
                                                         </SelectItem>
-                                                    ))}
+                                                    ) : (
+                                                        channels.map((channel) => (
+                                                            <SelectItem key={channel._id} value={channel._id}>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span>{channel.name}</span>
+                                                                    {!channel.isConnected && (
+                                                                        <span className="text-xs text-orange-600">(Chưa kết nối)</span>
+                                                                    )}
+                                                                </div>
+                                                            </SelectItem>
+                                                        ))
+                                                    )}
                                                 </SelectContent>
                                             </Select>
+                                            <FormDescription>
+                                                {channels.length === 0
+                                                    ? "Vui lòng liên hệ Manager/Admin để được phân công quản lý kênh."
+                                                    : "Chọn kênh YouTube mà bạn muốn đăng video lên."
+                                                }
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -311,10 +372,15 @@ export default function CreateVideoPage() {
                         </Card>
 
                         <div className="flex justify-end gap-4">
-                            <Button type="button" variant="outline" onClick={() => navigate("/dashboard")}>
+                            <Button type="button" variant="outline" onClick={() => navigate("/channels/my")}>
                                 Hủy bỏ
                             </Button>
-                            <Button type="submit" disabled={loading} className="bg-red-600 hover:bg-red-700 min-w-[150px]">
+                            <Button
+                                type="submit"
+                                disabled={loading || channels.length === 0}
+                                className="bg-red-600 hover:bg-red-700 min-w-[150px]"
+                                title={channels.length === 0 ? "Bạn chưa có quyền upload video" : ""}
+                            >
                                 {loading ? (
                                     <>
                                         <span className="animate-spin mr-2">⏳</span> Đang xử lý...
@@ -326,6 +392,26 @@ export default function CreateVideoPage() {
                                 )}
                             </Button>
                         </div>
+
+                        {channels.length === 0 && (
+                            <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
+                                <div className="flex gap-3">
+                                    <div className="flex-shrink-0">
+                                        <svg className="h-5 w-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="text-sm font-medium text-amber-800">
+                                            Chưa có quyền upload video
+                                        </h3>
+                                        <p className="mt-1 text-sm text-amber-700">
+                                            Bạn chưa được phân công quản lý kênh nào. Vui lòng liên hệ Manager hoặc Admin để được giao quyền upload video.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </form>
             </Form>
