@@ -17,6 +17,7 @@ import CreateVideoPage from "@/pages/examples/videos/create/page"
 import MyVideosPage from "@/pages/examples/videos/my/page"
 import AllVideosPage from "@/pages/examples/videos/all/page"
 import MyChannelsPage from "@/pages/examples/channels/my/page";
+import TeamsManagementPage from "@/pages/examples/teams/components/TeamsManagementPage";
 import './i18n';
 import "./style/App.css"
 
@@ -93,6 +94,16 @@ export default function App() {
           <PrivateRoute>
             <AdminLayout>
               <PermissionsManagement />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/teams"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <TeamsManagementPage />
             </AdminLayout>
           </PrivateRoute>
         }

@@ -29,24 +29,24 @@ export function SiteHeader({ onBranchAdded, onTeamAdded }: SiteHeaderProps) {
             <header className="bg-white border-b sticky top-0 z-10 shadow-sm">
                 <div className="flex items-center justify-between px-6 py-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Quản Lý Nhóm</h1>
+                        <h1 className="text-2xl font-bold text-slate-900">Quản Lý chính nhánh</h1>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
-                            variant="outline"
-                            className="gap-2"
+                            // variant="outline"
+                            className=" bg-red-600 hover:bg-red-700 gap-2"
                             onClick={() => setShowAddBranchModal(true)}
                         >
                             <Plus className="w-4 h-4" />
                             Thêm Chi Nhánh
                         </Button>
-                        <Button
+                        {/* <Button
                             className="bg-red-600 hover:bg-red-700 gap-2"
                             onClick={() => setShowAddTeamModal(true)}
                         >
                             <Plus className="w-4 h-4" />
                             Thêm Nhóm
-                        </Button>
+                        </Button> */}
                     </div>
                 </div>
             </header>

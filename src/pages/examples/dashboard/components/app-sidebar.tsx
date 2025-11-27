@@ -20,6 +20,7 @@ import {
 
 import {
     Youtube,
+    Users,
 } from "lucide-react";
 
 import {
@@ -61,13 +62,13 @@ const getNavItems = (role: string) => {
 
     if (['admin', 'director', 'branch_director'].includes(role)) {
         items.push({
-            title: "Quản Lý Nhóm",
+            title: "Quản Lý Chi Nhánh",
             url: "/tasks",
             icon: IconListDetails,
         });
     } else if (role === 'manager') {
         items.push({
-            title: "Nhóm Của Tôi",
+            title: "Chi Nhánh Của Tôi",
             url: "/tasks",
             icon: IconListDetails,
         });
@@ -79,6 +80,15 @@ const getNavItems = (role: string) => {
             title: "Quản Lý Kênh",
             url: "/channels",
             icon: IconChartBar,
+        });
+    }
+
+    // Teams management for non-editors
+    if (role !== 'editor') {
+        items.push({
+            title: "Quản Lý Nhóm",
+            url: "/teams",
+            icon: Users,
         });
     }
 
