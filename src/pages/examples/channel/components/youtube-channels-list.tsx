@@ -126,8 +126,9 @@ export function YouTubeChannelsList() {
             }
 
             // Sử dụng API mới: GET /api/channels/my-channels
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
             const response = await axios.get<ApiResponse>(
-                'http://localhost:3000/api/channels/my-channels',
+                `${API_URL}/channels/my-channels`,
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`

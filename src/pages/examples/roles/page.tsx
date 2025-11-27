@@ -154,8 +154,9 @@ export default function PermissionsManagement() {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('authToken')
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
-            const response = await axios.get('http://localhost:3000/api/users', {
+            const response = await axios.get(`${API_URL}/users`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
 
@@ -284,7 +285,8 @@ export default function PermissionsManagement() {
 
         try {
             const token = localStorage.getItem('authToken')
-            await axios.delete(`http://localhost:3000/api/users/${userId}`, {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+            await axios.delete(`${API_URL}/users/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
 

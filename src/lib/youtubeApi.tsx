@@ -1,7 +1,7 @@
 // src/lib/youtubeApi.ts
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/youtube';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/youtube`;
 
 // Lấy token từ localStorage (key: "authToken")
 const getAuthToken = (): string | null => {

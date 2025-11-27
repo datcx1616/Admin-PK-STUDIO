@@ -41,9 +41,10 @@ export function AddBranchModal({ open, onClose, onSuccess }: AddBranchModalProps
     const fetchDirectors = async () => {
         try {
             const token = localStorage.getItem('authToken')
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
             // Nếu có API users
-            const response = await axios.get('http://localhost:3000/api/users', {
+            const response = await axios.get(`${API_URL}/users`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 params: { role: 'branch_director' }
             })
@@ -54,7 +55,8 @@ export function AddBranchModal({ open, onClose, onSuccess }: AddBranchModalProps
 
             // Fallback: fetch từ dashboard
             try {
-                const response = await axios.get('http://localhost:3000/api/dashboard/overview', {
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+                const response = await axios.get(`${API_URL}/dashboard/overview`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
                 })
 
@@ -97,9 +99,10 @@ export function AddBranchModal({ open, onClose, onSuccess }: AddBranchModalProps
         try {
             setLoading(true)
             const token = localStorage.getItem('authToken')
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
             await axios.post(
-                'http://localhost:3000/api/branches',
+                `${API_URL}/branches`,
                 {
                     name: formData.name,
                     code: formData.code,

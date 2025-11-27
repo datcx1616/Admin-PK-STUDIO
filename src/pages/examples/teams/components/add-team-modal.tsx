@@ -70,15 +70,16 @@ export function AddTeamModal({ open, onClose, onSuccess }: AddTeamModalProps) {
         setFetchingData(true)
         try {
             const token = localStorage.getItem('authToken')
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
             // Fetch branches
-            const branchesResponse = await axios.get('http://localhost:3000/api/branches', {
+            const branchesResponse = await axios.get(`${API_URL}/branches`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             setBranches(branchesResponse.data.branches || [])
 
             // Fetch all editors
-            const editorsResponse = await axios.get('http://localhost:3000/api/users', {
+            const editorsResponse = await axios.get(`${API_URL}/users`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 params: { role: 'editor' }
             })
@@ -95,9 +96,10 @@ export function AddTeamModal({ open, onClose, onSuccess }: AddTeamModalProps) {
     const fetchManagersForBranch = async (branchId: string) => {
         try {
             const token = localStorage.getItem('authToken')
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
             // Fetch managers thuộc branch này
-            const response = await axios.get('http://localhost:3000/api/users', {
+            const response = await axios.get(`${API_URL}/users`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 params: {
                     role: 'manager',
@@ -146,9 +148,10 @@ export function AddTeamModal({ open, onClose, onSuccess }: AddTeamModalProps) {
         try {
             setLoading(true)
             const token = localStorage.getItem('authToken')
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
             const response = await axios.post(
-                'http://localhost:3000/api/teams',
+                `${API_URL}/teams`,
                 {
                     name: formData.name.trim(),
                     description: formData.description.trim(),

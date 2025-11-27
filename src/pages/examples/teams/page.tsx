@@ -113,15 +113,16 @@ export default function TeamManagement() {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('authToken')
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
             const [branchesRes, teamsRes, usersRes] = await Promise.all([
-                axios.get('http://localhost:3000/api/branches', {
+                axios.get(`${API_URL}/branches`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                axios.get('http://localhost:3000/api/teams', {
+                axios.get(`${API_URL}/teams`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                axios.get('http://localhost:3000/api/users', {
+                axios.get(`${API_URL}/users`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
             ])

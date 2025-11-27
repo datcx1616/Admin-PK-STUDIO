@@ -81,15 +81,16 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
         setFetchingData(true)
         try {
             const token = localStorage.getItem('authToken')
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
             // Fetch branches
-            const branchesResponse = await axios.get('http://localhost:3000/api/branches', {
+            const branchesResponse = await axios.get(`${API_URL}/branches`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             setBranches(branchesResponse.data.branches || [])
 
             // Fetch teams
-            const teamsResponse = await axios.get('http://localhost:3000/api/teams', {
+            const teamsResponse = await axios.get(`${API_URL}/teams`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             setTeams(teamsResponse.data.teams || [])
@@ -182,8 +183,9 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
                 payload.team = formData.teamId
             }
 
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
             const response = await axios.post(
-                'http://localhost:3000/api/users',
+                `${API_URL}/users`,
                 payload,
                 {
                     headers: {

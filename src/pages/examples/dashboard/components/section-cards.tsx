@@ -105,8 +105,9 @@ export function SectionCards({ stats: propStats }: SectionCardsProps) {
                 return
             }
 
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
             const response = await axios.get<AdminStatsResponse>(
-                'http://localhost:3000/api/dashboard/admin-stats',
+                `${API_URL}/dashboard/admin-stats`,
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`
