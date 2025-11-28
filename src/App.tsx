@@ -1,6 +1,4 @@
-// import AuthenticationPage from "@/pages/examples/authentication/page"
-// import PlaygroundPage from "@/pages/examples/playground/page"
-// import TaskPage from "@/pages/examples/tasks/page"
+// src/App.tsx - UPDATED VERSION
 import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Routes, Route, Navigate } from "react-router-dom";
@@ -8,18 +6,26 @@ import PermissionsManagement from "@/pages/examples/roles/page";
 import LoginPage from "@/[locale]/login/page";
 import SignupPage from "@/[locale]/signup/page";
 import { PrivateRoute } from "@/pages/auth/PrivateRoute";
-import Page from "@/pages/examples/dashboard/page"
-import { AppSidebar } from "@/pages/examples/dashboard/components/app-sidebar"
-import TeamsManagement from "@/pages/examples/teams/page"
-import ChannelManagement from "@/pages/examples/channel/page"
-import DetailedAnalytics from "@/pages/examples/analytics/page"
-import CreateVideoPage from "@/pages/examples/videos/create/page"
-import MyVideosPage from "@/pages/examples/videos/my/page"
-import AllVideosPage from "@/pages/examples/videos/all/page"
+import Page from "@/pages/examples/dashboard/page";
+import { AppSidebar } from "@/pages/examples/dashboard/components/app-sidebar";
+import TeamsManagement from "@/pages/examples/teams/page";
+import ChannelManagement from "@/pages/examples/channel/page";
+import DetailedAnalytics from "@/pages/examples/analytics/page";
+import CreateVideoPage from "@/pages/examples/videos/create/page";
+import MyVideosPage from "@/pages/examples/videos/my/page";
+import AllVideosPage from "@/pages/examples/videos/all/page";
 import MyChannelsPage from "@/pages/examples/channels/my/page";
 import TeamsManagementPage from "@/pages/examples/teams/components/TeamsManagementPage";
+
+// New Dashboard Pages
+import DashboardOverviewPage from "@/dashboard/DashboardOverviewPage";
+import AdminStatsPage from "@/dashboard/AdminStatsPage";
+import BranchDetailPage from "@/dashboard/BranchDetailPage";
+import TeamDetailPage from "@/dashboard/TeamDetailPage";
+import ChannelAnalyticsPage from "@/dashboard/ChannelAnalyticsPage";
+
 import './i18n';
-import "./style/App.css"
+import "./style/App.css";
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -48,6 +54,7 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
+      {/* Original Dashboard */}
       <Route
         path="/dashboard"
         element={
@@ -58,6 +65,68 @@ export default function App() {
           </PrivateRoute>
         }
       />
+
+      {/* NEW: Dashboard Overview */}
+      <Route
+        path="/dashboard/overview"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <DashboardOverviewPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+
+      {/* NEW: Admin Statistics */}
+      <Route
+        path="/dashboard/admin-stats"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <AdminStatsPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+
+      {/* NEW: Branch Detail */}
+      <Route
+        path="/dashboard/branch/:branchId"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <BranchDetailPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+
+      {/* NEW: Team Detail */}
+      <Route
+        path="/dashboard/teams/:teamId"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <TeamDetailPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+
+      {/* NEW: Channel Analytics */}
+      <Route
+        path="/dashboard/channels/:channelId/analytics"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <ChannelAnalyticsPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+
+      {/* Existing Routes */}
       <Route
         path="/tasks"
         element={
@@ -79,6 +148,16 @@ export default function App() {
         }
       />
       <Route
+        path="/teams"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <TeamsManagementPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
         path="/analytics"
         element={
           <PrivateRoute>
@@ -94,16 +173,6 @@ export default function App() {
           <PrivateRoute>
             <AdminLayout>
               <PermissionsManagement />
-            </AdminLayout>
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/teams"
-        element={
-          <PrivateRoute>
-            <AdminLayout>
-              <TeamsManagementPage />
             </AdminLayout>
           </PrivateRoute>
         }

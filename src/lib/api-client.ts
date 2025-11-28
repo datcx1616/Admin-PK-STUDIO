@@ -1,4 +1,4 @@
-// lib/api-client.ts
+// lib/api-client.ts - FIXED VERSION
 import { toast } from "sonner";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
@@ -22,9 +22,11 @@ interface DashboardOverviewResponse {
   user: any;
   branches?: any[];
   branch?: any;
-  stats?: any;
+  summary?: any;
   team?: any;
   channels?: any[];
+  topChannels?: any[];
+  recentActivity?: any[];
 }
 
 // Thêm interfaces cho YouTube
@@ -89,17 +91,53 @@ class ApiClient {
   }
 
   async getDashboardOverview(): Promise<DashboardOverviewResponse> {
+    console.log('🔄 [API] Calling /dashboard/overview...');
+    
     const response = await this.request<any>("/dashboard/overview");
+    
+    console.log('✅ [API] Raw response:', response);
+    console.log('📊 [API] Response type:', typeof response);
+    console.log('📋 [API] Response keys:', Object.keys(response || {}));
+    
     if (response.data) {
+      console.log('✓ [API] Format: Nested in data object');
+      console.log('📊 [API] totalStats:', response.data.totalStats);
+      console.log('📊 [API] branches:', response.data.branches);
+      
+      // Calculate missing stats from arrays
+      const totalBranches = response.data.branches?.length || 0;
+      const totalTeams = response.data.branches?.reduce((sum: number, branch: any) => 
+        sum + (branch.teams?.length || 0), 0) || 0;
+      
+      const summary = {
+        totalBranches,
+        totalTeams,
+        totalChannels: response.data.totalStats?.totalChannels || 0,
+        totalSubscribers: response.data.totalStats?.totalSubscribers || 0,
+        totalViews: response.data.totalStats?.totalViews || 0,
+        totalVideos: response.data.totalStats?.totalVideos || 0,
+        connectedChannels: response.data.totalStats?.connectedChannels || 0
+      };
+      
+      console.log('✅ [API] Calculated summary:', summary);
+      console.log('📺 [API] topChannels:', response.data.topChannels);
+      console.log('📺 [API] topChannels length:', response.data.topChannels?.length);
+      console.log('🎬 [API] recentActivity:', response.data.recentActivity);
+      console.log('🎬 [API] recentActivity length:', response.data.recentActivity?.length);
+      
       return {
         user: { role: response.data.userRole, ...response.data.user },
-        stats: response.data.totalStats,
+        summary,
         branches: response.data.branches,
         branch: response.data.branch,
         team: response.data.team,
-        channels: response.data.channels
+        channels: response.data.channels,
+        topChannels: response.data.topChannels,
+        recentActivity: response.data.recentActivity
       };
     }
+    
+    console.log('⚠️ [API] No data object, returning as-is');
     return response;
   }
 
@@ -189,7 +227,49 @@ class ApiClient {
   }
 
   async getAdminStats(): Promise<any> {
-    return this.request<any>("/dashboard/admin-stats");
+    console.log('🔄 [API] Calling /dashboard/admin-stats...');
+    const response = await this.request<any>("/dashboard/admin-stats");
+    console.log('✅ [API] Admin stats response:', response);
+    console.log('📊 [API] Response keys:', Object.keys(response || {}));
+    
+    // If response has 'data' wrapper, unwrap and transform it
+    if (response.data) {
+      console.log('✓ [API] Unwrapping and transforming data object');
+      const raw = response.data;
+      
+      // Transform to match AdminStats interface and provide topChannels for overview fallback
+      const transformed = {
+        system: {
+          totalUsers: raw.overview?.totalUsers || 0,
+          totalBranches: raw.overview?.totalBranches || 0,
+          totalTeams: raw.overview?.totalTeams || 0,
+          totalChannels: raw.overview?.totalChannels || 0
+        },
+        usersByRole: raw.usersByRole || {},
+        channelsByBranch: raw.branchesWithTeams?.map((branch: any) => ({
+          branchName: branch.name,
+          count: branch.channelCount || 0
+        })) || [],
+        analytics: {
+          totalSubscribers: raw.youtubeMetrics?.totalSubscribers || 0,
+          totalViews: raw.youtubeMetrics?.totalViews || 0,
+          totalWatchTime: raw.youtubeMetrics?.totalWatchTime || 0,
+          estimatedRevenue: raw.youtubeMetrics?.estimatedRevenue || 0
+        },
+        // Map backend topChannels to a common shape
+        topChannels: (raw.topChannels || []).map((ch: any) => ({
+          _id: ch.id || ch._id,
+          name: ch.name,
+          subscriberCount: ch.subscribers ?? ch.subscriberCount ?? 0,
+          viewCount: ch.views ?? ch.viewCount ?? 0
+        }))
+      };
+      
+      console.log('🔄 [API] Transformed data:', transformed);
+      return transformed;
+    }
+    
+    return response;
   }
 
   // ===== YOUTUBE METHODS =====
@@ -200,6 +280,12 @@ class ApiClient {
 
   async getYouTubeStatus(): Promise<YouTubeStatusResponse> {
     return this.request<YouTubeStatusResponse>("/youtube/status");
+  }
+
+  async syncAllChannels(): Promise<any> {
+    return this.request<any>("/dashboard/sync-all", {
+      method: "POST"
+    });
   }
 }
 
@@ -368,8 +454,6 @@ export const videoAPI = {
         return response.json();
     },
 
-
-    
     getPendingVideos: async () => {
         const response = await fetch(`${videoAPI.baseURL}/api/videos/pending`, {
             method: 'GET',

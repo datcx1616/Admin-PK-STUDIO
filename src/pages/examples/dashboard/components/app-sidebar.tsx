@@ -52,10 +52,19 @@ const getNavItems = (role: string) => {
     const items = [];
 
     // Dashboard link for everyone except Editor
+    // if (role !== 'editor') {
+    //     items.push({
+    //         title: "Thống Kê",
+    //         url: "/dashboard",
+    //         icon: IconDashboard,
+    //     });
+    // }
+
+    // 👇 THÊM MỚI: Dashboard Overview
     if (role !== 'editor') {
         items.push({
-            title: "Thống Kê",
-            url: "/dashboard",
+            title: "Tổng Quan",
+            url: "/dashboard/overview",
             icon: IconDashboard,
         });
     }
