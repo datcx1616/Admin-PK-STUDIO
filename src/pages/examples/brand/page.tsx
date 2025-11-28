@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import axios from 'axios'
-import { SiteHeader } from './components/site-header'
 
 interface Member {
     _id: string
@@ -243,7 +242,6 @@ export default function TeamManagement() {
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-50">
-                <SiteHeader onBranchAdded={fetchData} onTeamAdded={fetchData} />
                 <div className="p-6">
                     <div className="animate-pulse space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -259,8 +257,6 @@ export default function TeamManagement() {
 
     return (
         <div className="min-h-screen bg-slate-50">
-            <SiteHeader onBranchAdded={fetchData} onTeamAdded={fetchData} />
-
             {/* Header Stats */}
             <div className="bg-white border-b px-6 py-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

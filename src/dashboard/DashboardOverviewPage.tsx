@@ -212,7 +212,7 @@ export default function DashboardOverviewPage() {
                             <Button
                                 onClick={handleSyncAll}
                                 disabled={syncing}
-                                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30"
+                                className="bg-gradient-to-r from-red-600 to-red-600 hover:red-blue-700 hover:to-red-700 shadow-lg shadow-blue-500/30"
                             >
                                 <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
                                 {syncing ? 'Syncing...' : 'Sync All Channels'}

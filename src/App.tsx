@@ -15,6 +15,7 @@ import MyVideosPage from "@/pages/examples/videos/my/page";
 import AllVideosPage from "@/pages/examples/videos/all/page";
 import MyChannelsPage from "@/pages/examples/channels/my/page";
 import TeamsManagementPage from "@/pages/examples/teams/TeamsManagementPage";
+import BranchManagementPage from "@/pages/examples/brand/BranchManagementPage";
 
 // New Dashboard Pages
 import DashboardOverviewPage from "@/dashboard/DashboardOverviewPage";
@@ -131,7 +132,7 @@ export default function App() {
         element={
           <PrivateRoute>
             <AdminLayout>
-              <TeamsManagement />
+              <BranchManagementPage />
             </AdminLayout>
           </PrivateRoute>
         }
