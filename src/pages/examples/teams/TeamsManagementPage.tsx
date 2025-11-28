@@ -173,7 +173,7 @@ export default function TeamsManagementPage() {
                     <h1 className="text-3xl font-bold text-slate-900">Quản Lý Nhóm</h1>
                     <p className="text-sm text-slate-500 mt-1">Quản lý các nhóm làm việc trong hệ thống</p>
                 </div>
-                <Button onClick={() => setShowCreateModal(true)} className="bg-green-600 hover:bg-green-700">
+                <Button onClick={() => setShowCreateModal(true)} className="bg-red-600 hover:bg-red-700">
                     <Plus className="w-4 h-4 mr-2" />
                     Thêm Nhóm
                 </Button>

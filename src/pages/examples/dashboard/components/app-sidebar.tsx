@@ -72,13 +72,13 @@ const getNavItems = (role: string) => {
     if (['admin', 'director', 'branch_director'].includes(role)) {
         items.push({
             title: "Quản Lý Chi Nhánh",
-            url: "/tasks",
+            url: "/brand",
             icon: IconListDetails,
         });
     } else if (role === 'manager') {
         items.push({
             title: "Chi Nhánh Của Tôi",
-            url: "/tasks",
+            url: "/brand",
             icon: IconListDetails,
         });
     }

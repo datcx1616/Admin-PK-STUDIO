@@ -76,7 +76,7 @@ export function TeamDetailsModal({ open, teamId, onClose }: TeamDetailsModalProp
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="!max-w-[1000px] w-full max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">

@@ -1,28 +1,22 @@
-// src/pages/examples/team/components/site-header.tsx
+
 import { Plus } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { useState } from 'react'
 import { AddBranchModal } from './add-branch-modal'
-import { AddTeamModal } from './add-team-modal'
 
 interface SiteHeaderProps {
     onBranchAdded?: () => void
     onTeamAdded?: () => void
 }
 
-export function SiteHeader({ onBranchAdded, onTeamAdded }: SiteHeaderProps) {
+export function SiteHeader({ onBranchAdded, }: SiteHeaderProps) {
     const [showAddBranchModal, setShowAddBranchModal] = useState(false)
-    const [showAddTeamModal, setShowAddTeamModal] = useState(false)
 
     const handleBranchSuccess = () => {
         setShowAddBranchModal(false)
         onBranchAdded?.()
     }
 
-    const handleTeamSuccess = () => {
-        setShowAddTeamModal(false)
-        onTeamAdded?.()
-    }
 
     return (
         <>
@@ -58,12 +52,6 @@ export function SiteHeader({ onBranchAdded, onTeamAdded }: SiteHeaderProps) {
                 onSuccess={handleBranchSuccess}
             />
 
-            {/* Add Team Modal */}
-            <AddTeamModal
-                open={showAddTeamModal}
-                onClose={() => setShowAddTeamModal(false)}
-                onSuccess={handleTeamSuccess}
-            />
         </>
     )
 }

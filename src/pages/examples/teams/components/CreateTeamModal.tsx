@@ -171,7 +171,7 @@ export function CreateTeamModal({ open, onClose, onSuccess }: CreateTeamModalPro
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="!max-w-[1000px] w-full max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -377,7 +377,7 @@ export function CreateTeamModal({ open, onClose, onSuccess }: CreateTeamModalPro
                     )}
 
                     {/* Info Box */}
-                    <Alert className="bg-green-50 border-green-200">
+                    {/* <Alert className="bg-green-50 border-green-200">
                         <div className="flex gap-3">
                             <div className="flex-shrink-0">
                                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -394,7 +394,7 @@ export function CreateTeamModal({ open, onClose, onSuccess }: CreateTeamModalPro
                                 </ul>
                             </div>
                         </div>
-                    </Alert>
+                    </Alert> */}
 
                     {/* Actions */}
                     <div className="flex items-center justify-end gap-3 pt-4 border-t">

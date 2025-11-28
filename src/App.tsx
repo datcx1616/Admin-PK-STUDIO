@@ -2,20 +2,19 @@
 import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Routes, Route, Navigate } from "react-router-dom";
-import PermissionsManagement from "@/pages/examples/roles/page";
+import UsersManagementPage from "@/pages/examples/roles/UsersManagementPage";
 import LoginPage from "@/[locale]/login/page";
 import SignupPage from "@/[locale]/signup/page";
 import { PrivateRoute } from "@/pages/auth/PrivateRoute";
-import Page from "@/pages/examples/dashboard/page";
 import { AppSidebar } from "@/pages/examples/dashboard/components/app-sidebar";
-import TeamsManagement from "@/pages/examples/teams/page";
+import TeamsManagement from "@/pages/examples/brand/page";
 import ChannelManagement from "@/pages/examples/channel/page";
 import DetailedAnalytics from "@/pages/examples/analytics/page";
 import CreateVideoPage from "@/pages/examples/videos/create/page";
 import MyVideosPage from "@/pages/examples/videos/my/page";
 import AllVideosPage from "@/pages/examples/videos/all/page";
 import MyChannelsPage from "@/pages/examples/channels/my/page";
-import TeamsManagementPage from "@/pages/examples/teams/components/TeamsManagementPage";
+import TeamsManagementPage from "@/pages/examples/teams/TeamsManagementPage";
 
 // New Dashboard Pages
 import DashboardOverviewPage from "@/dashboard/DashboardOverviewPage";
@@ -60,7 +59,7 @@ export default function App() {
         element={
           <PrivateRoute>
             <AdminLayout>
-              <Page />
+              <DashboardOverviewPage />
             </AdminLayout>
           </PrivateRoute>
         }
@@ -128,7 +127,7 @@ export default function App() {
 
       {/* Existing Routes */}
       <Route
-        path="/tasks"
+        path="/brand"
         element={
           <PrivateRoute>
             <AdminLayout>
@@ -172,7 +171,7 @@ export default function App() {
         element={
           <PrivateRoute>
             <AdminLayout>
-              <PermissionsManagement />
+              <UsersManagementPage />
             </AdminLayout>
           </PrivateRoute>
         }
