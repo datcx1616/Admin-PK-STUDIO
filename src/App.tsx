@@ -7,7 +7,6 @@ import LoginPage from "@/[locale]/login/page";
 import SignupPage from "@/[locale]/signup/page";
 import { PrivateRoute } from "@/pages/auth/PrivateRoute";
 import { AppSidebar } from "@/pages/examples/dashboard/components/app-sidebar";
-import TeamsManagement from "@/pages/examples/brand/page";
 import ChannelManagement from "@/pages/examples/channel/page";
 import DetailedAnalytics from "@/pages/examples/analytics/page";
 import CreateVideoPage from "@/pages/examples/videos/create/page";
@@ -16,6 +15,8 @@ import AllVideosPage from "@/pages/examples/videos/all/page";
 import MyChannelsPage from "@/pages/examples/channels/my/page";
 import TeamsManagementPage from "@/pages/examples/teams/TeamsManagementPage";
 import BranchManagementPage from "@/pages/examples/brand/BranchManagementPage";
+import ChannelManagementPage from '@/pages/examples/channel/ChannelManagementPage';
+import ChannelDetailPage from '@/pages/examples/channel/ChannelDetailPage';
 
 // New Dashboard Pages
 import DashboardOverviewPage from "@/dashboard/DashboardOverviewPage";
@@ -142,7 +143,17 @@ export default function App() {
         element={
           <PrivateRoute>
             <AdminLayout>
-              <ChannelManagement />
+              <ChannelManagementPage />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/channels/:channelId"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <ChannelDetailPage />
             </AdminLayout>
           </PrivateRoute>
         }
