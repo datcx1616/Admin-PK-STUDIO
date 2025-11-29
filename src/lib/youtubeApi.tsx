@@ -56,6 +56,29 @@ export const youtubeApi = {
 
             console.log('🚀 Mở popup OAuth...');
 
+            // Hiển thị hướng dẫn trước khi mở popup
+            const instruction = `
+📺 HƯỚNG DẪN KẾT NỐI KÊNH YOUTUBE
+
+Bạn sẽ thực hiện các bước sau:
+
+1️⃣ Đăng nhập Google
+2️⃣ Cho phép quyền truy cập YouTube
+3️⃣ Chọn kênh YouTube muốn kết nối
+4️⃣ Chọn Team để gán kênh vào
+5️⃣ Hoàn tất! ✅
+
+⚠️ QUAN TRỌNG: 
+- Đừng đóng popup trước khi thấy thông báo "Kết nối thành công"
+- Popup sẽ tự động đóng sau khi hoàn tất
+
+Click OK để bắt đầu!
+            `.trim();
+
+            if (!confirm(instruction)) {
+                return;
+            }
+
             // Mở popup OAuth
             const oauthWindow = window.open(
                 authUrl,
@@ -73,11 +96,26 @@ export const youtubeApi = {
                 try {
                     if (oauthWindow.closed) {
                         clearInterval(pollInterval);
-                        console.log('✅ OAuth hoàn tất! Reload trang...');
+                        console.log('✅ OAuth popup đã đóng!');
 
-                        // Reload để lấy dữ liệu mới
-                        alert('✅ Kết nối hoàn tất!');
-                        window.location.reload();
+                        // Kiểm tra xem user có hoàn thành flow không
+                        setTimeout(() => {
+                            console.log('🔄 Đang kiểm tra kết nối...');
+
+                            // Hiển thị thông báo
+                            const message = `
+✅ Đã đóng cửa sổ OAuth!
+
+⚠️ LƯU Ý: 
+- Nếu bạn vừa chọn kênh và team → Kênh đã được kết nối thành công!
+- Nếu bạn đóng popup trước khi chọn team → Kênh CHƯA được lưu!
+
+Click OK để reload và xem kênh mới.
+                            `.trim();
+
+                            alert(message);
+                            window.location.reload();
+                        }, 1500);
                     }
                 } catch (e) {
                     // Ignore cross-origin errors

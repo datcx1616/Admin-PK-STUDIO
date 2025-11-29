@@ -85,7 +85,11 @@ interface Team {
     branch: Branch
 }
 
-export function YouTubeChannelsList() {
+interface YouTubeChannelsListProps {
+    onRefetchRequest?: () => void;
+}
+
+export function YouTubeChannelsList({ onRefetchRequest }: YouTubeChannelsListProps = {}) {
     const [channels, setChannels] = useState<Channel[]>([])
     const [filteredChannels, setFilteredChannels] = useState<Channel[]>([])
     const [loading, setLoading] = useState(true)
@@ -112,6 +116,13 @@ export function YouTubeChannelsList() {
         fetchChannels()
     }, [])
 
+    // Trigger refetch when parent requests it
+    useEffect(() => {
+        if (onRefetchRequest) {
+            fetchChannels()
+        }
+    }, [onRefetchRequest])
+
     useEffect(() => {
         applyFilters()
     }, [channels, searchQuery, selectedBranch, selectedTeam, currentPage, pageSize])
@@ -127,17 +138,28 @@ export function YouTubeChannelsList() {
 
             // Sử dụng API mới: GET /api/channels/my-channels
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+            // Thêm timestamp để tránh cache
+            const timestamp = new Date().getTime()
             const response = await axios.get<ApiResponse>(
-                `${API_URL}/channels/my-channels`,
+                `${API_URL}/channels/my-channels?_t=${timestamp}`,
                 {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
                     }
                 }
             )
 
             if (response.data.success && response.data.data) {
                 console.log('📊 Fetched channels:', response.data.data)
+                console.log('📊 Total channels:', response.data.data.length)
+                console.log('📋 Channel names:', response.data.data.map((c: Channel) => c.name || c.channelTitle))
+                console.log('📋 Channel IDs:', response.data.data.map((c: Channel) => ({
+                    id: c._id || c.id,
+                    channelId: c.channelId,
+                    name: c.name || c.channelTitle
+                })))
                 console.log('📋 Channel assignments:', response.data.data.map((c: Channel) => ({
                     _id: c._id || c.id,
                     name: c.name || c.channelTitle,
@@ -146,6 +168,8 @@ export function YouTubeChannelsList() {
                     assignedTo: c.assignedTo
                 })))
                 setChannels(response.data.data)
+
+                console.log(`✅ Đã tải ${response.data.data.length} kênh thành công!`)
 
                 // Extract unique branches and teams
                 const uniqueBranches = new Map<string, Branch>()
@@ -312,7 +336,7 @@ export function YouTubeChannelsList() {
         <div className="w-full space-y-4">
             {/* Header with Stats */}
             <Card>
-                <CardHeader className="border-b bg-gradient-to-r from-green-50 to-emerald-50">
+                <CardHeader className="border-b bg-linear-to-r from-green-50 to-emerald-50">
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2 text-green-600">
                             <div className="w-6 h-6 bg-green-500 rounded flex items-center justify-center">
@@ -423,9 +447,9 @@ export function YouTubeChannelsList() {
                                             {/* Kênh */}
                                             <TableCell className="py-3">
                                                 <div className="flex items-center gap-3">
-                                                    <Avatar className="h-10 w-10 border-2 border-slate-200 flex-shrink-0">
+                                                    <Avatar className="h-10 w-10 border-2 border-slate-200 shrink-0">
                                                         <AvatarImage src={channelThumbnail} alt={channelName} />
-                                                        <AvatarFallback className="bg-gradient-to-br from-red-500 to-red-600 text-white font-bold text-xs">
+                                                        <AvatarFallback className="bg-linear-to-br from-red-500 to-red-600 text-white font-bold text-xs">
                                                             {channelName.substring(0, 2).toUpperCase()}
                                                         </AvatarFallback>
                                                     </Avatar>

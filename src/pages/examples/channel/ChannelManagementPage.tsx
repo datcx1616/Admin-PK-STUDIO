@@ -4,10 +4,12 @@
  * Displays all channels with CRUD operations
  */
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useChannels } from '@/hooks/useChannels';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import axios from 'axios';
+import { channelsAPI } from '@/lib/channels-api';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -47,14 +49,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     Search,
-    Filter,
     MoreVertical,
     Edit,
     Trash2,
     UserPlus,
     Move,
     Eye,
-    RefreshCw,
     Plus,
     Video,
     Users,
@@ -83,13 +83,16 @@ export default function ChannelManagementPage() {
     const {
         channels,
         loading,
-        stats,
         refetch,
         deleteChannel,
         searchChannels,
         filterByBranch,
         filterByTeam,
     } = useChannels();
+
+    // YouTube OAuth channels state
+    const [youtubeChannels, setYoutubeChannels] = useState<any[]>([]);
+    const [mergedChannels, setMergedChannels] = useState<Channel[]>([]);
 
     // Local state
     const [searchQuery, setSearchQuery] = useState('');
@@ -103,6 +106,152 @@ export default function ChannelManagementPage() {
     const [isAssignOpen, setIsAssignOpen] = useState(false);
     const [isMoveOpen, setIsMoveOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+    /**
+     * Fetch YouTube OAuth connected channels
+     */
+    const fetchYouTubeChannels = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                console.warn('No auth token; skip my-channels fetch');
+                return;
+            }
+
+            const data = await channelsAPI.getMyChannels();
+            setYoutubeChannels(data);
+            console.log('✅ Fetched YouTube OAuth channels:', data.length);
+        } catch (error: any) {
+            if (error?.message?.includes('HTTP 401') || error?.message?.includes('Unauthorized')) {
+                console.warn('YouTube channels fetch unauthorized. Please re-login.');
+            } else {
+                console.error('❌ Error fetching YouTube channels:', error);
+            }
+        }
+    };
+
+    /**
+     * Merge YouTube OAuth data với system channels
+     * Hiển thị TẤT CẢ kênh YouTube đã kết nối (kể cả chưa import vào hệ thống)
+     * Cập nhật: isConnected, subscriberCount, viewCount, videoCount, thumbnailUrl, customUrl
+     */
+    const mergeChannelData = () => {
+        if (youtubeChannels.length === 0) {
+            setMergedChannels(channels);
+            return;
+        }
+
+        // Map để track các kênh YouTube đã được merge
+        const mergedChannelIds = new Set<string>();
+
+        // 1. Merge YouTube data vào các kênh đã có trong hệ thống
+        const mergedSystemChannels = channels.map(channel => {
+            // Tìm channel tương ứng từ YouTube OAuth data
+            const youtubeChannel = youtubeChannels.find(
+                ytCh =>
+                    ytCh.channelId === channel.youtubeChannelId ||
+                    ytCh.id === channel.youtubeChannelId ||
+                    ytCh._id === channel._id
+            );
+
+            if (youtubeChannel) {
+                // Đánh dấu kênh YouTube này đã được merge
+                mergedChannelIds.add(youtubeChannel.channelId || youtubeChannel.id);
+
+                // Merge data từ YouTube
+                return {
+                    ...channel,
+                    isConnected: true,
+                    subscriberCount: youtubeChannel.subscriberCount || channel.subscriberCount,
+                    viewCount: youtubeChannel.viewCount || channel.viewCount,
+                    videoCount: youtubeChannel.videoCount || channel.videoCount,
+                    thumbnailUrl: youtubeChannel.thumbnailUrl || youtubeChannel.thumbnail || channel.thumbnailUrl,
+                    customUrl: youtubeChannel.customUrl || channel.customUrl,
+                    name: youtubeChannel.name || youtubeChannel.channelTitle || channel.name,
+                };
+            }
+
+            return channel;
+        });
+
+        // 2. Thêm các kênh YouTube mới kết nối (chưa có trong hệ thống)
+        const newYouTubeChannels = youtubeChannels
+            .filter(ytCh => {
+                const channelId = ytCh.channelId || ytCh.id;
+                return !mergedChannelIds.has(channelId);
+            })
+            .map(ytCh => ({
+                _id: ytCh._id || ytCh.id || ytCh.channelId,
+                name: ytCh.name || ytCh.channelTitle || 'Unknown Channel',
+                youtubeChannelId: ytCh.channelId || ytCh.id,
+                description: ytCh.description || '',
+                customUrl: ytCh.customUrl || '',
+                thumbnailUrl: ytCh.thumbnailUrl || ytCh.thumbnail || '',
+                subscriberCount: ytCh.subscriberCount || 0,
+                viewCount: ytCh.viewCount || 0,
+                videoCount: ytCh.videoCount || 0,
+                isConnected: true,
+                isActive: true,
+                team: ytCh.team || null,
+                assignedEditors: [],
+                assignedTo: ytCh.assignedTo || [],
+                createdAt: ytCh.connectedAt || new Date().toISOString(),
+                // Đánh dấu đây là kênh mới từ YouTube (chưa import vào hệ thống)
+                _isNewFromYouTube: true
+            } as Channel & { _isNewFromYouTube?: boolean }));
+
+        // 3. Kết hợp cả hai
+        const finalMerged = [...mergedSystemChannels, ...newYouTubeChannels];
+
+        setMergedChannels(finalMerged);
+        console.log('✅ Merged channels:', {
+            total: finalMerged.length,
+            systemChannels: mergedSystemChannels.length,
+            newYouTubeChannels: newYouTubeChannels.length
+        });
+    };
+
+    /**
+     * Handle refresh - fetch both system and YouTube data
+     */
+    const handleRefresh = async () => {
+        await Promise.all([
+            refetch(),
+            fetchYouTubeChannels()
+        ]);
+    };
+
+    /**
+     * Auto-fetch YouTube channels on mount and when system channels change
+     */
+    useEffect(() => {
+        fetchYouTubeChannels();
+        const onFocus = () => {
+            // When returning from OAuth popup, refetch both datasets
+            handleRefresh();
+        };
+        window.addEventListener('focus', onFocus);
+        return () => window.removeEventListener('focus', onFocus);
+    }, []);
+
+    /**
+     * Merge data whenever channels or youtubeChannels change
+     */
+    useEffect(() => {
+        mergeChannelData();
+    }, [channels, youtubeChannels]);
+
+    /**
+     * Calculate merged stats
+     */
+    const mergedStats = {
+        totalChannels: mergedChannels.length,
+        connectedChannels: mergedChannels.filter(c => c.isConnected).length,
+        disconnectedChannels: mergedChannels.filter(c => !c.isConnected).length,
+        totalSubscribers: mergedChannels.reduce((sum, c) => sum + (c.subscriberCount || 0), 0),
+        totalViews: mergedChannels.reduce((sum, c) => sum + (c.viewCount || 0), 0),
+        totalVideos: mergedChannels.reduce((sum, c) => sum + (c.videoCount || 0), 0),
+    };
 
     // Handle search
     const handleSearch = (value: string) => {
@@ -191,7 +340,7 @@ export default function ChannelManagementPage() {
                         </Button>
                     </div>
                 </div> */}
-                <SiteHeader />
+                <SiteHeader onRefresh={handleRefresh} />
                 {/* Stats Cards */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card>
@@ -200,7 +349,7 @@ export default function ChannelManagementPage() {
                                 <div>
                                     <p className="text-sm font-medium text-slate-600">Tổng kênh</p>
                                     <p className="text-2xl font-bold text-slate-900 mt-1">
-                                        {stats.totalChannels}
+                                        {mergedStats.totalChannels}
                                     </p>
                                 </div>
                                 <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
@@ -210,11 +359,11 @@ export default function ChannelManagementPage() {
                             <div className="mt-4 flex items-center gap-4 text-xs">
                                 <div className="flex items-center gap-1 text-green-600">
                                     <CheckCircle2 className="h-3 w-3" />
-                                    <span>{stats.connectedChannels} kết nối</span>
+                                    <span>{mergedStats.connectedChannels} kết nối</span>
                                 </div>
                                 <div className="flex items-center gap-1 text-slate-500">
                                     <XCircle className="h-3 w-3" />
-                                    <span>{stats.disconnectedChannels} chưa kết nối</span>
+                                    <span>{mergedStats.disconnectedChannels} chưa kết nối</span>
                                 </div>
                             </div>
                         </CardContent>
@@ -226,7 +375,7 @@ export default function ChannelManagementPage() {
                                 <div>
                                     <p className="text-sm font-medium text-slate-600">Subscribers</p>
                                     <p className="text-2xl font-bold text-slate-900 mt-1">
-                                        {formatNumber(stats.totalSubscribers)}
+                                        {formatNumber(mergedStats.totalSubscribers)}
                                     </p>
                                 </div>
                                 <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
@@ -242,7 +391,7 @@ export default function ChannelManagementPage() {
                                 <div>
                                     <p className="text-sm font-medium text-slate-600">Lượt xem</p>
                                     <p className="text-2xl font-bold text-slate-900 mt-1">
-                                        {formatNumber(stats.totalViews)}
+                                        {formatNumber(mergedStats.totalViews)}
                                     </p>
                                 </div>
                                 <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
@@ -258,7 +407,7 @@ export default function ChannelManagementPage() {
                                 <div>
                                     <p className="text-sm font-medium text-slate-600">Videos</p>
                                     <p className="text-2xl font-bold text-slate-900 mt-1">
-                                        {formatNumber(stats.totalVideos)}
+                                        {formatNumber(mergedStats.totalVideos)}
                                     </p>
                                 </div>
                                 <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
@@ -332,7 +481,7 @@ export default function ChannelManagementPage() {
                                     <Skeleton key={i} className="h-16 w-full" />
                                 ))}
                             </div>
-                        ) : channels.length === 0 ? (
+                        ) : mergedChannels.length === 0 ? (
                             <div className="text-center py-12">
                                 <Video className="h-12 w-12 text-slate-300 mx-auto mb-3" />
                                 <h3 className="font-semibold text-slate-900 mb-1">
@@ -362,20 +511,27 @@ export default function ChannelManagementPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {channels.map((channel) => (
+                                        {(mergedChannels.length > 0 ? mergedChannels : channels).map((channel) => (
                                             <TableRow key={channel._id} className="hover:bg-slate-50">
                                                 <TableCell>
                                                     <div className="flex items-center gap-3">
                                                         <Avatar className="h-10 w-10 border-2 border-slate-200">
                                                             <AvatarImage src={channel.thumbnailUrl} alt={channel.name} />
-                                                            <AvatarFallback className="bg-gradient-to-br from-red-500 to-red-600 text-white font-bold">
+                                                            <AvatarFallback className="bg-linear-to-br from-red-500 to-red-600 text-white font-bold">
                                                                 {channel.name.substring(0, 2).toUpperCase()}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         <div className="min-w-0">
-                                                            <p className="font-semibold text-slate-900 truncate">
-                                                                {channel.name}
-                                                            </p>
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="font-semibold text-slate-900 truncate">
+                                                                    {channel.name}
+                                                                </p>
+                                                                {(channel as any)._isNewFromYouTube && (
+                                                                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 text-xs">
+                                                                        Mới kết nối
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
                                                             {channel.customUrl && (
                                                                 <p className="text-xs text-slate-500 truncate">
                                                                     {channel.customUrl}
@@ -468,61 +624,76 @@ export default function ChannelManagementPage() {
                                                 </TableCell>
 
                                                 <TableCell className="text-right">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                                                <MoreVertical className="h-4 w-4" />
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem
-                                                                onClick={() => navigate(`/channels/${channel._id}`)}
-                                                            >
-                                                                <Eye className="h-4 w-4 mr-2" />
-                                                                Xem chi tiết
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    setSelectedChannel(channel);
-                                                                    setIsEditOpen(true);
-                                                                }}
-                                                            >
-                                                                <Edit className="h-4 w-4 mr-2" />
-                                                                Chỉnh sửa
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    setSelectedChannel(channel);
-                                                                    setIsAssignOpen(true);
-                                                                }}
-                                                            >
-                                                                <UserPlus className="h-4 w-4 mr-2" />
-                                                                Phân công editor
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                onClick={() => {
-                                                                    setSelectedChannel(channel);
-                                                                    setIsMoveOpen(true);
-                                                                }}
-                                                            >
-                                                                <Move className="h-4 w-4 mr-2" />
-                                                                Chuyển team
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuSeparator />
-                                                            <DropdownMenuItem
-                                                                className="text-red-600"
-                                                                onClick={() => {
-                                                                    setSelectedChannel(channel);
-                                                                    setIsDeleteOpen(true);
-                                                                }}
-                                                            >
-                                                                <Trash2 className="h-4 w-4 mr-2" />
-                                                                Xóa kênh
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
+                                                    {(channel as any)._isNewFromYouTube ? (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="default"
+                                                            className="bg-green-600 hover:bg-green-700"
+                                                            onClick={() => {
+                                                                setSelectedChannel(channel);
+                                                                setIsCreateOpen(true);
+                                                            }}
+                                                        >
+                                                            <Plus className="h-4 w-4 mr-2" />
+                                                            Import vào hệ thống
+                                                        </Button>
+                                                    ) : (
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                                                    <MoreVertical className="h-4 w-4" />
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem
+                                                                    onClick={() => navigate(`/channels/${channel._id}`)}
+                                                                >
+                                                                    <Eye className="h-4 w-4 mr-2" />
+                                                                    Xem chi tiết
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    onClick={() => {
+                                                                        setSelectedChannel(channel);
+                                                                        setIsEditOpen(true);
+                                                                    }}
+                                                                >
+                                                                    <Edit className="h-4 w-4 mr-2" />
+                                                                    Chỉnh sửa
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    onClick={() => {
+                                                                        setSelectedChannel(channel);
+                                                                        setIsAssignOpen(true);
+                                                                    }}
+                                                                >
+                                                                    <UserPlus className="h-4 w-4 mr-2" />
+                                                                    Phân công editor
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    onClick={() => {
+                                                                        setSelectedChannel(channel);
+                                                                        setIsMoveOpen(true);
+                                                                    }}
+                                                                >
+                                                                    <Move className="h-4 w-4 mr-2" />
+                                                                    Chuyển team
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem
+                                                                    className="text-red-600"
+                                                                    onClick={() => {
+                                                                        setSelectedChannel(channel);
+                                                                        setIsDeleteOpen(true);
+                                                                    }}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                                    Xóa kênh
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ))}

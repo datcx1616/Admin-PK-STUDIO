@@ -4,8 +4,12 @@ import { youtubeApi } from '@/lib/youtubeApi';
 import { useState, } from 'react';
 import { RefreshCw } from 'lucide-react';
 
-export function SiteHeader() {
-    const [analytics, setAnalytics] = useState<any>(null);
+interface SiteHeaderProps {
+    onRefresh?: () => void | Promise<void>;
+}
+
+export function SiteHeader({ onRefresh }: SiteHeaderProps = {}) {
+    const [analytics] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -19,8 +23,19 @@ export function SiteHeader() {
         }
     };
 
-    const handleRefresh = () => {
-        window.location.reload();
+    const handleRefresh = async () => {
+        if (onRefresh) {
+            setLoading(true);
+            try {
+                await onRefresh();
+            } catch (error) {
+                console.error('Refresh error:', error);
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            window.location.reload();
+        }
     };
 
 
