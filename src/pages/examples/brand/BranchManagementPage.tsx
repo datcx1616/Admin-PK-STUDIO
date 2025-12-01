@@ -165,7 +165,7 @@ export default function BranchManagementPage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-l-4 border-l-purple-500">
+                    {/* <Card className="border-l-4 border-l-purple-500">
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -175,9 +175,9 @@ export default function BranchManagementPage() {
                                 <Users className="w-10 h-10 text-purple-500" />
                             </div>
                         </CardContent>
-                    </Card>
+                    </Card> */}
 
-                    <Card className="border-l-4 border-l-red-500">
+                    {/* <Card className="border-l-4 border-l-red-500">
                         <CardContent className="pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -187,7 +187,7 @@ export default function BranchManagementPage() {
                                 <Youtube className="w-10 h-10 text-red-500" />
                             </div>
                         </CardContent>
-                    </Card>
+                    </Card> */}
                 </div>
 
                 <Card>

@@ -64,16 +64,29 @@ export function EditChannelDialog({
             return;
         }
 
+        console.log('=== EDIT CHANNEL SUBMIT ===');
+        console.log('Current channel:', channel);
+        console.log('Form data:', formData);
+        console.log('Team ID to send:', formData.teamId && formData.teamId !== 'none' ? formData.teamId : undefined);
+
         setLoading(true);
         try {
-            await updateChannel(channel._id, {
+            const updateData = {
                 name: formData.name,
                 description: formData.description,
                 teamId: formData.teamId && formData.teamId !== 'none' ? formData.teamId : undefined,
-            });
+            };
+
+            console.log('Update payload:', updateData);
+
+            const result = await updateChannel(channel._id, updateData);
+
+            console.log('Update result:', result);
+            console.log('✅ Channel updated successfully');
+
             onSuccess();
         } catch (error) {
-            console.error('Update channel error:', error);
+            console.error('❌ Update channel error:', error);
         } finally {
             setLoading(false);
         }
@@ -150,7 +163,8 @@ export function EditChannelDialog({
                             Hủy
                         </Button>
                         <Button
-                            variant="outline" type="submit" disabled={loading}>
+                            variant="outline"
+                            type="submit" disabled={loading}>
                             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Cập nhật
                         </Button>

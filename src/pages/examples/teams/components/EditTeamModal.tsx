@@ -11,6 +11,13 @@ import { AlertCircle, CheckCircle, Edit, Loader2 } from 'lucide-react';
 import { teamsAPI, type Team, type UpdateTeamRequest } from '@/lib/teams-api';
 import { apiClient } from '@/lib/api-client';
 
+interface Branch {
+    _id: string;
+    name: string;
+    code: string;
+    description?: string;
+}
+
 interface User {
     _id: string;
     name: string;
@@ -26,12 +33,14 @@ interface EditTeamModalProps {
 }
 
 export function EditTeamModal({ open, team, onClose, onSuccess }: EditTeamModalProps) {
-    const [formData, setFormData] = useState<UpdateTeamRequest>({
+    const [formData, setFormData] = useState<UpdateTeamRequest & { branchId?: string }>({
         name: '',
         description: '',
         leaderId: '',
+        branchId: '',
     });
 
+    const [branches, setBranches] = useState<Branch[]>([]);
     const [managers, setManagers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [fetchingData, setFetchingData] = useState(false);
@@ -46,10 +55,14 @@ export function EditTeamModal({ open, team, onClose, onSuccess }: EditTeamModalP
                 name: team.name,
                 description: team.description,
                 leaderId: team.leader?._id || '',
+                branchId: team.branch?._id || '',
             });
             setErrors({});
             setSuccessMessage('');
             setErrorMessage('');
+
+            // Fetch branches
+            fetchBranches();
 
             // Fetch managers for this team's branch
             if (team.branch?._id) {
@@ -57,6 +70,26 @@ export function EditTeamModal({ open, team, onClose, onSuccess }: EditTeamModalP
             }
         }
     }, [open, team]);
+
+    // Fetch managers when branch changes
+    useEffect(() => {
+        if (formData.branchId) {
+            fetchManagersForBranch(formData.branchId);
+        } else {
+            setManagers([]);
+        }
+    }, [formData.branchId]);
+
+    const fetchBranches = async () => {
+        try {
+            const branchesData = await apiClient.getBranches();
+            const branchesArray = branchesData.branches || branchesData.data || [];
+            setBranches(branchesArray);
+        } catch (error) {
+            console.error('Error fetching branches:', error);
+            setBranches([]);
+        }
+    };
 
     const fetchManagersForBranch = async (branchId: string) => {
         setFetchingData(true);
@@ -183,11 +216,52 @@ export function EditTeamModal({ open, team, onClose, onSuccess }: EditTeamModalP
                         />
                     </div>
 
-                    {/* Branch (Read-only) */}
+                    {/* Branch Selection */}
                     <div className="space-y-2">
-                        <Label>Chi Nhánh</Label>
-                        <Input value={`${team.branch.name} (${team.branch.code || ''})`} disabled className="bg-slate-50" />
-                        <p className="text-xs text-slate-500">Chi nhánh không thể thay đổi sau khi tạo</p>
+                        <Label htmlFor="branch">
+                            Chi Nhánh <span className="text-red-500">*</span>
+                        </Label>
+                        {branches.length === 0 ? (
+                            <Alert className="bg-yellow-50 border-yellow-200">
+                                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                                <AlertDescription className="text-yellow-800">
+                                    Chưa có chi nhánh nào. Vui lòng tạo chi nhánh trước.
+                                </AlertDescription>
+                            </Alert>
+                        ) : (
+                            <>
+                                <Select
+                                    value={formData.branchId}
+                                    onValueChange={(value) =>
+                                        setFormData({
+                                            ...formData,
+                                            branchId: value,
+                                            leaderId: '',
+                                        })
+                                    }
+                                    disabled={loading}
+                                >
+                                    <SelectTrigger className={errors.branchId ? 'border-red-500' : ''}>
+                                        <SelectValue placeholder="-- Chọn Chi Nhánh --" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {branches.map((branch) => (
+                                            <SelectItem key={branch._id} value={branch._id}>
+                                                {branch.name} ({branch.code})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.branchId ? (
+                                    <p className="text-xs text-red-500 flex items-center gap-1">
+                                        <AlertCircle className="w-3 h-3" />
+                                        {errors.branchId}
+                                    </p>
+                                ) : (
+                                    <p className="text-xs text-slate-500">Chọn chi nhánh mới sẽ reset trưởng nhóm</p>
+                                )}
+                            </>
+                        )}
                     </div>
 
                     {/* Team Leader Selection */}

@@ -5,12 +5,8 @@ import { useNavigate } from "react-router-dom"
 import {
     IconChartBar,
     IconDashboard,
-    IconDatabase,
-    IconFileWord,
-    IconFolder,
     IconHelp,
     IconListDetails,
-    IconReport,
     IconSearch,
     IconSettings,
     IconUsers,
@@ -32,7 +28,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { NavDocuments } from "@/pages/examples/dashboard/components/nav-documents"
+import { NavBranchHierarchy } from "@/pages/examples/dashboard/components/NavBranchHierarchy"
 import { NavMain } from "@/pages/examples/dashboard/components/nav-main"
 import { NavSecondary } from "@/pages/examples/dashboard/components/nav-secondary"
 import { NavUser } from "@/pages/examples/dashboard/components/nav-user"
@@ -51,16 +47,7 @@ const getUser = () => {
 const getNavItems = (role: string) => {
     const items = [];
 
-    // Dashboard link for everyone except Editor
-    // if (role !== 'editor') {
-    //     items.push({
-    //         title: "Thống Kê",
-    //         url: "/dashboard",
-    //         icon: IconDashboard,
-    //     });
-    // }
-
-    // 👇 THÊM MỚI: Dashboard Overview
+    // Dashboard Overview
     if (role !== 'editor') {
         items.push({
             title: "Tổng Quan",
@@ -119,7 +106,7 @@ const getNavItems = (role: string) => {
     items.push({
         title: "Phân Tích",
         url: "/analytics",
-        icon: IconFolder,
+        icon: IconChartBar,
     });
 
     if (['admin', 'director'].includes(role)) {
@@ -149,17 +136,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         }
     }, []);
 
-    const navSecondary = [
-        { title: "Cài đặt", url: "#", icon: IconSettings },
-        { title: "Trợ giúp", url: "#", icon: IconHelp },
-        { title: "Tìm kiếm", url: "#", icon: IconSearch },
-    ];
-
-    const documents = [
-        { name: "Thư viện dữ liệu", url: "#", icon: IconDatabase },
-        { name: "Báo cáo", url: "#", icon: IconReport },
-        { name: "Trợ lý", url: "#", icon: IconFileWord },
-    ];
+    // const navSecondary = [
+    //     { title: "Cài đặt", url: "#", icon: IconSettings },
+    //     { title: "Trợ giúp", url: "#", icon: IconHelp },
+    //     { title: "Tìm kiếm", url: "#", icon: IconSearch },
+    // ];
 
     const userData = {
         name: user?.name || "User",
@@ -179,7 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             className="bg-white hover:bg-gray-50"
                         >
                             <Button
-                                className="w-full gap-3 h-auto bg-transparent hover:bg-transparent justify-start px-4 py-3"
+                                className="w-full gap-3 h-auto bg-transparent hover:bg-transparent justify-start p-0"
                                 onClick={() => navigate(homeRoute)}
                             >
                                 <div className="w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center">
@@ -198,8 +179,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarHeader>
             <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <NavMain items={navMain} />
-                <NavDocuments items={documents} />
-                <NavSecondary items={navSecondary} className="mt-auto" />
+                {/* THAY ĐỔI: Thay NavDocuments bằng NavBranchHierarchy */}
+                <NavBranchHierarchy />
+                {/* <NavSecondary items={navSecondary} className="mt-auto" /> */}
             </SidebarContent>
             <SidebarFooter>
                 <NavUser user={userData} />

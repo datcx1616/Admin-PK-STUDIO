@@ -156,19 +156,30 @@ export const channelsAPI = {
    * Permission: Admin, Director, Branch Director, Manager, Editor (assigned)
    */
   async update(channelId: string, channelData: UpdateChannelRequest): Promise<Channel> {
+    console.log('🔄 [API] Updating channel:', channelId);
+    console.log('📤 [API] Update data:', channelData);
+    console.log('🔗 [API] URL:', `${API_BASE_URL}/channels/${channelId}`);
+    
     const response = await fetch(`${API_BASE_URL}/channels/${channelId}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(channelData),
     });
 
+    console.log('📡 [API] Response status:', response.status);
+
     const data = await handleResponse<ChannelActionResponse>(response);
+    
+    console.log('✅ [API] Response data:', data);
     
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');
     }
     
-    return data.channel || data.data!;
+    const updatedChannel = data.channel || data.data!;
+    console.log('📊 [API] Updated channel team:', updatedChannel.team);
+    
+    return updatedChannel;
   },
 
   /**
@@ -191,16 +202,27 @@ export const channelsAPI = {
    * Permission: Admin, Director, Branch Director, Manager
    */
   async assignEditor(channelId: string, editorData: AssignEditorRequest): Promise<Channel> {
+    console.log('🔄 [API] Assigning editor:', { channelId, userId: editorData.userId });
+    
+    const requestBody = {
+      userId: editorData.userId
+      // Backend only expects userId, not role
+    };
+    
+    console.log('📤 [API] Request body:', requestBody);
+    console.log('🔗 [API] URL:', `${API_BASE_URL}/channels/${channelId}/assign`);
+    
     const response = await fetch(`${API_BASE_URL}/channels/${channelId}/assign`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({
-        userId: editorData.userId,
-        role: 'editor' // Always assign as editor role
-      }),
+      body: JSON.stringify(requestBody),
     });
 
+    console.log('📡 [API] Response status:', response.status);
+    
     const data = await handleResponse<ChannelActionResponse>(response);
+    
+    console.log('✅ [API] Response data:', data);
     
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');

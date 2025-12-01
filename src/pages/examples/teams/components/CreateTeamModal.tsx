@@ -30,9 +30,10 @@ interface CreateTeamModalProps {
     open: boolean;
     onClose: () => void;
     onSuccess?: () => void;
+    branchId?: string;
 }
 
-export function CreateTeamModal({ open, onClose, onSuccess }: CreateTeamModalProps) {
+export function CreateTeamModal({ open, onClose, onSuccess, branchId }: CreateTeamModalProps) {
     const [formData, setFormData] = useState<CreateTeamRequest>({
         name: '',
         description: '',
@@ -58,7 +59,7 @@ export function CreateTeamModal({ open, onClose, onSuccess }: CreateTeamModalPro
             setFormData({
                 name: '',
                 description: '',
-                branchId: '',
+                branchId: branchId || '',
                 leaderId: '',
                 memberIds: [],
             });
@@ -66,7 +67,7 @@ export function CreateTeamModal({ open, onClose, onSuccess }: CreateTeamModalPro
             setSuccessMessage('');
             setErrorMessage('');
         }
-    }, [open]);
+    }, [open, branchId]);
 
     // Fetch managers when branch changes
     useEffect(() => {
