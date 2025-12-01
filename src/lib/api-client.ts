@@ -226,6 +226,32 @@ class ApiClient {
     return this.request<any>(`/youtube/analytics/branch/${branchId}?${queryString}`);
   }
 
+  async getAggregateAnalytics(params: {
+    channelIds: string[];
+    startDate: string;
+    endDate: string;
+  }): Promise<any> {
+    const queryString = new URLSearchParams({
+      channelIds: params.channelIds.join(','),
+      startDate: params.startDate,
+      endDate: params.endDate,
+    }).toString();
+    return this.request<any>(`/youtube/analytics/aggregate?${queryString}`);
+  }
+
+  async getCompareAnalytics(params: {
+    channelIds: string[];
+    startDate: string;
+    endDate: string;
+  }): Promise<any> {
+    const queryString = new URLSearchParams({
+      channelIds: params.channelIds.join(','),
+      startDate: params.startDate,
+      endDate: params.endDate,
+    }).toString();
+    return this.request<any>(`/youtube/analytics/compare?${queryString}`);
+  }
+
   async getAdminStats(): Promise<any> {
     console.log('🔄 [API] Calling /dashboard/admin-stats...');
     const response = await this.request<any>("/dashboard/admin-stats");

@@ -24,8 +24,11 @@ export const formatDuration = (seconds: number): string => {
     return `${minutes}:${secs.toString().padStart(2, '0')}`
 }
 
-export const formatPercent = (num: number): string => {
-    return num.toFixed(2) + '%'
+export const formatPercent = (num?: number | null): string => {
+    if (num === null || num === undefined) return 'N/A'
+    const n = Number(num)
+    if (!Number.isFinite(n)) return 'N/A'
+    return n.toFixed(2) + '%'
 }
 
 export const getDeviceIcon = (deviceType: string) => {
