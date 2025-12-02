@@ -1,6 +1,7 @@
-// src/pages/examples/dashboard/components/NavBranchHierarchy.tsx
-// VERSION 6: Hover Chevron REPLACE Icon (không đè lên text)
+// src/pages/examples/layout/components/NavBranchHierarchy.tsx
+// VERSION 6: Hover Chevron REPLACE Icon + Navigation
 import * as React from "react"
+import { useNavigate } from "react-router-dom"
 import { ChevronRight, Building2, Users2, User2, Plus, Pencil, BarChart3, Trash2, Users, Youtube } from "lucide-react"
 
 import {
@@ -124,6 +125,7 @@ function HierarchySkeleton() {
 }
 
 export function NavBranchHierarchy() {
+    const navigate = useNavigate()  // ✅ THÊM navigate hook
     const [branches, setBranches] = React.useState<BranchWithTeams[]>([])
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
@@ -344,8 +346,13 @@ export function NavBranchHierarchy() {
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton
-                                        tooltip={`${branch.name}${branch.code ? ` (${branch.code})` : ''}`}
                                         className="group h-auto py-2 relative hover:bg-accent hover:text-accent-foreground"
+                                        onClick={(e) => {
+                                            // ✅ THÊM Navigation khi click vào branch
+                                            if (!e.defaultPrevented) {
+                                                navigate(`/branches/${branch._id}`)
+                                            }
+                                        }}
                                     >
                                         {/* Icon container với replacement effect */}
                                         <div className="h-3.5 w-3.5 shrink-0 relative">
@@ -370,9 +377,12 @@ export function NavBranchHierarchy() {
                                         {/* More icon - hiện khi hover */}
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <button
+                                                <span
+                                                    role="button"
+                                                    tabIndex={0}
                                                     onClick={(e) => {
                                                         e.stopPropagation()
+                                                        e.preventDefault()  // ✅ THÊM preventDefault
                                                     }}
                                                     className={cn(
                                                         "absolute right-2 p-0.5 rounded hover:bg-accent",
@@ -388,7 +398,7 @@ export function NavBranchHierarchy() {
                                                         <circle cx="8" cy="8" r="1.5" />
                                                         <circle cx="8" cy="13" r="1.5" />
                                                     </svg>
-                                                </button>
+                                                </span>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-48">
                                                 <DropdownMenuItem
@@ -409,14 +419,6 @@ export function NavBranchHierarchy() {
                                                     <Pencil className="mr-2 h-4 w-4" />
                                                     <span>Chỉnh Sửa</span>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem
-                                                    onClick={() => {
-                                                        console.log('View analytics:', branch._id)
-                                                    }}
-                                                >
-                                                    <BarChart3 className="mr-2 h-4 w-4" />
-                                                    <span>Phân Tích</span>
-                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem
                                                     onClick={() => {
@@ -436,7 +438,7 @@ export function NavBranchHierarchy() {
                                 {hasTeams && (
                                     <CollapsibleContent>
                                         <SidebarMenuSub className="px-0 mx-0">
-                                            {branch.teams.map((team) => {
+                                            {(branch.teams ?? []).map((team) => {
                                                 const isTeamExpanded = expandedTeams.has(team._id)
                                                 const hasMembers = team.members && team.members.length > 0
 
@@ -449,8 +451,13 @@ export function NavBranchHierarchy() {
                                                         <SidebarMenuSubItem>
                                                             <CollapsibleTrigger asChild>
                                                                 <SidebarMenuSubButton
-                                                                    tooltip={`${team.name}${hasMembers ? ` (${team.members.length} thành viên)` : ''}`}
                                                                     className={cn("group relative w-full", !hasMembers && "cursor-default")}
+                                                                    onClick={(e) => {
+                                                                        // ✅ THÊM Navigation khi click vào team
+                                                                        if (!e.defaultPrevented) {
+                                                                            navigate(`/teams/${team._id}`)
+                                                                        }
+                                                                    }}
                                                                 >
                                                                     {hasMembers ? (
                                                                         // Team CÓ members - có hover effect
@@ -478,9 +485,12 @@ export function NavBranchHierarchy() {
                                                                     {/* More icon - hiện khi hover */}
                                                                     <DropdownMenu>
                                                                         <DropdownMenuTrigger asChild>
-                                                                            <button
+                                                                            <span
+                                                                                role="button"
+                                                                                tabIndex={0}
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation()
+                                                                                    e.preventDefault()  // ✅ THÊM preventDefault
                                                                                 }}
                                                                                 className={cn(
                                                                                     "absolute right-2 p-0.5 rounded hover:bg-accent",
@@ -496,7 +506,7 @@ export function NavBranchHierarchy() {
                                                                                     <circle cx="8" cy="8" r="1.5" />
                                                                                     <circle cx="8" cy="13" r="1.5" />
                                                                                 </svg>
-                                                                            </button>
+                                                                            </span>
                                                                         </DropdownMenuTrigger>
                                                                         <DropdownMenuContent align="end" className="w-48">
                                                                             <DropdownMenuItem
@@ -527,6 +537,15 @@ export function NavBranchHierarchy() {
                                                                                 <Pencil className="mr-2 h-4 w-4" />
                                                                                 <span>Chỉnh Sửa</span>
                                                                             </DropdownMenuItem>
+                                                                            <DropdownMenuItem
+                                                                                onClick={() => {
+                                                                                    // ✅ THÊM Navigation đến team analytics
+                                                                                    navigate(`/dashboard/teams/${team._id}`)
+                                                                                }}
+                                                                            >
+                                                                                <BarChart3 className="mr-2 h-4 w-4" />
+                                                                                <span>Phân Tích</span>
+                                                                            </DropdownMenuItem>
                                                                             <DropdownMenuSeparator />
                                                                             <DropdownMenuItem
                                                                                 onClick={async () => {
@@ -551,10 +570,9 @@ export function NavBranchHierarchy() {
                                                             {hasMembers && (
                                                                 <CollapsibleContent>
                                                                     <SidebarMenuSub className="px-0 mx-0">
-                                                                        {team.members.map((member) => (
+                                                                        {(team.members ?? []).map((member) => (
                                                                             <SidebarMenuSubItem key={member._id}>
                                                                                 <SidebarMenuSubButton
-                                                                                    tooltip={`${member.name} - ${member.email}`}
                                                                                     className="pl-8 group relative w-full"
                                                                                 >
                                                                                     {/* Icon container với transition */}
@@ -579,9 +597,12 @@ export function NavBranchHierarchy() {
                                                                                     {/* More icon - hiện khi hover */}
                                                                                     <DropdownMenu>
                                                                                         <DropdownMenuTrigger asChild>
-                                                                                            <button
+                                                                                            <span
+                                                                                                role="button"
+                                                                                                tabIndex={0}
                                                                                                 onClick={(e) => {
                                                                                                     e.stopPropagation()
+                                                                                                    e.preventDefault()  // ✅ THÊM preventDefault
                                                                                                 }}
                                                                                                 className={cn(
                                                                                                     "absolute right-2 p-0.5 rounded hover:bg-accent",
@@ -597,7 +618,7 @@ export function NavBranchHierarchy() {
                                                                                                     <circle cx="8" cy="8" r="1.5" />
                                                                                                     <circle cx="8" cy="13" r="1.5" />
                                                                                                 </svg>
-                                                                                            </button>
+                                                                                            </span>
                                                                                         </DropdownMenuTrigger>
                                                                                         <DropdownMenuContent align="end" className="w-48">
                                                                                             <DropdownMenuItem

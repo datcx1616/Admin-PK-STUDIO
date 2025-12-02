@@ -28,10 +28,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { NavBranchHierarchy } from "@/pages/examples/dashboard/components/NavBranchHierarchy"
-import { NavMain } from "@/pages/examples/dashboard/components/nav-main"
-import { NavSecondary } from "@/pages/examples/dashboard/components/nav-secondary"
-import { NavUser } from "@/pages/examples/dashboard/components/nav-user"
+import { NavBranchHierarchy } from "@/pages/examples/layout/components/NavBranchHierarchy"
+import { NavMain } from "@/pages/examples/layout/components/nav-main"
+import { NavSecondary } from "@/pages/examples/layout/components/nav-secondary"
+import { NavUser } from "@/pages/examples/layout/components/nav-user"
 import { Button } from "@/components/ui/button"
 
 // Helper to get user from storage

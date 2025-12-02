@@ -6,7 +6,7 @@ import UsersManagementPage from "@/pages/examples/roles/UsersManagementPage";
 import LoginPage from "@/[locale]/login/page";
 import SignupPage from "@/[locale]/signup/page";
 import { PrivateRoute } from "@/pages/auth/PrivateRoute";
-import { AppSidebar } from "@/pages/examples/dashboard/components/app-sidebar";
+import { AppSidebar } from "@/pages/examples/layout/components/app-sidebar";
 import ChannelManagement from "@/pages/examples/channel/page";
 import DetailedAnalytics from "@/pages/examples/analytics/page";
 import CreateVideoPage from "@/pages/examples/videos/create/page";
@@ -24,6 +24,11 @@ import AdminStatsPage from "@/dashboard/AdminStatsPage";
 import BranchDetailPage from "@/dashboard/BranchDetailPage";
 import TeamDetailPage from "@/dashboard/TeamDetailPage";
 import ChannelAnalyticsPage from "@/dashboard/ChannelAnalyticsPage";
+
+//
+import HomePage from "@/pages/HomePage"
+import BranchDetailPagee from "@/pages/BranchDetailPage"
+import TeamDetailPagee from "@/pages/TeamDetailPage"
 
 import './i18n';
 import "./style/App.css";
@@ -228,6 +233,9 @@ export default function App() {
           </PrivateRoute>
         }
       />
+      <Route path="/home" element={<HomePage />} />
+      <Route path="/branches/:branchId" element={<BranchDetailPagee />} />
+      <Route path="/teams/:teamId" element={<TeamDetailPagee />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

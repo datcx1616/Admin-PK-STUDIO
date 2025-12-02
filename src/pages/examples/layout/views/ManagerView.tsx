@@ -1,7 +1,7 @@
 
-import { SectionCards } from "@/pages/examples/dashboard/components/section-cards";
-import { ChartAreaInteractive } from "@/pages/examples/dashboard/components/chart-area-interactive";
-import { DataTable } from "@/pages/examples/dashboard/components/data-table";
+import { SectionCards } from "@/pages/examples/layout/components/section-cards";
+import { ChartAreaInteractive } from "@/pages/examples/layout/components/chart-area-interactive";
+import { DataTable } from "@/pages/examples/layout/components/data-table";
 
 interface ManagerViewProps {
     data: any;
