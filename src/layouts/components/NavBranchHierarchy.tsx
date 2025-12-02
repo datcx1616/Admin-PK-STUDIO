@@ -322,7 +322,7 @@ export function NavBranchHierarchy() {
     }
 
     return (
-        <SidebarGroup className="bg-[#F7F7F7]">
+        <SidebarGroup className="bg-[#F7F7F7] border-0" style={{ border: 'none' }}>
             <div className="flex items-center justify-between px-2 mb-1 group hover:bg-accent rounded transition-colors cursor-pointer">
                 <SidebarGroupLabel className="mb-0">Tổ chức</SidebarGroupLabel>
                 <button
@@ -333,7 +333,7 @@ export function NavBranchHierarchy() {
                     <Plus className="h-3.5 w-3.5 transition-transform" />
                 </button>
             </div>
-            <SidebarMenu>
+            <SidebarMenu className="border-0" style={{ border: 'none' }}>
                 {branches.map((branch) => {
                     const isBranchExpanded = expandedBranches.has(branch._id)
                     const hasTeams = branch.teams && branch.teams.length > 0
@@ -441,7 +441,7 @@ export function NavBranchHierarchy() {
 
                                 {hasTeams && (
                                     <CollapsibleContent>
-                                        <SidebarMenuSub className="px-0 mx-0">
+                                        <SidebarMenuSub className="px-0 mx-0 border-0" style={{ border: 'none' }}>
                                             {(branch.teams ?? []).map((team) => {
                                                 const isTeamExpanded = expandedTeams.has(team._id)
                                                 const hasMembers = team.members && team.members.length > 0
@@ -452,11 +452,11 @@ export function NavBranchHierarchy() {
                                                         open={isTeamExpanded}
                                                         onOpenChange={() => toggleTeam(team._id)}
                                                     >
-                                                        <SidebarMenuSubItem>
+                                                        <SidebarMenuSubItem className="border-0" style={{ border: 'none' }}>
                                                             <CollapsibleTrigger asChild>
                                                                 <SidebarMenuSubButton
                                                                     className={cn(
-                                                                        "group relative w-full",
+                                                                        "group relative w-full border-0",
                                                                         !hasMembers && "cursor-default",
                                                                         location.pathname === `/teams/${team._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
                                                                     )}
@@ -569,11 +569,11 @@ export function NavBranchHierarchy() {
 
                                                             {hasMembers && (
                                                                 <CollapsibleContent>
-                                                                    <SidebarMenuSub className="px-0 mx-0">
+                                                                    <SidebarMenuSub className="px-0 mx-0 border-0" style={{ border: 'none' }}>
                                                                         {(team.members ?? []).map((member) => (
-                                                                            <SidebarMenuSubItem key={member._id}>
+                                                                            <SidebarMenuSubItem key={member._id} className="border-0" style={{ border: 'none' }}>
                                                                                 <SidebarMenuSubButton
-                                                                                    className="pl-8 group relative w-full"
+                                                                                    className="pl-8 group relative w-full border-0"
                                                                                 >
                                                                                     {/* Icon container với transition */}
                                                                                     <div className="h-3.5 w-3.5 shrink-0 relative">

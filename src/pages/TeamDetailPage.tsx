@@ -7,6 +7,7 @@ import { teamsAPI } from "@/lib/teams-api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { RightSidebar } from "@/pages/components/RightSidebar"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function TeamDetailPage() {
     const { teamId } = useParams()
@@ -41,8 +42,82 @@ export default function TeamDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <div className="text-muted-foreground">Loading...</div>
+            <div className="flex flex-col h-full">
+                {/* Skeleton Breadcrumb */}
+                <div className="border-b px-6 py-4 bg-background/50 backdrop-blur">
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-4" />
+                        <Skeleton className="h-4 w-20" />
+                        <span className="text-muted-foreground">/</span>
+                        <Skeleton className="h-4 w-16" />
+                        <span className="text-muted-foreground">/</span>
+                        <Skeleton className="h-4 w-24" />
+                    </div>
+                </div>
+
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Fake TOC column */}
+                    <div className="hidden md:block w-48 shrink-0 border-r px-3 py-4 space-y-3">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="flex items-center gap-2">
+                                <Skeleton className="h-3 w-3 rounded" />
+                                <Skeleton className="h-3 flex-1" />
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex-1 overflow-y-auto">
+                        <div className="max-w-5xl mx-auto p-6 space-y-8">
+                            {/* Stats grid skeleton */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {[1, 2, 3].map(i => (
+                                    <Card key={i} className="h-28">
+                                        <CardContent className="pt-6 space-y-3">
+                                            <Skeleton className="h-3 w-24" />
+                                            <Skeleton className="h-6 w-16" />
+                                            <Skeleton className="h-3 w-32" />
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+
+                            {/* Members section skeleton */}
+                            <div className="space-y-4">
+                                <Skeleton className="h-5 w-40" />
+                                <div className="space-y-3">
+                                    {[1, 2, 3, 4].map(i => (
+                                        <div key={i} className="flex items-center gap-4 p-3 border rounded-lg">
+                                            <Skeleton className="h-10 w-10 rounded-full" />
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-48" />
+                                                <Skeleton className="h-3 w-32" />
+                                            </div>
+                                            <Skeleton className="h-5 w-20 rounded-full" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Channels section skeleton */}
+                            <div className="space-y-4">
+                                <Skeleton className="h-5 w-44" />
+                                <div className="space-y-3">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                                            <div className="flex items-center gap-3">
+                                                <Skeleton className="h-5 w-5 rounded" />
+                                                <div className="space-y-2">
+                                                    <Skeleton className="h-4 w-40" />
+                                                    <Skeleton className="h-3 w-32" />
+                                                </div>
+                                            </div>
+                                            <Skeleton className="h-5 w-24 rounded-full" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         )
     }

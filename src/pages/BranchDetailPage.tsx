@@ -27,24 +27,99 @@ export default function BranchDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex flex-col h-full overflow-hidden">
-                <ContentHeader
-                    breadcrumbs={[
-                        { label: "Home", href: "/dashboard" },
-                        { label: "Branches", href: "/branches" },
-                        { label: "Loading...", icon: <Building2 className="h-4 w-4" /> },
-                    ]}
-                />
+            <div className="flex flex-col h-full">
+                {/* Skeleton Breadcrumb */}
+                <div className="border-b px-6 py-4 bg-background/50 backdrop-blur">
+                    <div className="flex items-center gap-2">
+                        <Skeleton className="h-4 w-4" />
+                        <Skeleton className="h-4 w-20" />
+                        <span className="text-muted-foreground">/</span>
+                        <Skeleton className="h-4 w-16" />
+                        <span className="text-muted-foreground">/</span>
+                        <Skeleton className="h-4 w-24" />
+                    </div>
+                </div>
+
                 <div className="flex flex-1 overflow-hidden">
-                    <RightSidebar items={tableOfContents} side="left" mode="inline" />
+                    {/* Fake TOC column */}
+                    <div className="hidden md:block w-48 shrink-0 border-r px-3 py-4 space-y-3">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
+                            <div key={i} className="flex items-center gap-2">
+                                <Skeleton className="h-3 w-3 rounded" />
+                                <Skeleton className="h-3 flex-1" />
+                            </div>
+                        ))}
+                    </div>
                     <div className="flex-1 overflow-y-auto">
-                        <div className="max-w-5xl mx-auto p-6">
-                            <Skeleton className="h-12 w-64 mb-4" />
-                            <Skeleton className="h-6 w-48 mb-8" />
-                            <div className="grid grid-cols-3 gap-6">
-                                {[1, 2, 3].map((i) => (
-                                    <Skeleton key={i} className="h-32" />
-                                ))}
+                        <div className="max-w-5xl mx-auto p-6 space-y-8">
+                            {/* Overview Section Skeleton */}
+                            <div className="space-y-4">
+                                <Skeleton className="h-10 w-72" />
+                                <Skeleton className="h-5 w-64" />
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="p-6 rounded-lg border bg-card">
+                                            <Skeleton className="h-4 w-24 mb-4" />
+                                            <Skeleton className="h-8 w-20 mb-2" />
+                                            <Skeleton className="h-3 w-32" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Teams Section Skeleton */}
+                            <div className="space-y-4">
+                                <Skeleton className="h-8 w-40" />
+                                <Skeleton className="h-6 w-32" />
+                                <div className="space-y-4">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="p-4 rounded-lg border bg-card">
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-2">
+                                                    <Skeleton className="h-4 w-56" />
+                                                    <Skeleton className="h-3 w-40" />
+                                                </div>
+                                                <div className="space-y-2 text-right">
+                                                    <Skeleton className="h-3 w-16 ml-auto" />
+                                                    <Skeleton className="h-6 w-12 ml-auto" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Channels Section Skeleton */}
+                            <div className="space-y-4">
+                                <Skeleton className="h-8 w-44" />
+                                <Skeleton className="h-6 w-36" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[1, 2].map(i => (
+                                        <div key={i} className="p-4 rounded-lg border bg-card">
+                                            <div className="flex items-start gap-3">
+                                                <Skeleton className="h-8 w-8 rounded" />
+                                                <div className="flex-1 space-y-2">
+                                                    <Skeleton className="h-4 w-48" />
+                                                    <Skeleton className="h-3 w-40" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Performance Section Skeleton */}
+                            <div className="space-y-4">
+                                <Skeleton className="h-8 w-48" />
+                                <Skeleton className="h-6 w-40" />
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {[1, 2, 3, 4].map(i => (
+                                        <div key={i} className="p-4 rounded-lg border bg-card space-y-3">
+                                            <Skeleton className="h-3 w-24" />
+                                            <Skeleton className="h-7 w-16" />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
