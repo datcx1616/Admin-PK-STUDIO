@@ -5,10 +5,7 @@ import { useNavigate } from "react-router-dom"
 import {
     IconChartBar,
     IconDashboard,
-    IconHelp,
     IconListDetails,
-    IconSearch,
-    IconSettings,
     IconUsers,
     IconMovie,
     IconVideoPlus,
@@ -17,6 +14,8 @@ import {
 import {
     Youtube,
     Users,
+    Search,
+    Bell,
 } from "lucide-react";
 
 import {
@@ -30,7 +29,7 @@ import {
 } from "@/components/ui/sidebar"
 import { NavBranchHierarchy } from "@/layouts/components/NavBranchHierarchy"
 import { NavMain } from "@/layouts/components/nav-main"
-import { NavSecondary } from "@/layouts/components/nav-secondary"
+// import { NavSecondary } from "@/layouts/components/nav-secondary"
 import { NavUser } from "@/layouts/components/nav-user"
 import { Button } from "@/components/ui/button"
 
@@ -151,8 +150,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const homeRoute = user?.role === 'editor' ? '/channels/my' : '/dashboard';
 
     return (
-        <Sidebar collapsible="none" className="h-screen border-r flex flex-col bg-[#F7F7F7]" {...props}>
-            <SidebarHeader className="border-b-0">
+        <Sidebar collapsible="none" className="h-full flex flex-col" style={{ backgroundColor: '#F7F7F7' }} {...props}>
+            <SidebarHeader className="border-b-0 p-0">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
@@ -176,14 +175,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
+
+                {/* Home section with icons */}
+                <div className="flex items-center justify-between px-2 py-2" style={{ backgroundColor: '#F7F7F7' }}>
+                    <span className="text-sm font-medium text-gray-700">Home</span>
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-accent"
+                        >
+                            <Search className="h-4 w-4 text-gray-600" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-accent"
+                        >
+                            <Bell className="h-4 w-4 text-gray-600" />
+                        </Button>
+                    </div>
+                </div>
             </SidebarHeader>
-            <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <SidebarContent className="p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <NavMain items={navMain} />
                 {/* THAY ĐỔI: Thay NavDocuments bằng NavBranchHierarchy */}
                 <NavBranchHierarchy />
                 {/* <NavSecondary items={navSecondary} className="mt-auto" /> */}
             </SidebarContent>
-            <SidebarFooter>
+            <SidebarFooter className="p-0">
                 <NavUser user={userData} />
             </SidebarFooter>
         </Sidebar>

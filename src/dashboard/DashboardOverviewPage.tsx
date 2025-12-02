@@ -182,7 +182,7 @@ export default function DashboardOverviewPage() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             {/* Header */}
             <div className="bg-white border-b border-slate-200 shadow-sm">
-                <div className="px-6 py-5">
+                <div className="px-3 py-3">
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
@@ -224,7 +224,7 @@ export default function DashboardOverviewPage() {
 
             {/* Warning if no data */}
             {hasNoData && (
-                <div className="px-6 pt-6">
+                <div className="px-3 pt-3">
                     <Alert>
                         <AlertCircle className="h-4 w-4" />
                         <AlertDescription className="ml-2">
@@ -236,7 +236,7 @@ export default function DashboardOverviewPage() {
             )}
 
             {/* Stats Grid */}
-            <div className="p-6 space-y-6">
+            <div className="p-3 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Total Branches - CLICKABLE */}
                     <Card

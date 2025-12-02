@@ -327,7 +327,7 @@ export function NavBranchHierarchy() {
                 <SidebarGroupLabel className="mb-0">Tổ chức</SidebarGroupLabel>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="h-5 w-5 rounded hover:bg-accent flex items-center justify-center transition-all group-hover:scale-110 active:scale-95"
+                    className="h-5 w-5 rounded hover:bg-accent flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 group-hover:scale-110 active:scale-95"
                     title="Thêm chi nhánh"
                 >
                     <Plus className="h-3.5 w-3.5 transition-transform" />
@@ -348,7 +348,7 @@ export function NavBranchHierarchy() {
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton
                                         className={cn(
-                                            "group h-auto py-2 relative hover:text-accent-foreground",
+                                            "group h-auto py-1 px-2 relative hover:text-accent-foreground",
                                             location.pathname === `/branches/${branch._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
                                         )}
                                         onClick={(e) => {

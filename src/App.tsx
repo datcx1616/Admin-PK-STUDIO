@@ -7,6 +7,7 @@ import LoginPage from "@/[locale]/login/page";
 import SignupPage from "@/[locale]/signup/page";
 import { PrivateRoute } from "@/pages/auth/PrivateRoute";
 import { AppSidebar } from "@/layouts/components/app-sidebar";
+import { SiteHeader } from "@/layouts/components/site-header";
 import DetailedAnalytics from "@/pages/analytics/page";
 import CreateVideoPage from "@/pages/videos/create/page";
 import MyVideosPage from "@/pages/videos/my/page";
@@ -35,15 +36,15 @@ import "./style/App.css";
 function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full overflow-hidden">
-        <div className="h-screen overflow-y">
+      <div className="flex h-screen w-full overflow-hidden p-2 gap-2" style={{ backgroundColor: '#F7F7F7' }}>
+        {/* Sidebar column (fixed) */}
+        <div className="w-[280px] h-[calc(100vh-1rem)] overflow-y-auto" style={{ backgroundColor: '#F7F7F7' }}>
           <AppSidebar />
         </div>
 
-        <div className="flex-1 flex flex-col h-screen overflow-hidden">
-          <div className="bg-white border-b border-gray-200">
-            {/* <UserAccountSelector /> */}
-          </div>
+        {/* Main panel */}
+        <div className="flex-1 rounded-2xl border shadow-sm overflow-hidden flex flex-col" style={{ backgroundColor: '#FFFFFF' }}>
+          <SiteHeader />
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>
@@ -233,8 +234,26 @@ export default function App() {
         }
       />
       <Route path="/home" element={<HomePage />} />
-      <Route path="/branches/:branchId" element={<BranchDetailPagee />} />
-      <Route path="/teams/:teamId" element={<TeamDetailPagee />} />
+      <Route
+        path="/branches/:branchId"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <BranchDetailPagee />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/teams/:teamId"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <TeamDetailPagee />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
