@@ -4,6 +4,8 @@ import { ContentHeader } from "@/pages/components/ContentHeader"
 import { Home } from "lucide-react"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/layouts/components/app-sidebar"
+// RightSidebar not used on Home page
+
 
 export default function HomePage() {
     return (
@@ -27,6 +29,7 @@ export default function HomePage() {
                     {/* Content will go here */}
                 </div>
             </SidebarInset>
+            {/* Home page has no headings; omit TOC sidebar */}
         </SidebarProvider>
     )
 }

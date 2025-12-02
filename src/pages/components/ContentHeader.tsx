@@ -20,8 +20,13 @@ interface ContentHeaderProps {
 export function ContentHeader({ breadcrumbs, actions, className, tableOfContents }: ContentHeaderProps) {
     return (
         <div className={cn(
-            "sticky top-0 z-10 bg-background border-b",
+            "sticky top-0 z-10 bg-background",
+            // Bo tròn góc phải lớn hơn
+            "rounded-r-2xl border shadow-sm",
+            // Không dịch trái/phải để tránh lệch với cột TOC và sidebar
             "px-6 py-3",
+            // Bỏ viền trái để nhìn liền mạch với khu vực bên trái
+            "border-l-0",
             className
         )}>
             <div className="flex items-center justify-between">

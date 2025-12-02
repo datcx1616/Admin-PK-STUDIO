@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/layouts/components/app-sidebar"
+import { RightSidebar } from "@/pages/components/RightSidebar"
 
 export default function TeamDetailPage() {
     const { teamId } = useParams()
@@ -70,150 +71,139 @@ export default function TeamDetailPage() {
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset className="flex flex-col h-screen overflow-hidden">
-                {/* Header with breadcrumb and TOC */}
+                {/* Header with breadcrumb */}
                 <ContentHeader
                     breadcrumbs={[
                         { label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                         { label: "Teams", href: "/teams" },
                         { label: team.name, icon: <Users className="h-4 w-4" /> },
                     ]}
-                    tableOfContents={tableOfContents}
                 />
 
-                {/* Title Box
-                <div className="bg-background border-b px-6 py-6">
-                    <h1 className="text-3xl font-bold mb-2">{team.name}</h1>
-                    {team.description && (
-                        <p className="text-muted-foreground">{team.description}</p>
-                    )}
-                    {team.branch && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                            Branch: {team.branch.name}
-                        </p>
-                    )}
-                </div> */}
+                {/* Layout: TOC column between app sidebar and content */}
+                <div className="flex flex-1 overflow-hidden">
+                    <RightSidebar items={tableOfContents} side="left" mode="inline" />
+                    <div className="flex-1 overflow-y-auto">
+                        <div className="max-w-5xl mx-auto p-6 space-y-6">
+                            {/* Stats section */}
+                            <div id="stats" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Members</CardTitle>
+                                        <User className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{team.members?.length || 0}</div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Team members
+                                        </p>
+                                    </CardContent>
+                                </Card>
 
-                {/* Content */}
-                <div className="flex-1 overflow-auto bg-background">
-                    <div className="p-6 space-y-6">
-                        {/* Stats section */}
-                        <div id="stats" className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Members</CardTitle>
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{team.members?.length || 0}</div>
-                                    <p className="text-xs text-muted-foreground">
-                                        Team members
-                                    </p>
-                                </CardContent>
-                            </Card>
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Channels</CardTitle>
+                                        <Youtube className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{team.channels?.length || 0}</div>
+                                        <p className="text-xs text-muted-foreground">
+                                            YouTube channels
+                                        </p>
+                                    </CardContent>
+                                </Card>
 
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Channels</CardTitle>
-                                    <Youtube className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{team.channels?.length || 0}</div>
-                                    <p className="text-xs text-muted-foreground">
-                                        YouTube channels
-                                    </p>
-                                </CardContent>
-                            </Card>
+                                <Card>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">Leader</CardTitle>
+                                        <Users className="h-4 w-4 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-lg font-bold">
+                                            {team.leader?.name || 'Not assigned'}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            Team leader
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            </div>
 
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Leader</CardTitle>
-                                    <Users className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-lg font-bold">
-                                        {team.leader?.name || 'Not assigned'}
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        Team leader
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        </div>
+                            {/* Overview section anchor */}
+                            <div id="overview" className="hidden" />
 
-                        {/* Overview section */}
-                        <div id="overview" className="hidden" />
-
-                        {/* Members List */}
-                        {team.members && team.members.length > 0 && (
-                            <Card id="members">
-                                <CardHeader>
-                                    <CardTitle>Team Members</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-3">
-                                        {team.members.map((member: any) => (
-                                            <div
-                                                key={member._id}
-                                                className="flex items-center gap-4 p-3 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
-                                            >
-                                                <Avatar>
-                                                    <AvatarFallback>
-                                                        {member.name?.charAt(0).toUpperCase()}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1">
-                                                    <div className="font-medium">{member.name}</div>
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {member.email}
-                                                    </div>
-                                                </div>
-                                                <div className="text-sm px-3 py-1 rounded-full bg-secondary">
-                                                    {member.role}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-
-                        {/* Channels List */}
-                        {team.channels && team.channels.length > 0 && (
-                            <Card id="channels">
-                                <CardHeader>
-                                    <CardTitle>Team Channels</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2">
-                                        {team.channels.map((channel: any) => (
-                                            <div
-                                                key={channel._id}
-                                                className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <Youtube className="h-5 w-5 text-red-600" />
-                                                    <div>
-                                                        <div className="font-medium">{channel.name}</div>
+                            {/* Members List */}
+                            {team.members && team.members.length > 0 && (
+                                <Card id="members">
+                                    <CardHeader>
+                                        <CardTitle>Team Members</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-3">
+                                            {team.members.map((member: any) => (
+                                                <div
+                                                    key={member._id}
+                                                    className="flex items-center gap-4 p-3 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
+                                                >
+                                                    <Avatar>
+                                                        <AvatarFallback>
+                                                            {member.name?.charAt(0).toUpperCase()}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div className="flex-1">
+                                                        <div className="font-medium">{member.name}</div>
                                                         <div className="text-sm text-muted-foreground">
-                                                            {channel.subscriberCount?.toLocaleString() || 0} subscribers
+                                                            {member.email}
                                                         </div>
                                                     </div>
+                                                    <div className="text-sm px-3 py-1 rounded-full bg-secondary">
+                                                        {member.role}
+                                                    </div>
                                                 </div>
-                                                {channel.isConnected ? (
-                                                    <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
-                                                        Connected
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {/* Channels List */}
+                            {team.channels && team.channels.length > 0 && (
+                                <Card id="channels">
+                                    <CardHeader>
+                                        <CardTitle>Team Channels</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-2">
+                                            {team.channels.map((channel: any) => (
+                                                <div
+                                                    key={channel._id}
+                                                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent cursor-pointer transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <Youtube className="h-5 w-5 text-red-600" />
+                                                        <div>
+                                                            <div className="font-medium">{channel.name}</div>
+                                                            <div className="text-sm text-muted-foreground">
+                                                                {channel.subscriberCount?.toLocaleString() || 0} subscribers
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                ) : (
-                                                    <div className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                                                        Disconnected
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
+                                                    {channel.isConnected ? (
+                                                        <div className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                                                            Connected
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                                                            Disconnected
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
                     </div>
                 </div>
             </SidebarInset>

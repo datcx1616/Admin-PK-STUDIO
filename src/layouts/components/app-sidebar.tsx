@@ -151,8 +151,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const homeRoute = user?.role === 'editor' ? '/channels/my' : '/dashboard';
 
     return (
-        <Sidebar collapsible="none" className="h-screen border-r flex flex-col" {...props}>
-            <SidebarHeader className="border-b">
+        <Sidebar collapsible="none" className="h-screen border-r flex flex-col bg-[#F7F7F7]" {...props}>
+            <SidebarHeader className="border-b-0">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton

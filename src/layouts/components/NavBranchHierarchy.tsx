@@ -1,7 +1,7 @@
 // src/pages/examples/layout/components/NavBranchHierarchy.tsx
 // VERSION 6: Hover Chevron REPLACE Icon + Navigation
 import * as React from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { ChevronRight, Building2, Users2, User2, Plus, Pencil, BarChart3, Trash2, Users, Youtube } from "lucide-react"
 
 import {
@@ -80,7 +80,7 @@ const getCurrentUser = () => {
 // Skeleton Loading Component
 function HierarchySkeleton() {
     return (
-        <SidebarGroup>
+        <SidebarGroup className="bg-[#F7F7F7]">
             <SidebarGroupLabel>Tổ chức</SidebarGroupLabel>
             <SidebarMenu>
                 <SidebarMenuItem>
@@ -126,6 +126,7 @@ function HierarchySkeleton() {
 
 export function NavBranchHierarchy() {
     const navigate = useNavigate()  // ✅ THÊM navigate hook
+    const location = useLocation()
     const [branches, setBranches] = React.useState<BranchWithTeams[]>([])
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
@@ -292,7 +293,7 @@ export function NavBranchHierarchy() {
 
     if (error) {
         return (
-            <SidebarGroup>
+            <SidebarGroup className="bg-[#F7F7F7]">
                 <SidebarGroupLabel>Tổ chức</SidebarGroupLabel>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -307,7 +308,7 @@ export function NavBranchHierarchy() {
 
     if (branches.length === 0) {
         return (
-            <SidebarGroup>
+            <SidebarGroup className="bg-[#F7F7F7]">
                 <SidebarGroupLabel>Tổ chức</SidebarGroupLabel>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -321,7 +322,7 @@ export function NavBranchHierarchy() {
     }
 
     return (
-        <SidebarGroup>
+        <SidebarGroup className="bg-[#F7F7F7]">
             <div className="flex items-center justify-between px-2 mb-1 group hover:bg-accent rounded transition-colors cursor-pointer">
                 <SidebarGroupLabel className="mb-0">Tổ chức</SidebarGroupLabel>
                 <button
@@ -346,7 +347,10 @@ export function NavBranchHierarchy() {
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton
-                                        className="group h-auto py-2 relative hover:bg-accent hover:text-accent-foreground"
+                                        className={cn(
+                                            "group h-auto py-2 relative hover:text-accent-foreground",
+                                            location.pathname === `/branches/${branch._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
+                                        )}
                                         onClick={(e) => {
                                             // ✅ THÊM Navigation khi click vào branch
                                             if (!e.defaultPrevented) {
@@ -372,7 +376,7 @@ export function NavBranchHierarchy() {
                                             )}
                                         </div>
 
-                                        <span className="flex-1 break-words pr-6">{branch.name}</span>
+                                        <span className="flex-1 wrap-break-word pr-6">{branch.name}</span>
 
                                         {/* More icon - hiện khi hover */}
                                         <DropdownMenu>
@@ -451,7 +455,11 @@ export function NavBranchHierarchy() {
                                                         <SidebarMenuSubItem>
                                                             <CollapsibleTrigger asChild>
                                                                 <SidebarMenuSubButton
-                                                                    className={cn("group relative w-full", !hasMembers && "cursor-default")}
+                                                                    className={cn(
+                                                                        "group relative w-full",
+                                                                        !hasMembers && "cursor-default",
+                                                                        location.pathname === `/teams/${team._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
+                                                                    )}
                                                                     onClick={(e) => {
                                                                         // ✅ THÊM Navigation khi click vào team
                                                                         if (!e.defaultPrevented) {

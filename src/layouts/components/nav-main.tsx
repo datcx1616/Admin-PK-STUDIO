@@ -1,6 +1,6 @@
 "use client"
 import { type Icon } from "@tabler/icons-react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -20,6 +20,7 @@ export function NavMain({
     }[]
 }) {
     const navigate = useNavigate()
+    const location = useLocation()
 
     return (
         <SidebarGroup>
@@ -31,7 +32,10 @@ export function NavMain({
                             <SidebarMenuButton
                                 tooltip={item.title}
                                 onClick={() => navigate(item.url)}
-                                className="cursor-pointer"
+                                className={[
+                                    "cursor-pointer",
+                                    location.pathname === item.url ? "bg-[#DEDFE3]" : "hover:bg-gray-100",
+                                ].join(" ")}
                             >
                                 {item.icon && <item.icon />}
                                 <span>{item.title}</span>
