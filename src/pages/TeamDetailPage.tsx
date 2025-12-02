@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { RightSidebar } from "@/pages/components/RightSidebar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ChannelSidebar } from "@/pages/components/ChannelSidebar"
+
 
 export default function TeamDetailPage() {
     const { teamId } = useParams()
@@ -143,7 +145,7 @@ export default function TeamDetailPage() {
 
             {/* Layout: TOC column between app sidebar and content */}
             <div className="flex flex-1 overflow-hidden">
-                <RightSidebar items={tableOfContents} side="left" mode="inline" />
+                <ChannelSidebar />
                 <div className="flex-1 overflow-y-auto">
                     <div className="max-w-5xl mx-auto p-6 space-y-6">
                         {/* Stats section */}

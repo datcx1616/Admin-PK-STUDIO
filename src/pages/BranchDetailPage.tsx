@@ -3,27 +3,14 @@ import * as React from "react"
 import { useParams } from "react-router-dom"
 import { useBranch } from "@/hooks/useBranches"
 import { ContentHeader } from "@/pages/components/ContentHeader"
-import { RightSidebar, type TableOfContentsItem } from "@/pages/components/RightSidebar"
 import { Building2, Users, Youtube, TrendingUp, MapPin } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ChannelSidebar } from "@/pages/components/ChannelSidebar"
 
 export default function BranchDetailPage() {
     const { branchId } = useParams<{ branchId: string }>()
     const { branch, loading, error } = useBranch(branchId!)
-
-    // Define table of contents
-    const tableOfContents: TableOfContentsItem[] = [
-        { id: "overview", title: "Overview", level: 1 },
-        { id: "statistics", title: "Statistics", level: 2 },
-        { id: "location", title: "Location", level: 2 },
-        { id: "teams", title: "Teams", level: 1 },
-        { id: "team-list", title: "Team List", level: 2 },
-        { id: "channels", title: "Channels", level: 1 },
-        { id: "channel-list", title: "Channel List", level: 2 },
-        { id: "performance", title: "Performance", level: 1 },
-        { id: "metrics", title: "Key Metrics", level: 2 },
-    ]
 
     if (loading) {
         return (
@@ -139,7 +126,7 @@ export default function BranchDetailPage() {
                     ]}
                 />
                 <div className="flex flex-1 overflow-hidden">
-                    <RightSidebar items={tableOfContents} side="left" mode="inline" />
+                    <ChannelSidebar />
                     <div className="flex-1 overflow-y-auto">
                         <div className="max-w-5xl mx-auto p-6">
                             <Alert variant="destructive">
@@ -165,7 +152,7 @@ export default function BranchDetailPage() {
             />
             {/* Layout: TOC column between app sidebar and content */}
             <div className="flex flex-1 overflow-hidden">
-                <RightSidebar items={tableOfContents} side="left" mode="inline" />
+                <ChannelSidebar />
                 <div className="flex-1 overflow-y-auto">
                     <div className="max-w-5xl mx-auto p-6">
                         <section id="overview" className="mb-12 scroll-mt-20">

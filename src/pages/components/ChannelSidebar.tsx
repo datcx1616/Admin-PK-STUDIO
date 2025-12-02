@@ -116,11 +116,11 @@ export function ChannelSidebar({
                         ? cn(
                             "fixed top-0 h-full bg-background transition-all duration-300 ease-in-out z-40",
                             side === "right" ? "right-0 border-l" : "left-0 border-r",
-                            isOpen ? "w-72" : "w-0"
+                            isOpen ? "w-96" : "w-0"
                         )
                         : cn(
                             "sticky top-0 h-[calc(100vh-0px)] transition-all duration-300 ease-in-out overflow-hidden",
-                            isOpen ? "bg-background w-72" : "bg-transparent w-8",
+                            isOpen ? "bg-background w-96" : "bg-transparent w-8",
                             isOpen
                                 ? side === "right" ? "border-l bg-background" : "border-r bg-background"
                                 : "border-transparent"
