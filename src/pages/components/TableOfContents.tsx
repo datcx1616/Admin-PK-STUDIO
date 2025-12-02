@@ -1,4 +1,3 @@
-// src/components/TableOfContents.tsx
 import * as React from "react"
 import { List, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -12,7 +11,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 
-interface TableOfContentsItem {
+export interface TableOfContentsItem {
     id: string
     title: string
     level: number // 1, 2, 3 for h1, h2, h3
@@ -27,7 +26,6 @@ export function TableOfContents({ items, className }: TableOfContentsProps) {
     const [open, setOpen] = React.useState(false)
     const [activeId, setActiveId] = React.useState<string>("")
 
-    // Track which heading is currently in view
     React.useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {

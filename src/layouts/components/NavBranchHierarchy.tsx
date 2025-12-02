@@ -537,15 +537,7 @@ export function NavBranchHierarchy() {
                                                                                 <Pencil className="mr-2 h-4 w-4" />
                                                                                 <span>Chỉnh Sửa</span>
                                                                             </DropdownMenuItem>
-                                                                            <DropdownMenuItem
-                                                                                onClick={() => {
-                                                                                    // ✅ THÊM Navigation đến team analytics
-                                                                                    navigate(`/dashboard/teams/${team._id}`)
-                                                                                }}
-                                                                            >
-                                                                                <BarChart3 className="mr-2 h-4 w-4" />
-                                                                                <span>Phân Tích</span>
-                                                                            </DropdownMenuItem>
+
                                                                             <DropdownMenuSeparator />
                                                                             <DropdownMenuItem
                                                                                 onClick={async () => {

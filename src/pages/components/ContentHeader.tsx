@@ -1,4 +1,3 @@
-// src/components/ContentHeader.tsx
 import * as React from "react"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -26,9 +25,7 @@ export function ContentHeader({ breadcrumbs, actions, className, tableOfContents
             className
         )}>
             <div className="flex items-center justify-between">
-                {/* Left side: Toggle button + Breadcrumbs */}
                 <div className="flex items-center gap-3">
-                    {/* Breadcrumbs */}
                     <nav className="flex items-center space-x-2 text-sm">
                         {breadcrumbs.map((item, index) => (
                             <React.Fragment key={index}>
@@ -54,15 +51,10 @@ export function ContentHeader({ breadcrumbs, actions, className, tableOfContents
                         ))}
                     </nav>
                 </div>
-
-                {/* Right side: Table of Contents + Actions */}
                 <div className="flex items-center gap-2">
-                    {/* Table of Contents */}
                     {tableOfContents && tableOfContents.length > 0 && (
                         <TableOfContents items={tableOfContents} />
                     )}
-
-                    {/* Actions */}
                     {actions || (
                         <Button variant="ghost" size="sm">
                             <MoreHorizontal className="h-4 w-4" />
