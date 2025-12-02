@@ -7,7 +7,7 @@ import { teamsAPI } from "@/lib/teams-api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/pages/examples/layout/components/app-sidebar"
+import { AppSidebar } from "@/layouts/components/app-sidebar"
 
 export default function TeamDetailPage() {
     const { teamId } = useParams()

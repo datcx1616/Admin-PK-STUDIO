@@ -2,21 +2,20 @@
 import React from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Routes, Route, Navigate } from "react-router-dom";
-import UsersManagementPage from "@/pages/examples/roles/UsersManagementPage";
+import UsersManagementPage from "@/pages/roles/UsersManagementPage";
 import LoginPage from "@/[locale]/login/page";
 import SignupPage from "@/[locale]/signup/page";
 import { PrivateRoute } from "@/pages/auth/PrivateRoute";
-import { AppSidebar } from "@/pages/examples/layout/components/app-sidebar";
-import ChannelManagement from "@/pages/examples/channel/page";
-import DetailedAnalytics from "@/pages/examples/analytics/page";
-import CreateVideoPage from "@/pages/examples/videos/create/page";
-import MyVideosPage from "@/pages/examples/videos/my/page";
-import AllVideosPage from "@/pages/examples/videos/all/page";
-import MyChannelsPage from "@/pages/examples/channels/my/page";
-import TeamsManagementPage from "@/pages/examples/teams/TeamsManagementPage";
-import BranchManagementPage from "@/pages/examples/brand/BranchManagementPage";
-import ChannelManagementPage from '@/pages/examples/channel/ChannelManagementPage';
-import ChannelDetailPage from '@/pages/examples/channel/ChannelDetailPage';
+import { AppSidebar } from "@/layouts/components/app-sidebar";
+import DetailedAnalytics from "@/pages/analytics/page";
+import CreateVideoPage from "@/pages/videos/create/page";
+import MyVideosPage from "@/pages/videos/my/page";
+import AllVideosPage from "@/pages/videos/all/page";
+import MyChannelsPage from "@/pages/channels/my/page";
+import TeamsManagementPage from "@/pages/teams/TeamsManagementPage";
+import BranchManagementPage from "@/pages/brand/BranchManagementPage";
+import ChannelManagementPage from '@/pages/channel/ChannelManagementPage';
+import ChannelDetailPage from '@/pages/channel/ChannelDetailPage';
 
 // New Dashboard Pages
 import DashboardOverviewPage from "@/dashboard/DashboardOverviewPage";

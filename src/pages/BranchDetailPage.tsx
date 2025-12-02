@@ -5,7 +5,7 @@ import { Home, Building2, Users, Youtube } from "lucide-react"
 import { branchesAPI } from "@/lib/branches-api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/pages/examples/layout/components/app-sidebar"
+import { AppSidebar } from "@/layouts/components/app-sidebar"
 
 export default function BranchDetailPage() {
     const { branchId } = useParams()
