@@ -529,6 +529,15 @@ export default function TeamDetailPage() {
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
+            {/* Header */}
+            <ContentHeader
+                breadcrumbs={[
+                    { label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
+                    { label: "Teams", href: "/teams" },
+                    { label: team.name, icon: <Users className="h-4 w-4" /> },
+                ]}
+            />
+
             {/* Layout: Channel Sidebar on left, Content on right */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Channel Sidebar - fetches channels from API based on teamId */}
