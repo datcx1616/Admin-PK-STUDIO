@@ -163,17 +163,22 @@ export function ChannelSidebar({
         <>
             {/* Toggle Button - Fixed position when sidebar is closed */}
             {mode === "fixed" && !isOpen && (
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setIsOpen(true)}
+                <div
                     className={cn(
-                        "fixed top-20 z-50 h-8 w-8 rounded-full shadow-md bg-background border",
-                        side === "right" ? "right-4" : "left-4"
+                        "fixed top-20",
+                        side === "right" ? "right-4" : "left-80"
                     )}
+                    style={{ zIndex: 99999 }}
                 >
-                    <Menu className="h-4 w-4" />
-                </Button>
+                    <Button
+                        variant="default"
+                        size="icon"
+                        onClick={() => setIsOpen(true)}
+                        className="h-10 w-10 rounded-full shadow-2xl bg-blue-600 hover:bg-blue-700 border-0 text-white"
+                    >
+                        <Menu className="h-5 w-5" />
+                    </Button>
+                </div>
             )}
 
             {/* Sidebar */}
@@ -181,13 +186,13 @@ export function ChannelSidebar({
                 className={cn(
                     mode === "fixed"
                         ? cn(
-                            "fixed top-0 h-full bg-background transition-all duration-300 ease-in-out z-40",
+                            "fixed top-0 h-full bg-background transition-all duration-300 ease-in-out z-30",
                             side === "right" ? "right-0 border-l" : "left-0 border-r",
                             isOpen ? "w-[300px]" : "w-0"
                         )
                         : cn(
-                            "sticky top-0 h-[calc(100vh-0px)] transition-all duration-300 ease-in-out overflow-hidden",
-                            isOpen ? "bg-background w-[300px]" : "bg-transparent w-8",
+                            "sticky top-0 h-[calc(100vh-0px)] transition-all duration-300 ease-in-out overflow-visible",
+                            isOpen ? "bg-background w-[300px]" : "bg-transparent w-20",
                             isOpen
                                 ? side === "right" ? "border-l bg-background" : "border-r bg-background"
                                 : "border-transparent"
@@ -234,15 +239,18 @@ export function ChannelSidebar({
                             </div>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center h-12">
+                        <div className="flex items-center h-12 w-full pl-6">
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setIsOpen(true)}
-                                className="h-7 w-7 rounded-full bg-background border shadow text-gray-700"
+                                className="h-8 w-8 rounded-md bg-transparent hover:bg-gray-100 text-gray-500 flex justify-start pl-[2px]"
                             >
                                 <Menu className="h-4 w-4" />
                             </Button>
+
+
+
                         </div>
                     )}
 

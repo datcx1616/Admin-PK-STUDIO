@@ -151,7 +151,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     return (
         <Sidebar collapsible="none" className="h-full flex flex-col" style={{ backgroundColor: '#F7F7F7' }} {...props}>
+            {/* Đưa khối người dùng lên Header */}
             <SidebarHeader className="border-b-0 p-0">
+                <NavUser user={userData} />
+            </SidebarHeader>
+
+            <SidebarContent className="p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <NavMain items={navMain} />
+                <NavBranchHierarchy />
+            </SidebarContent>
+
+            {/* Đưa khối logo/tiêu đề xuống Footer */}
+            <SidebarFooter className="p-0">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
@@ -175,36 +186,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
-
-                {/* Home section with icons */}
-                {/* <div className="flex items-center justify-between px-2 py-2" style={{ backgroundColor: '#F7F7F7' }}>
-                    <span className="text-sm font-medium text-gray-700"></span>
-                    <div className="flex items-center gap-1">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 hover:bg-accent"
-                        >
-                            <Search className="h-4 w-4 text-gray-600" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 hover:bg-accent"
-                        >
-                            <Bell className="h-4 w-4 text-gray-600" />
-                        </Button>
-                    </div>
-                </div> */}
-            </SidebarHeader>
-            <SidebarContent className="p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                <NavMain items={navMain} />
-                {/* THAY ĐỔI: Thay NavDocuments bằng NavBranchHierarchy */}
-                <NavBranchHierarchy />
-                {/* <NavSecondary items={navSecondary} className="mt-auto" /> */}
-            </SidebarContent>
-            <SidebarFooter className="p-0">
-                <NavUser user={userData} />
             </SidebarFooter>
         </Sidebar>
     )

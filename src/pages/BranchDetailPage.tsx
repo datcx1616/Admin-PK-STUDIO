@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom"
 import { useBranch } from "@/hooks/useBranches"
 import { ContentHeader } from "@/pages/components/ContentHeader"
 import { ChannelSidebar } from "@/pages/components/ChannelSidebar"
-import { Building2, Users, Youtube, TrendingUp, MapPin } from "lucide-react"
+import { Building2, Users, Youtube, TrendingUp, MapPin, Home } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -157,7 +157,7 @@ export default function BranchDetailPage() {
         <div className="flex flex-col h-full overflow-hidden">
             <ContentHeader
                 breadcrumbs={[
-                    { label: "Home", href: "/dashboard" },
+                    { label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                     { label: "Branches", href: "/branches" },
                     { label: branch.name, icon: <Building2 className="h-4 w-4" /> },
                 ]}

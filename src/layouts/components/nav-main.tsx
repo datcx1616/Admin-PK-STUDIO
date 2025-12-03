@@ -23,9 +23,8 @@ export function NavMain({
     const location = useLocation()
 
     return (
-        <SidebarGroup>
-            <SidebarGroupContent>
-                <SidebarGroupLabel></SidebarGroupLabel>
+        <SidebarGroup className="px-0">
+            <SidebarGroupContent className="px-0">
                 <SidebarMenu>
                     {items.map((item) => (
                         <SidebarMenuItem key={item.title}>
