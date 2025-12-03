@@ -17,18 +17,28 @@ import {
     Share2,
     Award,
     Calendar,
+    Dot,
     Building2,
     UserCircle,
     Video,
-    BarChart3
+    BarChart3,
+    Download,
+    Printer,
+    RefreshCw
 } from "lucide-react"
 import { teamsAPI } from "@/lib/teams-api"
+import { apiClient } from "@/lib/api-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// Using ToggleGroup for range instead of Select
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { ButtonGroup } from "@/components/ui/button-group"
 import { cn } from "@/lib/utils"
+import { OverviewSummary } from "./components/OverviewSummary"
 import {
     Table,
     TableBody,
@@ -116,12 +126,186 @@ interface OverviewData {
     }>
 }
 
+interface YouTubeAnalyticsData {
+    success?: boolean
+    data?: {
+        team?: {
+            id: string
+            name: string
+        }
+        totalChannels?: number
+        channels?: Array<{
+            id: string
+            name: string
+            thumbnail?: string
+        }>
+        dateRange?: {
+            startDate: string
+            endDate: string
+        }
+        basic?: {
+            totals: {
+                totalViews: number
+                totalWatchTimeMinutes: number
+                totalWatchTimeHours: number
+                totalSubscribersGained: number
+                totalSubscribersLost: number
+                totalSubscribersNet: number
+                averageViewDuration: number
+            }
+        }
+        engagement?: {
+            totals: {
+                totalLikes: number
+                totalDislikes: number
+                totalComments: number
+                totalShares: number
+                engagementRate: number
+                likeDislikeRatio: number
+            }
+        }
+        revenue?: {
+            totals: {
+                estimatedRevenue: number
+                estimatedAdRevenue: number
+                monetizedPlaybacks: number
+                adImpressions: number
+                cpm: number
+                rpm: number
+            }
+            monetizationStatus: string
+            currency: string
+        }
+        traffic?: {
+            sources: Array<{
+                sourceType: string
+                views: number
+                watchTimeMinutes: number
+                percentage: number
+            }>
+            topSource: string
+        }
+        devices?: {
+            types: Array<{
+                deviceType: string
+                views: number
+                watchTimeMinutes: number
+                percentage: number
+            }>
+            topDevice: string
+        }
+        demographics?: {
+            ageGroups: Array<{
+                ageGroup: string
+                viewsPercentage: number
+            }>
+            gender: {
+                male: number
+                female: number
+            }
+            topCountries: Array<{
+                country: string
+                countryName: string
+                views: number
+                watchTimeMinutes: number
+                percentage: number
+            }>
+        }
+        videos?: {
+            topByViews: Array<{
+                videoId: string
+                title: string
+                views: number
+                watchTimeMinutes: number
+                likes: number
+                comments: number
+                shares: number
+                channelName?: string
+            }>
+            topByWatchTime: Array<Record<string, unknown>>
+            topByEngagement: Array<Record<string, unknown>>
+        }
+        retention?: {
+            averageViewPercentage: number
+            cardClickRate: number
+            impressions: number
+            impressionClickThroughRate: number
+        }
+        playbackLocation?: {
+            locations: Array<{
+                locationType: string
+                locationName: string
+                views: number
+                watchTimeMinutes: number
+                percentage: number
+            }>
+            topLocation: string
+        }
+        operatingSystem?: {
+            systems: Array<{
+                osType: string
+                osName: string
+                views: number
+                watchTimeMinutes: number
+                percentage: number
+            }>
+            topOS: string
+        }
+        subscriptionStatus?: {
+            statuses: Array<{
+                status: string
+                statusName: string
+                views: number
+                percentage: number
+            }>
+            subscribedPercentage: number
+            unsubscribedPercentage: number
+        }
+        sharingServices?: {
+            services: Array<{
+                service: string
+                serviceName: string
+                shares: number
+                percentage: number
+            }>
+            topService: string
+            totalShares: number
+        }
+        channelAnalytics?: Array<ChannelAnalyticsItem>
+    }
+}
+
+interface ChannelAnalyticsItem {
+    channelId: string
+    channelName: string
+    basic?: {
+        totals?: {
+            totalViews?: number
+            totalWatchTimeMinutes?: number
+            totalWatchTimeHours?: number
+            totalSubscribersGained?: number
+            totalSubscribersLost?: number
+            totalSubscribersNet?: number
+            averageViewDuration?: number
+        }
+    }
+    engagement?: {
+        totals?: {
+            totalLikes?: number
+            totalComments?: number
+            totalShares?: number
+        }
+    }
+}
+
 export default function TeamDetailPage() {
     const { teamId } = useParams()
     const [team, setTeam] = React.useState<TeamData | null>(null)
     const [overview, setOverview] = React.useState<OverviewData | null>(null)
+    const [youtubeAnalytics, setYoutubeAnalytics] = React.useState<YouTubeAnalyticsData | null>(null)
     const [loading, setLoading] = React.useState(true)
-    const [overviewLoading, setOverviewLoading] = React.useState(true)
+    // Đã lược bỏ cờ loading chi tiết (overviewLoading, analyticsLoading) sau khi tách UI
+    const [dateRange, setDateRange] = React.useState<'7' | '30' | '90' | '180'>('30')
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -129,7 +313,7 @@ export default function TeamDetailPage() {
 
             try {
                 setLoading(true)
-                setOverviewLoading(true)
+
 
                 // Fetch team basic info
                 const teamData = await teamsAPI.getById(teamId)
@@ -143,8 +327,22 @@ export default function TeamDetailPage() {
                     setOverview(overviewData)
                 } catch (err) {
                     console.error('❌ Error fetching overview:', err)
-                } finally {
-                    setOverviewLoading(false)
+                }
+
+                // Fetch YouTube Analytics data
+                try {
+                    const endDate = new Date().toISOString().split('T')[0]
+                    const days = parseInt(dateRange)
+                    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
+                    const analyticsData = await apiClient.getTeamAnalytics(teamId, {
+                        startDate,
+                        endDate
+                    })
+                    console.log('📊 Dữ liệu YouTube Analytics:', analyticsData)
+                    setYoutubeAnalytics(analyticsData)
+                } catch (err) {
+                    console.error('❌ Lỗi khi lấy dữ liệu YouTube Analytics:', err)
                 }
             } catch (error) {
                 console.error('❌ Error fetching team:', error)
@@ -154,7 +352,41 @@ export default function TeamDetailPage() {
         }
 
         fetchData()
-    }, [teamId])
+    }, [teamId, dateRange])
+
+    // Refresh data
+    const handleRefresh = () => {
+        window.location.reload()
+    }
+
+    // Export to CSV
+    const handleExportCSV = () => {
+        if (!ytData) return
+
+        const csvData = [
+            ['Chỉ số', 'Giá trị'],
+            ['Tổng lượt xem', ytData.basic?.totals?.totalViews || 0],
+            ['Thời gian xem (giờ)', ytData.basic?.totals?.totalWatchTimeHours || 0],
+            ['Tổng lượt thích', ytData.engagement?.totals?.totalLikes || 0],
+            ['Tổng bình luận', ytData.engagement?.totals?.totalComments || 0],
+            ['Subscriber tăng', ytData.basic?.totals?.totalSubscribersGained || 0],
+            ['Subscriber giảm', ytData.basic?.totals?.totalSubscribersLost || 0],
+            ['Tỷ lệ tương tác', `${ytData.engagement?.totals?.engagementRate || 0}%`],
+        ]
+
+        const csv = csvData.map(row => row.join(',')).join('\n')
+        const blob = new Blob([csv], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `team-${team?.name}-phan-tich-${dateRange}-ngay.csv`
+        a.click()
+    }
+
+    // Print / PDF
+    const handlePrint = () => {
+        window.print()
+    }
 
     if (loading) {
         return (
@@ -243,15 +475,15 @@ export default function TeamDetailPage() {
             <div className="flex flex-col h-full overflow-hidden">
                 <ContentHeader
                     breadcrumbs={[
-                        { label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
-                        { label: "Teams", href: "/teams" },
-                        { label: "Error", icon: <Users className="h-4 w-4" /> },
+                        { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
+                        { label: "Đội", href: "/teams" },
+                        { label: "Lỗi", icon: <Users className="h-4 w-4" /> },
                     ]}
                 />
                 <div className="flex flex-1 overflow-hidden">
                     <ChannelSidebar teamId={teamId} side="left" mode="inline" />
                     <div className="flex-1 overflow-y-auto p-6">
-                        <div className="text-center text-muted-foreground">Team not found</div>
+                        <div className="text-center text-muted-foreground">Không tìm thấy đội</div>
                     </div>
                 </div>
             </div>
@@ -260,26 +492,31 @@ export default function TeamDetailPage() {
 
     // Calculate statistics from both API data and local data
     const channels = team?.channels || []
+
+    // Merge data from overview và YouTube Analytics API - Sử dụng cấu trúc mới
+    const ytData = youtubeAnalytics?.data
+
     const stats = {
         totalMembers: overview?.statistics?.totalMembers ?? (team?.members?.length || 0),
         totalChannels: overview?.statistics?.totalChannels ?? channels.length,
         totalVideos: overview?.statistics?.totalVideos ?? (channels.reduce((sum, ch) => sum + (ch.videoCount || 0), 0)),
         totalSubscribers: overview?.statistics?.totalSubscribers ?? (channels.reduce((sum, ch) => sum + (ch.subscriberCount || 0), 0)),
-        totalViews: overview?.statistics?.totalViews ?? (channels.reduce((sum, ch) => sum + (ch.viewCount || 0), 0)),
-        totalWatchTimeHours: overview?.statistics?.totalWatchTimeHours ?? 0,
-        totalWatchTimeMinutes: overview?.statistics?.totalWatchTimeMinutes ?? 0,
-        averageViewDuration: overview?.statistics?.averageViewDuration ?? 0,
-        totalLikes: overview?.statistics?.totalLikes ?? 0,
-        totalComments: overview?.statistics?.totalComments ?? 0,
-        totalShares: overview?.statistics?.totalShares ?? 0,
-        engagementRate: overview?.statistics?.engagementRate ?? 0,
-        subscribersGained: overview?.statistics?.subscribersGained ?? 0,
-        subscribersLost: overview?.statistics?.subscribersLost ?? 0,
-        subscribersNet: overview?.statistics?.subscribersNet ?? ((overview?.statistics?.subscribersGained ?? 0) - (overview?.statistics?.subscribersLost ?? 0))
+        totalViews: ytData?.basic?.totals?.totalViews ?? overview?.statistics?.totalViews ?? (channels.reduce((sum, ch) => sum + (ch.viewCount || 0), 0)),
+        totalWatchTimeHours: ytData?.basic?.totals?.totalWatchTimeHours ?? (overview?.statistics?.totalWatchTimeHours ?? 0),
+        totalWatchTimeMinutes: ytData?.basic?.totals?.totalWatchTimeMinutes ?? (overview?.statistics?.totalWatchTimeMinutes ?? 0),
+        averageViewDuration: ytData?.basic?.totals?.averageViewDuration ?? (overview?.statistics?.averageViewDuration ?? 0),
+        totalLikes: ytData?.engagement?.totals?.totalLikes ?? (overview?.statistics?.totalLikes ?? 0),
+        totalDislikes: ytData?.engagement?.totals?.totalDislikes ?? 0,
+        totalComments: ytData?.engagement?.totals?.totalComments ?? (overview?.statistics?.totalComments ?? 0),
+        totalShares: ytData?.engagement?.totals?.totalShares ?? (overview?.statistics?.totalShares ?? 0),
+        engagementRate: ytData?.engagement?.totals?.engagementRate ?? (overview?.statistics?.engagementRate ?? 0),
+        likeDislikeRatio: ytData?.engagement?.totals?.likeDislikeRatio ?? 0,
+        subscribersGained: ytData?.basic?.totals?.totalSubscribersGained ?? (overview?.statistics?.subscribersGained ?? 0),
+        subscribersLost: ytData?.basic?.totals?.totalSubscribersLost ?? (overview?.statistics?.subscribersLost ?? 0),
+        subscribersNet: ytData?.basic?.totals?.totalSubscribersNet ?? (overview?.statistics?.subscribersNet ?? ((overview?.statistics?.subscribersGained ?? 0) - (overview?.statistics?.subscribersLost ?? 0)))
     }
 
-    const hasWatchTime = (stats.totalWatchTimeHours || stats.totalWatchTimeMinutes || stats.averageViewDuration)
-    const hasEngagement = (stats.totalLikes || stats.totalComments || stats.totalShares || stats.engagementRate)
+    // Các cờ tổng hợp (không dùng sau khi lược bỏ phần tổng quan nhanh)
 
     const formatDate = (dateStr?: string) => {
         if (!dateStr) return ''
@@ -292,15 +529,6 @@ export default function TeamDetailPage() {
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            {/* Header with breadcrumb */}
-            <ContentHeader
-                breadcrumbs={[
-                    { label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
-                    { label: "Teams", href: "/teams" },
-                    { label: team.name, icon: <Users className="h-4 w-4" /> },
-                ]}
-            />
-
             {/* Layout: Channel Sidebar on left, Content on right */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Channel Sidebar - fetches channels from API based on teamId */}
@@ -309,219 +537,77 @@ export default function TeamDetailPage() {
                 {/* Main Content */}
                 <div className="flex-1 overflow-y-auto">
                     <div className="max-w-7xl mx-auto p-6 space-y-6">
-                        {/* Header Card with Team Info */}
-                        <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 via-primary/3 to-background">
-                            <CardHeader className="space-y-4">
-                                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                                    <div className="space-y-3">
-                                        <CardTitle className="text-3xl font-bold flex items-center gap-3">
-                                            <Users className="h-8 w-8 text-primary" />
-                                            {team.name}
-                                        </CardTitle>
-                                        <CardDescription className="text-base">
-                                            {team.description || 'No description provided'}
-                                        </CardDescription>
-                                        <div className="flex flex-wrap gap-3 mt-2">
-                                            {team.branch && (
-                                                <Badge variant="secondary" className="px-3 py-1.5">
-                                                    <Building2 className="h-4 w-4 mr-2" />
-                                                    {team.branch.name}
-                                                    {team.branch.code && ` (${team.branch.code})`}
-                                                </Badge>
-                                            )}
-                                            {team.isActive !== undefined && (
-                                                <Badge
-                                                    variant={team.isActive ? "default" : "secondary"}
-                                                    className="px-3 py-1.5"
-                                                >
-                                                    <Activity className="h-4 w-4 mr-2" />
-                                                    {team.isActive ? 'Active' : 'Inactive'}
-                                                </Badge>
-                                            )}
-                                            {team.createdAt && (
-                                                <Badge variant="outline" className="px-3 py-1.5">
-                                                    <Calendar className="h-4 w-4 mr-2" />
-                                                    Created: {formatDate(team.createdAt)}
-                                                </Badge>
-                                            )}
-                                        </div>
+                        {/* Modern Header - compact toolbar style */}
+                        <Card className="border shadow-sm">
+                            <CardHeader className="space-y-3">
+                                {/* Row 1: Title + channel count + range selector */}
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3">
+                                        <Users className="h-6 w-6 text-primary" />
+                                        <h1 className="text-2xl font-bold tracking-tight">{team.name}</h1>
+                                        <Badge variant="secondary" className="ml-1 gap-1">
+                                            <Dot className="h-4 w-4" />
+                                            {stats.totalChannels} kênh
+                                        </Badge>
+                                        {team.branch && (
+                                            <Badge variant="outline" className="gap-1.5">
+                                                <Building2 className="h-3 w-3" />
+                                                {team.branch.name}
+                                            </Badge>
+                                        )}
                                     </div>
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm text-muted-foreground">Khoảng thời gian:</span>
+                                        <ToggleGroup
+                                            type="single"
+                                            value={dateRange}
+                                            onValueChange={(v) => v && setDateRange(v as '7' | '30' | '90' | '180')}
+                                            variant="outline"
+                                            size="sm"
+                                            spacing={0}
+                                            className="border bg-background shadow-xs"
+                                            aria-label="Chọn khoảng thời gian"
+                                        >
+                                            <ToggleGroupItem value="7" className="px-4 font-semibold">7 ngày</ToggleGroupItem>
+                                            <ToggleGroupItem value="30" className="px-4 font-semibold">30 ngày</ToggleGroupItem>
+                                            <ToggleGroupItem value="90" className="px-4 font-semibold">90 ngày</ToggleGroupItem>
+                                            <ToggleGroupItem value="180" className="px-4 font-semibold">180 ngày</ToggleGroupItem>
+                                        </ToggleGroup>
+                                    </div>
+                                </div>
+
+                                {/* Row 2: Actions + Leader */}
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <ButtonGroup>
+                                        <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
+                                            <RefreshCw className="h-4 w-4" />
+                                            Làm mới
+                                        </Button>
+                                        <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
+                                            <Download className="h-4 w-4" />
+                                            Xuất CSV
+                                        </Button>
+                                        <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2">
+                                            <Printer className="h-4 w-4" />
+                                            In/PDF
+                                        </Button>
+                                    </ButtonGroup>
 
                                     {team.leader && (
-                                        <Card className="min-w-[280px]">
-                                            <CardHeader className="pb-3">
-                                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                                                    <Award className="h-4 w-4" />
-                                                    Team Leader
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="pt-0">
-                                                <div className="flex items-center gap-3">
-                                                    <Avatar className="h-12 w-12">
-                                                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-lg">
-                                                            {team.leader.name?.charAt(0).toUpperCase()}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-semibold text-base truncate">{team.leader.name}</p>
-                                                        <p className="text-sm text-muted-foreground truncate">{team.leader.email}</p>
-                                                        <Badge variant="outline" className="mt-1 text-xs">
-                                                            {team.leader.role}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
+                                        <div className="flex items-center gap-2 text-sm">
+                                            <span className="text-muted-foreground">Trưởng nhóm:</span>
+                                            <span className="font-medium">{team.leader.name}</span>
+                                        </div>
                                     )}
                                 </div>
                             </CardHeader>
                         </Card>
 
-                        {/* Statistics Overview - Main Metrics */}
-                        <Card className="border-0 shadow-md">
-                            <CardHeader>
-                                <CardTitle className="text-xl font-bold flex items-center gap-2">
-                                    <BarChart3 className="h-6 w-6 text-primary" />
-                                    Team Statistics Overview
-                                </CardTitle>
-                                <CardDescription>
-                                    Tổng hợp số liệu từ {stats.totalChannels} kênh YouTube
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                {overviewLoading ? (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                                            <Card key={i}>
-                                                <CardContent className="p-6">
-                                                    <Skeleton className="h-4 w-20 mb-2" />
-                                                    <Skeleton className="h-8 w-16 mb-1" />
-                                                    <Skeleton className="h-3 w-24" />
-                                                </CardContent>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <Tabs defaultValue="overview" className="space-y-4">
-                                        <TabsList className="grid w-full grid-cols-3">
-                                            <TabsTrigger value="overview">Tổng Quan</TabsTrigger>
-                                            {hasEngagement ? (
-                                                <TabsTrigger value="engagement">Tương Tác</TabsTrigger>
-                                            ) : null}
-                                            <TabsTrigger value="performance">Hiệu Suất</TabsTrigger>
-                                        </TabsList>
+                        {/* Khối thống kê tổng quan với các ô màu */}
+                        <OverviewSummary stats={stats} />
 
-                                        <TabsContent value="overview" className="space-y-4">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                <MetricCard
-                                                    icon={Eye}
-                                                    title="Tổng Lượt Xem"
-                                                    value={stats.totalViews.toLocaleString()}
-                                                    subtitle={stats.totalChannels ? `~${Math.round(stats.totalViews / stats.totalChannels).toLocaleString()}/kênh` : undefined}
-                                                    gradient="from-emerald-500 to-teal-600"
-                                                />
-                                                {hasWatchTime ? (
-                                                    <MetricCard
-                                                        icon={Clock}
-                                                        title="Thời Gian Xem"
-                                                        value={`${stats.totalWatchTimeHours.toLocaleString()}h`}
-                                                        subtitle={`${Math.round(stats.totalWatchTimeMinutes).toLocaleString()} phút`}
-                                                        gradient="from-amber-500 to-orange-600"
-                                                    />
-                                                ) : null}
-                                                <MetricCard
-                                                    icon={Users}
-                                                    title="Subscribers Thuần"
-                                                    value={`${stats.subscribersNet >= 0 ? '+' : ''}${stats.subscribersNet.toLocaleString()}`}
-                                                    subtitle={`+${stats.subscribersGained.toLocaleString()} / -${stats.subscribersLost.toLocaleString()}`}
-                                                    gradient="from-pink-500 to-rose-600"
-                                                    trend={stats.subscribersNet >= 0 ? 'up' : 'down'}
-                                                />
-                                                {stats.averageViewDuration ? (
-                                                    <MetricCard
-                                                        icon={Activity}
-                                                        title="Thời Lượng TB"
-                                                        value={`${Math.round(stats.averageViewDuration)}s`}
-                                                        subtitle={`${Math.round(stats.averageViewDuration / 60 * 10) / 10} phút`}
-                                                        gradient="from-sky-500 to-cyan-600"
-                                                    />
-                                                ) : null}
-                                            </div>
-                                        </TabsContent>
-
-                                        {hasEngagement ? (
-                                            <TabsContent value="engagement" className="space-y-4">
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                    <MetricCard
-                                                        icon={ThumbsUp}
-                                                        title="Tổng Likes"
-                                                        value={stats.totalLikes.toLocaleString()}
-                                                        subtitle={stats.totalChannels ? `~${Math.round(stats.totalLikes / stats.totalChannels).toLocaleString()}/kênh` : undefined}
-                                                        gradient="from-green-500 to-emerald-600"
-                                                    />
-                                                    <MetricCard
-                                                        icon={MessageSquare}
-                                                        title="Tổng Comments"
-                                                        value={stats.totalComments.toLocaleString()}
-                                                        subtitle={stats.totalChannels ? `~${Math.round(stats.totalComments / stats.totalChannels).toLocaleString()}/kênh` : undefined}
-                                                        gradient="from-amber-500 to-orange-600"
-                                                    />
-                                                    <MetricCard
-                                                        icon={Share2}
-                                                        title="Tổng Shares"
-                                                        value={stats.totalShares.toLocaleString()}
-                                                        subtitle={stats.totalChannels ? `~${Math.round(stats.totalShares / stats.totalChannels).toLocaleString()}/kênh` : undefined}
-                                                        gradient="from-pink-500 to-rose-600"
-                                                    />
-                                                    <MetricCard
-                                                        icon={Activity}
-                                                        title="Engagement Rate"
-                                                        value={`${stats.engagementRate.toFixed(2)}%`}
-                                                        subtitle="Tỷ lệ tương tác"
-                                                        gradient="from-blue-500 to-indigo-600"
-                                                    />
-                                                </div>
-                                            </TabsContent>
-                                        ) : null}
-
-                                        <TabsContent value="performance" className="space-y-4">
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                <MetricCard
-                                                    icon={User}
-                                                    title="Thành Viên"
-                                                    value={stats.totalMembers.toLocaleString()}
-                                                    subtitle="Team members"
-                                                    gradient="from-blue-500 to-indigo-600"
-                                                />
-                                                <MetricCard
-                                                    icon={Youtube}
-                                                    title="Kênh YouTube"
-                                                    value={stats.totalChannels.toLocaleString()}
-                                                    subtitle="Active channels"
-                                                    gradient="from-red-500 to-pink-600"
-                                                />
-                                                <MetricCard
-                                                    icon={Video}
-                                                    title="Tổng Videos"
-                                                    value={stats.totalVideos.toLocaleString()}
-                                                    subtitle={stats.totalChannels ? `~${Math.round(stats.totalVideos / stats.totalChannels).toLocaleString()}/kênh` : undefined}
-                                                    gradient="from-purple-500 to-violet-600"
-                                                />
-                                                <MetricCard
-                                                    icon={Users}
-                                                    title="Total Subscribers"
-                                                    value={stats.totalSubscribers.toLocaleString()}
-                                                    subtitle={stats.totalChannels ? `~${Math.round(stats.totalSubscribers / stats.totalChannels).toLocaleString()}/kênh` : undefined}
-                                                    gradient="from-emerald-500 to-teal-600"
-                                                />
-                                            </div>
-                                        </TabsContent>
-                                    </Tabs>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Tabs for detailed information */}
+                        {/* Tabs chi tiết */}
                         <Tabs defaultValue="members" className="space-y-6">
                             <TabsList className="inline-flex h-auto w-full items-center justify-start rounded-lg bg-muted p-1 gap-1">
                                 <TabsTrigger
@@ -529,7 +615,7 @@ export default function TeamDetailPage() {
                                     className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                                 >
                                     <User className="h-4 w-4 mr-2" />
-                                    Members ({team.members?.length || 0})
+                                    Thành viên ({team.members?.length || 0})
                                 </TabsTrigger>
 
                                 <TabsTrigger
@@ -537,7 +623,7 @@ export default function TeamDetailPage() {
                                     className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                                 >
                                     <Youtube className="h-4 w-4 mr-2" />
-                                    Channels ({team.channels?.length || 0})
+                                    Kênh ({team.channels?.length || 0})
                                 </TabsTrigger>
 
                                 {overview?.channelAssignments && overview.channelAssignments.length > 0 && (
@@ -546,7 +632,7 @@ export default function TeamDetailPage() {
                                         className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                                     >
                                         <UserCircle className="h-4 w-4 mr-2" />
-                                        Assignments
+                                        Phân công
                                     </TabsTrigger>
                                 )}
 
@@ -556,7 +642,17 @@ export default function TeamDetailPage() {
                                         className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                                     >
                                         <Video className="h-4 w-4 mr-2" />
-                                        Recent Videos
+                                        Video gần đây
+                                    </TabsTrigger>
+                                )}
+
+                                {ytData?.channelAnalytics && ytData.channelAnalytics.length > 0 && (
+                                    <TabsTrigger
+                                        value="analytics"
+                                        className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                                    >
+                                        <BarChart3 className="h-4 w-4 mr-2" />
+                                        Phân tích theo kênh
                                     </TabsTrigger>
                                 )}
 
@@ -565,7 +661,7 @@ export default function TeamDetailPage() {
                                     className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                                 >
                                     <BarChart3 className="h-4 w-4 mr-2" />
-                                    Details
+                                    Chi tiết
                                 </TabsTrigger>
                             </TabsList>
 
@@ -575,10 +671,10 @@ export default function TeamDetailPage() {
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2">
                                             <User className="h-5 w-5" />
-                                            Team Members
+                                            Thành viên đội
                                         </CardTitle>
                                         <CardDescription>
-                                            All members in this team
+                                            Tất cả thành viên trong đội
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent>
@@ -587,10 +683,10 @@ export default function TeamDetailPage() {
                                                 <Table>
                                                     <TableHeader>
                                                         <TableRow className="bg-muted/50">
-                                                            <TableHead className="font-semibold">Member</TableHead>
+                                                            <TableHead className="font-semibold">Thành viên</TableHead>
                                                             <TableHead className="font-semibold">Email</TableHead>
-                                                            <TableHead className="font-semibold">Role</TableHead>
-                                                            <TableHead className="font-semibold text-right">Status</TableHead>
+                                                            <TableHead className="font-semibold">Vai trò</TableHead>
+                                                            <TableHead className="font-semibold text-right">Trạng thái</TableHead>
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
@@ -599,7 +695,7 @@ export default function TeamDetailPage() {
                                                                 <TableCell>
                                                                     <div className="flex items-center gap-3">
                                                                         <Avatar>
-                                                                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                                                                            <AvatarFallback className="bg-linear-to-br from-blue-500 to-indigo-600 text-white">
                                                                                 {member.name?.charAt(0).toUpperCase()}
                                                                             </AvatarFallback>
                                                                         </Avatar>
@@ -618,7 +714,7 @@ export default function TeamDetailPage() {
                                                                     {team.leader?._id === member._id && (
                                                                         <Badge className="bg-amber-500 hover:bg-amber-600">
                                                                             <Award className="h-3 w-3 mr-1" />
-                                                                            Leader
+                                                                            Trưởng nhóm
                                                                         </Badge>
                                                                     )}
                                                                 </TableCell>
@@ -630,8 +726,8 @@ export default function TeamDetailPage() {
                                         ) : (
                                             <EmptyState
                                                 icon={User}
-                                                title="No members"
-                                                description="This team doesn't have any members yet"
+                                                title="Chưa có thành viên"
+                                                description="Đội này chưa có thành viên"
                                             />
                                         )}
                                     </CardContent>
@@ -644,10 +740,10 @@ export default function TeamDetailPage() {
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2">
                                             <Youtube className="h-5 w-5" />
-                                            YouTube Channels
+                                            Kênh YouTube
                                         </CardTitle>
                                         <CardDescription>
-                                            All channels managed by this team
+                                            Tất cả kênh do đội quản lý
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent>
@@ -657,7 +753,7 @@ export default function TeamDetailPage() {
                                                     <Card key={channel._id} className="border-2 hover:border-primary transition-colors">
                                                         <CardContent className="p-6">
                                                             <div className="flex items-start gap-4">
-                                                                <div className="flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-red-500 to-pink-600 shrink-0">
+                                                                <div className="flex items-center justify-center h-14 w-14 rounded-full bg-linear-to-br from-red-500 to-pink-600 shrink-0">
                                                                     <Youtube className="h-7 w-7 text-white" />
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
@@ -675,7 +771,7 @@ export default function TeamDetailPage() {
                                                                             </span>
                                                                         </div>
                                                                         <Badge variant={channel.isConnected ? "default" : "secondary"}>
-                                                                            {channel.isConnected ? '✓ Connected' : 'Offline'}
+                                                                            {channel.isConnected ? '✓ Đã kết nối' : 'Ngoại tuyến'}
                                                                         </Badge>
                                                                     </div>
                                                                 </div>
@@ -687,8 +783,8 @@ export default function TeamDetailPage() {
                                         ) : (
                                             <EmptyState
                                                 icon={Youtube}
-                                                title="No channels"
-                                                description="This team doesn't have any YouTube channels yet"
+                                                title="Chưa có kênh"
+                                                description="Đội này chưa có kênh YouTube"
                                             />
                                         )}
                                     </CardContent>
@@ -696,131 +792,311 @@ export default function TeamDetailPage() {
                             </TabsContent>
 
                             {/* Channel Assignments Tab */}
-                            {overview?.channelAssignments && overview.channelAssignments.length > 0 && (
-                                <TabsContent value="assignments" className="space-y-4">
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <UserCircle className="h-5 w-5" />
-                                                Channel Assignments
-                                            </CardTitle>
-                                            <CardDescription>
-                                                Editor assignments for each channel
-                                            </CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="space-y-4">
-                                                {overview.channelAssignments.map((assignment) => (
-                                                    <Card key={assignment.channelId} className="border-2">
-                                                        <CardHeader className="pb-3">
-                                                            <div className="flex items-center justify-between">
+                            {
+                                overview?.channelAssignments && overview.channelAssignments.length > 0 && (
+                                    <TabsContent value="assignments" className="space-y-4">
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle className="flex items-center gap-2">
+                                                    <UserCircle className="h-5 w-5" />
+                                                    Phân công kênh
+                                                </CardTitle>
+                                                <CardDescription>
+                                                    Phân công biên tập cho từng kênh
+                                                </CardDescription>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="space-y-4">
+                                                    {overview.channelAssignments.map((assignment) => (
+                                                        <Card key={assignment.channelId} className="border-2">
+                                                            <CardHeader className="pb-3">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-red-100">
+                                                                            <Youtube className="h-5 w-5 text-red-600" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <CardTitle className="text-base">{assignment.channelName}</CardTitle>
+                                                                            <CardDescription className="text-xs">
+                                                                                {assignment.editorsAssigned} biên tập được phân công
+                                                                            </CardDescription>
+                                                                        </div>
+                                                                    </div>
+                                                                    <Badge variant="secondary" className="text-xs">
+                                                                        {assignment.editorsAssigned} Biên tập
+                                                                    </Badge>
+                                                                </div>
+                                                            </CardHeader>
+                                                            <CardContent>
+                                                                {assignment.editors && assignment.editors.length > 0 ? (
+                                                                    <div className="space-y-2">
+                                                                        {assignment.editors.map((editor) => (
+                                                                            <div
+                                                                                key={editor.userId}
+                                                                                className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                                                                            >
+                                                                                <div className="flex items-center gap-3">
+                                                                                    <Avatar className="h-8 w-8">
+                                                                                        <AvatarFallback className="bg-linear-to-br from-blue-500 to-indigo-600 text-white text-xs">
+                                                                                            {editor.userName.charAt(0).toUpperCase()}
+                                                                                        </AvatarFallback>
+                                                                                    </Avatar>
+                                                                                    <div>
+                                                                                        <p className="font-medium text-sm">{editor.userName}</p>
+                                                                                        <p className="text-xs text-muted-foreground">{editor.email}</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="text-xs text-muted-foreground">
+                                                                                    {formatDate(editor.assignedAt)}
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                ) : (
+                                                                    <p className="text-sm text-muted-foreground text-center py-4">
+                                                                        Chưa phân công biên tập
+                                                                    </p>
+                                                                )}
+                                                            </CardContent>
+                                                        </Card>
+                                                    ))}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </TabsContent>
+                                )
+                            }
+
+                            {/* Recent Videos Tab */}
+                            {
+                                overview?.recentVideos && overview.recentVideos.length > 0 && (
+                                    <TabsContent value="videos" className="space-y-4">
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle className="flex items-center gap-2">
+                                                    <Video className="h-5 w-5" />
+                                                    Video gần đây
+                                                </CardTitle>
+                                                <CardDescription>
+                                                    Các video mới nhất từ các kênh của đội
+                                                </CardDescription>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="space-y-3">
+                                                    {overview.recentVideos.map((video) => (
+                                                        <div
+                                                            key={video._id}
+                                                            className="flex items-start gap-4 p-4 border rounded-lg hover:bg-accent transition-colors"
+                                                        >
+                                                            <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-red-100 shrink-0">
+                                                                <Video className="h-6 w-6 text-red-600" />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h4 className="font-medium mb-1 line-clamp-2">
+                                                                    {video.title}
+                                                                </h4>
+                                                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                                                    <Badge variant="outline" className="text-xs">
+                                                                        {video.status}
+                                                                    </Badge>
+                                                                    {video.channel && (
+                                                                        <span className="flex items-center gap-1">
+                                                                            <Youtube className="h-3 w-3" />
+                                                                            {video.channel.name}
+                                                                        </span>
+                                                                    )}
+                                                                    {video.createdAt && (
+                                                                        <span className="flex items-center gap-1">
+                                                                            <Clock className="h-3 w-3" />
+                                                                            {formatDate(video.createdAt)}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </TabsContent>
+                                )
+                            }
+
+                            {/* Analytics by Channel Tab - Thống kê từ YouTube API */}
+                            {
+                                ytData?.channelAnalytics && ytData.channelAnalytics.length > 0 && (
+                                    <TabsContent value="analytics" className="space-y-4">
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle className="flex items-center gap-2">
+                                                    <BarChart3 className="h-5 w-5" />
+                                                    Phân tích YouTube theo kênh
+                                                </CardTitle>
+                                                <CardDescription>
+                                                    Dữ liệu thống kê từ YouTube API ({ytData.dateRange?.startDate} - {ytData.dateRange?.endDate})
+                                                </CardDescription>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="space-y-4">
+                                                    {ytData.channelAnalytics.map((item: ChannelAnalyticsItem) => (
+                                                        <Card key={item.channelId} className="border-2">
+                                                            <CardHeader className="pb-3">
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-red-100">
+                                                                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-red-100 shrink-0">
                                                                         <Youtube className="h-5 w-5 text-red-600" />
                                                                     </div>
-                                                                    <div>
-                                                                        <CardTitle className="text-base">{assignment.channelName}</CardTitle>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <CardTitle className="text-lg">{item.channelName}</CardTitle>
                                                                         <CardDescription className="text-xs">
-                                                                            {assignment.editorsAssigned} editor(s) assigned
+                                                                            ID: {item.channelId}
                                                                         </CardDescription>
                                                                     </div>
                                                                 </div>
-                                                                <Badge variant="secondary" className="text-xs">
-                                                                    {assignment.editorsAssigned} Editor{assignment.editorsAssigned !== 1 ? 's' : ''}
-                                                                </Badge>
-                                                            </div>
+                                                            </CardHeader>
+                                                            <CardContent>
+                                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                            <Eye className="h-4 w-4" />
+                                                                            Lượt xem
+                                                                        </div>
+                                                                        <p className="text-2xl font-bold">{(item.basic?.totals?.totalViews || 0).toLocaleString()}</p>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                            <Clock className="h-4 w-4" />
+                                                                            Thời gian xem
+                                                                        </div>
+                                                                        <p className="text-2xl font-bold">
+                                                                            {(item.basic?.totals?.totalWatchTimeHours || 0).toLocaleString()}h
+                                                                        </p>
+                                                                        <p className="text-xs text-muted-foreground">
+                                                                            {(item.basic?.totals?.totalWatchTimeMinutes || 0).toLocaleString()} phút
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                            <ThumbsUp className="h-4 w-4" />
+                                                                            Lượt thích
+                                                                        </div>
+                                                                        <p className="text-2xl font-bold">{(item.engagement?.totals?.totalLikes || 0).toLocaleString()}</p>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                            <MessageSquare className="h-4 w-4" />
+                                                                            Bình luận
+                                                                        </div>
+                                                                        <p className="text-2xl font-bold">{(item.engagement?.totals?.totalComments || 0).toLocaleString()}</p>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                            <Share2 className="h-4 w-4" />
+                                                                            Chia sẻ
+                                                                        </div>
+                                                                        <p className="text-2xl font-bold">{(item.engagement?.totals?.totalShares || 0).toLocaleString()}</p>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                            <TrendingUp className="h-4 w-4 text-green-600" />
+                                                                            Subscriber tăng
+                                                                        </div>
+                                                                        <p className="text-2xl font-bold text-green-600">
+                                                                            +{(item.basic?.totals?.totalSubscribersGained || 0).toLocaleString()}
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                            <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
+                                                                            Subscriber giảm
+                                                                        </div>
+                                                                        <p className="text-2xl font-bold text-red-600">
+                                                                            -{(item.basic?.totals?.totalSubscribersLost || 0).toLocaleString()}
+                                                                        </p>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                            <Activity className="h-4 w-4" />
+                                                                            Thời lượng xem TB
+                                                                        </div>
+                                                                        <p className="text-2xl font-bold">
+                                                                            {Math.round(item.basic?.totals?.averageViewDuration || 0)}s
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </CardContent>
+                                                        </Card>
+                                                    ))}
+                                                </div>
+
+                                                {/* Summary Card */}
+                                                {ytData?.basic && ytData?.engagement && (
+                                                    <Card className="mt-6 border-2 border-primary/20 bg-primary/5">
+                                                        <CardHeader>
+                                                            <CardTitle className="flex items-center gap-2">
+                                                                <Award className="h-5 w-5 text-primary" />
+                                                                Tổng Hợp Toàn Team
+                                                            </CardTitle>
                                                         </CardHeader>
                                                         <CardContent>
-                                                            {assignment.editors && assignment.editors.length > 0 ? (
-                                                                <div className="space-y-2">
-                                                                    {assignment.editors.map((editor) => (
-                                                                        <div
-                                                                            key={editor.userId}
-                                                                            className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                                                                        >
-                                                                            <div className="flex items-center gap-3">
-                                                                                <Avatar className="h-8 w-8">
-                                                                                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xs">
-                                                                                        {editor.userName.charAt(0).toUpperCase()}
-                                                                                    </AvatarFallback>
-                                                                                </Avatar>
-                                                                                <div>
-                                                                                    <p className="font-medium text-sm">{editor.userName}</p>
-                                                                                    <p className="text-xs text-muted-foreground">{editor.email}</p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="text-xs text-muted-foreground">
-                                                                                {formatDate(editor.assignedAt)}
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
+                                                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                        <Eye className="h-4 w-4" />
+                                                                        Tổng lượt xem
+                                                                    </div>
+                                                                    <p className="text-3xl font-bold text-primary">
+                                                                        {(ytData.basic.totals.totalViews || 0).toLocaleString()}
+                                                                    </p>
                                                                 </div>
-                                                            ) : (
-                                                                <p className="text-sm text-muted-foreground text-center py-4">
-                                                                    No editors assigned
-                                                                </p>
-                                                            )}
+                                                                <div className="space-y-1">
+                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                        <Clock className="h-4 w-4" />
+                                                                        Thời gian xem
+                                                                    </div>
+                                                                    <p className="text-3xl font-bold text-primary">
+                                                                        {(ytData.basic.totals.totalWatchTimeHours || 0).toLocaleString()}h
+                                                                    </p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                        <ThumbsUp className="h-4 w-4" />
+                                                                        Tổng lượt thích
+                                                                    </div>
+                                                                    <p className="text-3xl font-bold text-primary">
+                                                                        {(ytData.engagement.totals.totalLikes || 0).toLocaleString()}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                        <TrendingUp className="h-4 w-4 text-green-600" />
+                                                                        Subscribers thuần
+                                                                    </div>
+                                                                    <p className={cn(
+                                                                        "text-3xl font-bold",
+                                                                        (ytData.basic.totals.totalSubscribersNet || 0) > 0 ? "text-green-600" : "text-red-600"
+                                                                    )}>
+                                                                        {(ytData.basic.totals.totalSubscribersNet || 0) > 0 ? '+' : ''}
+                                                                        {(ytData.basic.totals.totalSubscribersNet || 0).toLocaleString()}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                        <Activity className="h-4 w-4" />
+                                                                        Tỷ lệ tương tác
+                                                                    </div>
+                                                                    <p className="text-3xl font-bold text-primary">
+                                                                        {(ytData.engagement.totals.engagementRate || 0).toFixed(2)}%
+                                                                    </p>
+                                                                </div>
+                                                            </div>
                                                         </CardContent>
                                                     </Card>
-                                                ))}
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </TabsContent>
-                            )}
-
-                            {/* Recent Videos Tab */}
-                            {overview?.recentVideos && overview.recentVideos.length > 0 && (
-                                <TabsContent value="videos" className="space-y-4">
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <Video className="h-5 w-5" />
-                                                Recent Videos
-                                            </CardTitle>
-                                            <CardDescription>
-                                                Latest videos from team channels
-                                            </CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="space-y-3">
-                                                {overview.recentVideos.map((video) => (
-                                                    <div
-                                                        key={video._id}
-                                                        className="flex items-start gap-4 p-4 border rounded-lg hover:bg-accent transition-colors"
-                                                    >
-                                                        <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-red-100 shrink-0">
-                                                            <Video className="h-6 w-6 text-red-600" />
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <h4 className="font-medium mb-1 line-clamp-2">
-                                                                {video.title}
-                                                            </h4>
-                                                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                                                <Badge variant="outline" className="text-xs">
-                                                                    {video.status}
-                                                                </Badge>
-                                                                {video.channel && (
-                                                                    <span className="flex items-center gap-1">
-                                                                        <Youtube className="h-3 w-3" />
-                                                                        {video.channel.name}
-                                                                    </span>
-                                                                )}
-                                                                {video.createdAt && (
-                                                                    <span className="flex items-center gap-1">
-                                                                        <Clock className="h-3 w-3" />
-                                                                        {formatDate(video.createdAt)}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </TabsContent>
-                            )}
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    </TabsContent>
+                                )
+                            }
 
                             {/* Details Tab - Chi tiết tổng hợp */}
                             <TabsContent value="details" className="space-y-4">
@@ -889,26 +1165,26 @@ export default function TeamDetailPage() {
                                                     />
                                                     <MetricRow
                                                         icon={ThumbsUp}
-                                                        label="Likes"
+                                                        label="Lượt thích"
                                                         total={stats.totalLikes}
                                                         avg={stats.totalChannels ? Math.round(stats.totalLikes / stats.totalChannels) : 0}
                                                     />
                                                     <MetricRow
                                                         icon={MessageSquare}
-                                                        label="Comments"
+                                                        label="Bình luận"
                                                         total={stats.totalComments}
                                                         avg={stats.totalChannels ? Math.round(stats.totalComments / stats.totalChannels) : 0}
                                                     />
                                                     <MetricRow
                                                         icon={Share2}
-                                                        label="Shares"
+                                                        label="Chia sẻ"
                                                         total={stats.totalShares}
                                                         avg={stats.totalChannels ? Math.round(stats.totalShares / stats.totalChannels) : 0}
                                                     />
                                                     <TableRow className="bg-primary/5 font-medium">
                                                         <TableCell className="flex items-center gap-2">
                                                             <Activity className="h-4 w-4 text-primary" />
-                                                            Engagement Rate
+                                                            Tỷ lệ tương tác
                                                         </TableCell>
                                                         <TableCell className="text-right font-semibold">
                                                             {stats.engagementRate.toFixed(2)}%
@@ -926,39 +1202,39 @@ export default function TeamDetailPage() {
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2">
                                             <Users className="h-5 w-5" />
-                                            Team Information
+                                            Thông tin đội
                                         </CardTitle>
                                         <CardDescription>
-                                            Complete information about this team
+                                            Thông tin đầy đủ về đội
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="rounded-md border">
                                             <Table>
                                                 <TableBody>
-                                                    <DetailRow label="Team ID" value={team._id} icon={BarChart3} />
-                                                    <DetailRow label="Team Name" value={team.name} icon={Users} />
-                                                    <DetailRow label="Description" value={team.description || 'N/A'} icon={MessageSquare} />
+                                                    <DetailRow label="Mã đội" value={team._id} icon={BarChart3} />
+                                                    <DetailRow label="Tên đội" value={team.name} icon={Users} />
+                                                    <DetailRow label="Mô tả" value={team.description || 'Không có'} icon={MessageSquare} />
                                                     <DetailRow
-                                                        label="Branch"
-                                                        value={team.branch ? `${team.branch.name}${team.branch.code ? ` (${team.branch.code})` : ''}` : 'N/A'}
+                                                        label="Chi nhánh"
+                                                        value={team.branch ? `${team.branch.name}${team.branch.code ? ` (${team.branch.code})` : ''}` : 'Không có'}
                                                         icon={Building2}
                                                     />
                                                     <DetailRow
-                                                        label="Leader"
-                                                        value={team.leader ? `${team.leader.name} (${team.leader.email})` : 'Not assigned'}
+                                                        label="Trưởng nhóm"
+                                                        value={team.leader ? `${team.leader.name} (${team.leader.email})` : 'Chưa phân công'}
                                                         icon={UserCircle}
                                                     />
                                                     <DetailRow
-                                                        label="Status"
-                                                        value={team.isActive ? 'Active' : 'Inactive'}
+                                                        label="Trạng thái"
+                                                        value={team.isActive ? 'Hoạt động' : 'Không hoạt động'}
                                                         icon={Activity}
                                                         highlight={team.isActive}
                                                     />
-                                                    <DetailRow label="Created At" value={formatDate(team.createdAt)} icon={Calendar} />
-                                                    <DetailRow label="Updated At" value={formatDate(team.updatedAt)} icon={Clock} />
-                                                    <DetailRow label="Total Members" value={team.members?.length || 0} icon={User} />
-                                                    <DetailRow label="Total Channels" value={team.channels?.length || 0} icon={Youtube} />
+                                                    <DetailRow label="Ngày tạo" value={formatDate(team.createdAt)} icon={Calendar} />
+                                                    <DetailRow label="Ngày cập nhật" value={formatDate(team.updatedAt)} icon={Clock} />
+                                                    <DetailRow label="Tổng thành viên" value={team.members?.length || 0} icon={User} />
+                                                    <DetailRow label="Tổng kênh" value={team.channels?.length || 0} icon={Youtube} />
                                                 </TableBody>
                                             </Table>
                                         </div>
@@ -981,28 +1257,28 @@ export default function TeamDetailPage() {
                                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                                 <AverageCard
                                                     icon={Eye}
-                                                    title="Views/Kênh"
+                                                    title="Lượt xem/Kênh"
                                                     value={Math.round(stats.totalViews / stats.totalChannels).toLocaleString()}
                                                     color="text-emerald-600"
                                                     bgColor="bg-emerald-50 dark:bg-emerald-950"
                                                 />
                                                 <AverageCard
                                                     icon={Clock}
-                                                    title="Watch Time/Kênh"
+                                                    title="Thời gian xem/Kênh"
                                                     value={`${Math.round(stats.totalWatchTimeHours / stats.totalChannels)}h`}
                                                     color="text-rose-600"
                                                     bgColor="bg-rose-50 dark:bg-rose-950"
                                                 />
                                                 <AverageCard
                                                     icon={Users}
-                                                    title="Subs Net/Kênh"
+                                                    title="Subscribers thuần/Kênh"
                                                     value={Math.round(stats.subscribersNet / stats.totalChannels).toLocaleString()}
                                                     color="text-sky-600"
                                                     bgColor="bg-sky-50 dark:bg-sky-950"
                                                 />
                                                 <AverageCard
                                                     icon={Activity}
-                                                    title="Engagement Rate"
+                                                    title="Tỷ lệ tương tác"
                                                     value={`${stats.engagementRate.toFixed(2)}%`}
                                                     color="text-indigo-600"
                                                     bgColor="bg-indigo-50 dark:bg-indigo-950"
@@ -1012,54 +1288,15 @@ export default function TeamDetailPage() {
                                     </Card>
                                 )}
                             </TabsContent>
-                        </Tabs>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        </Tabs >
+                    </div >
+                </div >
+            </div >
+        </div >
     )
 }
 
-// Metric Card Component (similar to AggregateDashboard)
-function MetricCard({
-    icon: Icon,
-    title,
-    value,
-    subtitle,
-    gradient,
-    trend
-}: {
-    icon: React.ComponentType<{ className?: string }>
-    title: string
-    value: string
-    subtitle?: string
-    gradient: string
-    trend?: 'up' | 'down'
-}) {
-    return (
-        <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-90", gradient)} />
-            <CardContent className="relative p-6 text-white">
-                <div className="flex items-start justify-between mb-3">
-                    <Icon className="h-6 w-6 opacity-80" />
-                    {trend && (
-                        <TrendingUp className={cn(
-                            "h-4 w-4",
-                            trend === 'down' && "rotate-180"
-                        )} />
-                    )}
-                </div>
-                <div className="space-y-1">
-                    <p className="text-sm font-medium opacity-90">{title}</p>
-                    <p className="text-3xl font-bold tracking-tight">{value}</p>
-                    {subtitle && (
-                        <p className="text-xs opacity-75">{subtitle}</p>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
+// Metric Card đã tách sang components/MetricCard (không dùng trực tiếp tại đây)
 
 // Metric Row Component for Statistics Table
 function MetricRow({
@@ -1105,71 +1342,12 @@ function MetricRow({
 }
 
 // Detail Row Component for Details Tab
-function DetailRow({
-    icon: Icon,
-    label,
-    value,
-    highlight = false
-}: {
-    icon: React.ComponentType<{ className?: string }>
-    label: string
-    value: string | number
-    highlight?: boolean
-}) {
-    return (
-        <TableRow className={cn(
-            "hover:bg-muted/50",
-            highlight && "bg-green-50 dark:bg-green-950"
-        )}>
-            <TableCell className="font-medium">
-                <div className="flex items-center gap-2">
-                    <Icon className={cn(
-                        "h-4 w-4",
-                        highlight ? "text-green-600" : "text-muted-foreground"
-                    )} />
-                    {label}
-                </div>
-            </TableCell>
-            <TableCell className={cn(
-                "text-right",
-                highlight && "font-semibold text-green-700 dark:text-green-400"
-            )}>
-                {value}
-            </TableCell>
-        </TableRow>
-    )
-}
+// Moved to components/DetailRow
+import { DetailRow } from "./components/DetailRow"
 
 // Average Card Component
-function AverageCard({
-    icon: Icon,
-    title,
-    value,
-    color,
-    bgColor
-}: {
-    icon: React.ComponentType<{ className?: string }>
-    title: string
-    value: string
-    color: string
-    bgColor: string
-}) {
-    return (
-        <Card className="border-2">
-            <CardContent className={cn("p-6", bgColor)}>
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
-                        <Icon className={cn("h-5 w-5", color)} />
-                    </div>
-                </div>
-                <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">{title}</p>
-                    <p className={cn("text-3xl font-bold", color)}>{value}</p>
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
+// Moved to components/AverageCard
+import { AverageCard } from "./components/AverageCard"
 
 // Empty State Component
 function EmptyState({
