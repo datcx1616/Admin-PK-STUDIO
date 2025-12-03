@@ -27,8 +27,8 @@ import ChannelAnalyticsPage from "@/dashboard/ChannelAnalyticsPage";
 
 //
 import HomePage from "@/pages/HomePage"
-import BranchDetailPagee from "@/pages/BranchDetailPage"
-import TeamDetailPagee from "@/pages/TeamDetailPage"
+import BranchDetailPageEnhanced from "@/pages/brand_chi_nhanh/BranchDetailPageEnhanced"
+import TeamDetailPagee from "@/pages/teams_chi_nhanh/TeamDetailPage"
 
 import './i18n';
 import "./style/App.css";
@@ -239,7 +239,7 @@ export default function App() {
         element={
           <PrivateRoute>
             <AdminLayout>
-              <BranchDetailPagee />
+              <BranchDetailPageEnhanced />
             </AdminLayout>
           </PrivateRoute>
         }
