@@ -29,7 +29,7 @@ export default function BranchDetailPage() {
 
                 <div className="flex flex-1 overflow-hidden">
                     {/* Channel Sidebar Skeleton */}
-                    <div className="w-72 border-r bg-background">
+                    <div className="w-[480px] border-r bg-background">
                         <div className="p-4 border-b">
                             <Skeleton className="h-5 w-32 mb-2" />
                             <Skeleton className="h-3 w-20" />

@@ -1,3 +1,9 @@
+// src/pages/components/ChannelSidebar.tsx
+/**
+ * Sidebar component to display list of channels from Branch or Team
+ * Fetches channels from API based on branchId or teamId
+ * Clicking a channel shows detailed information in a dialog
+ */
 
 import * as React from "react"
 import { ChevronRight, ChevronLeft, Menu, Youtube, Users, Eye, TrendingUp, ExternalLink } from "lucide-react"
@@ -44,20 +50,56 @@ export function ChannelSidebar({
                 let data: Channel[] = []
 
                 if (teamId) {
-                    console.log('🔄 Fetching channels for team:', teamId)
+                    console.log('🔄 [ChannelSidebar] Fetching channels for TEAM:', teamId)
+
+                    // Try API first
                     data = await channelsAPI.getByTeam(teamId)
+
+                    console.log('📦 [ChannelSidebar] API Response:', data)
+                    console.log('📊 [ChannelSidebar] Total channels returned:', data.length)
+
+                    // Debug: Check if channels have team property
+                    if (data.length > 0) {
+                        console.log('🔍 [ChannelSidebar] Sample channel:', data[0])
+                        console.log('🔍 [ChannelSidebar] Sample channel.team:', data[0].team)
+                    }
+
+                    // FALLBACK: If API returns all channels, filter manually by teamId
+                    const filteredData = data.filter(channel => {
+                        const channelTeamId = typeof channel.team === 'string'
+                            ? channel.team
+                            : channel.team?._id
+
+                        const matches = channelTeamId === teamId
+
+                        if (!matches && data.length > 5) {
+                            console.log('⚠️ [ChannelSidebar] Channel filtered out:', channel.name, 'teamId:', channelTeamId)
+                        }
+
+                        return matches
+                    })
+
+                    if (filteredData.length !== data.length) {
+                        console.log('⚠️ [ChannelSidebar] API returned wrong data! Filtered manually.')
+                        console.log(`📉 [ChannelSidebar] Original: ${data.length} → Filtered: ${filteredData.length}`)
+                        data = filteredData
+                    }
+
+                    console.log('✅ [ChannelSidebar] Final channels for team:', data.length)
+
                 } else if (branchId) {
-                    console.log('🔄 Fetching channels for branch:', branchId)
+                    console.log('🔄 [ChannelSidebar] Fetching channels for BRANCH:', branchId)
                     data = await channelsAPI.getByBranch(branchId)
+                    console.log('✅ [ChannelSidebar] Fetched channels for branch:', data.length)
                 } else {
-                    console.log('🔄 Fetching all channels')
+                    console.log('🔄 [ChannelSidebar] Fetching ALL channels')
                     data = await channelsAPI.getAll()
+                    console.log('✅ [ChannelSidebar] Fetched all channels:', data.length)
                 }
 
-                console.log('✅ Fetched channels:', data)
                 setChannels(data)
             } catch (error) {
-                console.error('❌ Error fetching channels:', error)
+                console.error('❌ [ChannelSidebar] Error fetching channels:', error)
                 toast.error('Failed to load channels')
             } finally {
                 setLoading(false)
@@ -141,11 +183,11 @@ export function ChannelSidebar({
                         ? cn(
                             "fixed top-0 h-full bg-background transition-all duration-300 ease-in-out z-40",
                             side === "right" ? "right-0 border-l" : "left-0 border-r",
-                            isOpen ? "w-96" : "w-0"
+                            isOpen ? "w-[300px]" : "w-0"
                         )
                         : cn(
                             "sticky top-0 h-[calc(100vh-0px)] transition-all duration-300 ease-in-out overflow-hidden",
-                            isOpen ? "bg-background w-96" : "bg-transparent w-8",
+                            isOpen ? "bg-background w-[300px]" : "bg-transparent w-8",
                             isOpen
                                 ? side === "right" ? "border-l bg-background" : "border-r bg-background"
                                 : "border-transparent"
@@ -156,19 +198,26 @@ export function ChannelSidebar({
                 <div className="flex flex-col h-full">
                     {/* Header */}
                     {isOpen ? (
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b">
-                            <div className="space-y-0.5">
-                                <h3 className="text-gray-900 font-semibold text-xs tracking-wide">Danh sách kênh</h3>
-                                <p className="text-[11px] text-muted-foreground">
+                        <div className="flex items-center justify-between px-5 py-3 border-b">
+                            <div>
+                                <h3 className="text-gray-900 font-bold text-sm">Danh sách kênh</h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">
                                     {loading ? 'Đang tải...' : `${channels.length} kênh`}
                                     {selectedIds.size > 0 && (
-                                        <span className="ml-2 text-green-600 font-medium">({selectedIds.size} đã chọn)</span>
+                                        <span className="ml-2 text-blue-600 font-medium">({selectedIds.size} đã chọn)</span>
                                     )}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
                                 {selectedIds.size > 0 && (
-                                    <Button variant="outline" size="sm" onClick={clearSelection} className="h-7 px-2 text-[11px]">Clear</Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={clearSelection}
+                                        className="h-7 px-2 text-xs"
+                                    >
+                                        Clear
+                                    </Button>
                                 )}
                                 <Button
                                     variant="ghost"
@@ -233,39 +282,39 @@ export function ChannelSidebar({
                                             onClick={() => handleChannelClick(channel)}
                                             onKeyDown={(e) => { if (e.key === 'Enter') handleChannelClick(channel) }}
                                             className={cn(
-                                                "w-full p-2 rounded-md border bg-card hover:bg-accent/60 transition-all text-left flex flex-col gap-1 focus:outline-none",
-                                                isSelected && "ring-1 ring-green-500/50"
+                                                "w-full p-1.5 rounded border bg-card hover:bg-accent/60 transition-all text-left flex flex-col gap-0.5 focus:outline-none cursor-pointer",
+                                                isSelected && "ring-1 ring-blue-500/50 bg-blue-50/30"
                                             )}
                                         >
-                                            <div className="flex items-start gap-2">
+                                            <div className="flex items-start gap-1.5">
                                                 <Checkbox
                                                     checked={isSelected}
                                                     onCheckedChange={(checked) => toggleSelect(channel._id, !!checked)}
                                                     onClick={(e) => e.stopPropagation()}
-                                                    className="mt-1"
+                                                    className="mt-0.5"
                                                 />
-                                                <Avatar className="h-8 w-8 shrink-0">
+                                                <Avatar className="h-7 w-7 shrink-0">
                                                     <AvatarImage src={channel.thumbnailUrl} alt={channel.name} />
                                                     <AvatarFallback className="bg-red-100 text-red-700">
                                                         <Youtube className="h-4 w-4" />
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex items-start justify-between gap-2 mb-0.5">
-                                                        <h4 className="font-medium text-xs truncate leading-4">
+                                                    <div className="flex items-start justify-between gap-1.5 mb-0">
+                                                        <h4 className="font-medium text-xs truncate leading-tight">
                                                             {channel.name}
                                                         </h4>
                                                         {channel.isConnected ? (
-                                                            <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200 shrink-0">
+                                                            <Badge variant="outline" className="text-[9px] py-0 h-4 bg-green-50 text-green-700 border-green-200 shrink-0">
                                                                 Connected
                                                             </Badge>
                                                         ) : (
-                                                            <Badge variant="outline" className="text-[10px] bg-gray-50 text-gray-700 border-gray-200 shrink-0">
+                                                            <Badge variant="outline" className="text-[9px] py-0 h-4 bg-gray-50 text-gray-700 border-gray-200 shrink-0">
                                                                 Offline
                                                             </Badge>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                                                    <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground mt-0.5">
                                                         <div className="flex items-center gap-1">
                                                             <Users className="h-3 w-3" />
                                                             <span>{formatNumber(channel.subscriberCount)}</span>
