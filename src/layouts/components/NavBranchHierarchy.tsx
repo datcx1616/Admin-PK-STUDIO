@@ -309,7 +309,16 @@ export function NavBranchHierarchy() {
     if (branches.length === 0) {
         return (
             <SidebarGroup className="bg-[#F7F7F7]">
-                <SidebarGroupLabel>Tổ chức</SidebarGroupLabel>
+                <div className="flex items-center justify-between px-2 mb-1 group hover:bg-accent rounded transition-colors cursor-pointer">
+                    <SidebarGroupLabel className="mb-0">Tổ chức</SidebarGroupLabel>
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="h-5 w-5 rounded hover:bg-accent flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 group-hover:scale-110 active:scale-95"
+                        title="Thêm chi nhánh"
+                    >
+                        <Plus className="h-3.5 w-3.5 transition-transform" />
+                    </button>
+                </div>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <div className="px-2 py-2 text-sm text-muted-foreground">
@@ -317,6 +326,14 @@ export function NavBranchHierarchy() {
                         </div>
                     </SidebarMenuItem>
                 </SidebarMenu>
+                <CreateBranchModal
+                    open={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    onSuccess={() => {
+                        setShowCreateModal(false)
+                        fetchData()
+                    }}
+                />
             </SidebarGroup>
         )
     }
@@ -360,13 +377,12 @@ export function NavBranchHierarchy() {
                                     >
                                         {/* Icon container với replacement effect */}
                                         <div className="h-3.5 w-3.5 shrink-0 relative">
-                                            {/* Original icon - ẩn khi hover */}
+                                            {/* Icon tòa nhà luôn hiện */}
                                             <Building2 className={cn(
                                                 "h-3.5 w-3.5 absolute inset-0 transition-opacity",
-                                                "group-hover:opacity-0"
+                                                hasTeams ? "group-hover:opacity-0" : ""
                                             )} />
-
-                                            {/* Chevron - hiện khi hover hoặc expanded */}
+                                            {/* Chevron chỉ hiện khi có nhóm */}
                                             {hasTeams && (
                                                 <ChevronRight className={cn(
                                                     "h-3.5 w-3.5 absolute inset-0 transition-all",

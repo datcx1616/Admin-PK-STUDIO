@@ -134,7 +134,9 @@ export const teamsAPI = {
       throw new Error(error.message || 'Failed to fetch team overview');
     }
 
-    return await response.json();
+    const result = await response.json();
+    // Backend returns { success: true, data: { team, statistics, channelAssignments } }
+    return result.data || result;
   },
 
   /**

@@ -239,12 +239,12 @@ export function ChannelSidebar({
                             </div>
                         </div>
                     ) : (
-                        <div className="flex items-center h-12 w-full pl-6">
+                        <div className="flex items-center h-12 w-full pl-4">
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setIsOpen(true)}
-                                className="h-8 w-8 rounded-md bg-transparent hover:bg-gray-100 text-gray-500 flex justify-start pl-[2px]"
+                                className="h-8 w-8 rounded-md bg-transparent hover:bg-gray-100 text-gray-500"
                             >
                                 <Menu className="h-4 w-4" />
                             </Button>
