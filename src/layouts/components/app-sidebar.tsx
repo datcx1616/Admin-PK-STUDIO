@@ -177,8 +177,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenu>
 
                 {/* Home section with icons */}
-                <div className="flex items-center justify-between px-2 py-2" style={{ backgroundColor: '#F7F7F7' }}>
-                    <span className="text-sm font-medium text-gray-700">Home</span>
+                {/* <div className="flex items-center justify-between px-2 py-2" style={{ backgroundColor: '#F7F7F7' }}>
+                    <span className="text-sm font-medium text-gray-700"></span>
                     <div className="flex items-center gap-1">
                         <Button
                             variant="ghost"
@@ -195,7 +195,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <Bell className="h-4 w-4 text-gray-600" />
                         </Button>
                     </div>
-                </div>
+                </div> */}
             </SidebarHeader>
             <SidebarContent className="p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <NavMain items={navMain} />

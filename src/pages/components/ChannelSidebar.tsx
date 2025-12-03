@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { channelsAPI } from "@/lib/channels-api"
 import type { Channel, ChannelDetail } from "@/types/channel.types"
@@ -33,6 +34,7 @@ export function ChannelSidebar({
     const [selectedChannel, setSelectedChannel] = React.useState<ChannelDetail | null>(null)
     const [dialogOpen, setDialogOpen] = React.useState(false)
     const [loadingDetail, setLoadingDetail] = React.useState(false)
+    const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
 
     // Fetch channels based on branchId or teamId
     React.useEffect(() => {
@@ -92,6 +94,29 @@ export function ChannelSidebar({
         return num.toString()
     }
 
+    const toggleSelect = (id: string, checked?: boolean) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev)
+            if (checked === undefined) {
+                // toggle
+                if (next.has(id)) {
+                    next.delete(id)
+                } else {
+                    next.add(id)
+                }
+            } else {
+                if (checked) {
+                    next.add(id)
+                } else {
+                    next.delete(id)
+                }
+            }
+            return next
+        })
+    }
+
+    const clearSelection = () => setSelectedIds(new Set())
+
     return (
         <>
             {/* Toggle Button - Fixed position when sidebar is closed */}
@@ -131,25 +156,33 @@ export function ChannelSidebar({
                 <div className="flex flex-col h-full">
                     {/* Header */}
                     {isOpen ? (
-                        <div className="flex items-center justify-between px-4 py-3 border-b">
-                            <div>
-                                <h3 className="text-gray-900 font-bold text-sm">Danh sách kênh</h3>
-                                <p className="text-xs text-muted-foreground mt-0.5">
+                        <div className="flex items-center justify-between px-4 py-2.5 border-b">
+                            <div className="space-y-0.5">
+                                <h3 className="text-gray-900 font-semibold text-xs tracking-wide">Danh sách kênh</h3>
+                                <p className="text-[11px] text-muted-foreground">
                                     {loading ? 'Đang tải...' : `${channels.length} kênh`}
+                                    {selectedIds.size > 0 && (
+                                        <span className="ml-2 text-green-600 font-medium">({selectedIds.size} đã chọn)</span>
+                                    )}
                                 </p>
                             </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setIsOpen(false)}
-                                className="h-7 w-7 text-gray-500 hover:text-gray-700"
-                            >
-                                {side === "right" ? (
-                                    <ChevronRight className="h-4 w-4" />
-                                ) : (
-                                    <ChevronLeft className="h-4 w-4" />
+                            <div className="flex items-center gap-2">
+                                {selectedIds.size > 0 && (
+                                    <Button variant="outline" size="sm" onClick={clearSelection} className="h-7 px-2 text-[11px]">Clear</Button>
                                 )}
-                            </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setIsOpen(false)}
+                                    className="h-7 w-7 text-gray-500 hover:text-gray-700"
+                                >
+                                    {side === "right" ? (
+                                        <ChevronRight className="h-4 w-4" />
+                                    ) : (
+                                        <ChevronLeft className="h-4 w-4" />
+                                    )}
+                                </Button>
+                            </div>
                         </div>
                     ) : (
                         <div className="flex items-center justify-center h-12">
@@ -190,50 +223,63 @@ export function ChannelSidebar({
                                 </div>
                             ) : (
                                 // Channel list
-                                channels.map((channel) => (
-                                    <button
-                                        key={channel._id}
-                                        onClick={() => handleChannelClick(channel)}
-                                        className="w-full p-3 rounded-lg border bg-card hover:bg-accent transition-all hover:shadow-sm text-left"
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            <Avatar className="h-10 w-10 shrink-0">
-                                                <AvatarImage src={channel.thumbnailUrl} alt={channel.name} />
-                                                <AvatarFallback className="bg-red-100 text-red-700">
-                                                    <Youtube className="h-5 w-5" />
-                                                </AvatarFallback>
-                                            </Avatar>
-
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between gap-2 mb-1">
-                                                    <h4 className="font-medium text-sm truncate">
-                                                        {channel.name}
-                                                    </h4>
-                                                    {channel.isConnected ? (
-                                                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 shrink-0">
-                                                            Connected
-                                                        </Badge>
-                                                    ) : (
-                                                        <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200 shrink-0">
-                                                            Offline
-                                                        </Badge>
-                                                    )}
-                                                </div>
-
-                                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                                    <div className="flex items-center gap-1">
-                                                        <Users className="h-3 w-3" />
-                                                        <span>{formatNumber(channel.subscriberCount)}</span>
+                                channels.map((channel) => {
+                                    const isSelected = selectedIds.has(channel._id)
+                                    return (
+                                        <div
+                                            key={channel._id}
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={() => handleChannelClick(channel)}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') handleChannelClick(channel) }}
+                                            className={cn(
+                                                "w-full p-2 rounded-md border bg-card hover:bg-accent/60 transition-all text-left flex flex-col gap-1 focus:outline-none",
+                                                isSelected && "ring-1 ring-green-500/50"
+                                            )}
+                                        >
+                                            <div className="flex items-start gap-2">
+                                                <Checkbox
+                                                    checked={isSelected}
+                                                    onCheckedChange={(checked) => toggleSelect(channel._id, !!checked)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="mt-1"
+                                                />
+                                                <Avatar className="h-8 w-8 shrink-0">
+                                                    <AvatarImage src={channel.thumbnailUrl} alt={channel.name} />
+                                                    <AvatarFallback className="bg-red-100 text-red-700">
+                                                        <Youtube className="h-4 w-4" />
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-start justify-between gap-2 mb-0.5">
+                                                        <h4 className="font-medium text-xs truncate leading-4">
+                                                            {channel.name}
+                                                        </h4>
+                                                        {channel.isConnected ? (
+                                                            <Badge variant="outline" className="text-[10px] bg-green-50 text-green-700 border-green-200 shrink-0">
+                                                                Connected
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge variant="outline" className="text-[10px] bg-gray-50 text-gray-700 border-gray-200 shrink-0">
+                                                                Offline
+                                                            </Badge>
+                                                        )}
                                                     </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <Eye className="h-3 w-3" />
-                                                        <span>{formatNumber(channel.viewCount)}</span>
+                                                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                                                        <div className="flex items-center gap-1">
+                                                            <Users className="h-3 w-3" />
+                                                            <span>{formatNumber(channel.subscriberCount)}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <Eye className="h-3 w-3" />
+                                                            <span>{formatNumber(channel.viewCount)}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </button>
-                                ))
+                                    )
+                                })
                             )}
                         </div>
                     </ScrollArea>

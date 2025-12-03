@@ -7,6 +7,23 @@ html, body, #root {
   width: 100%;
   overflow-x: hidden;
 }
+/* Custom scrollbar - light color */
+::-webkit-scrollbar {
+  width: 12px;
+  background: #e0e0e0;
+}
+::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+/* Firefox */
+html {
+  scrollbar-color: #bdbdbd #e0e0e0;
+  scrollbar-width: thin;
+}
 
 @custom-variant dark (&:is(.dark *));
 :root {

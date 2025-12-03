@@ -1,12 +1,12 @@
-// src/pages/BranchDetailPage.tsx - UPDATED WITH RIGHT SIDEBAR
+// src/pages/BranchDetailPage.tsx - UPDATED WITH CHANNEL SIDEBAR FROM API
 import * as React from "react"
 import { useParams } from "react-router-dom"
 import { useBranch } from "@/hooks/useBranches"
 import { ContentHeader } from "@/pages/components/ContentHeader"
+import { ChannelSidebar } from "@/pages/components/ChannelSidebar"
 import { Building2, Users, Youtube, TrendingUp, MapPin } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { ChannelSidebar } from "@/pages/components/ChannelSidebar"
 
 export default function BranchDetailPage() {
     const { branchId } = useParams<{ branchId: string }>()
@@ -28,15 +28,27 @@ export default function BranchDetailPage() {
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
-                    {/* Fake TOC column */}
-                    <div className="hidden md:block w-48 shrink-0 border-r px-3 py-4 space-y-3">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => (
-                            <div key={i} className="flex items-center gap-2">
-                                <Skeleton className="h-3 w-3 rounded" />
-                                <Skeleton className="h-3 flex-1" />
-                            </div>
-                        ))}
+                    {/* Channel Sidebar Skeleton */}
+                    <div className="w-72 border-r bg-background">
+                        <div className="p-4 border-b">
+                            <Skeleton className="h-5 w-32 mb-2" />
+                            <Skeleton className="h-3 w-20" />
+                        </div>
+                        <div className="p-3 space-y-2">
+                            {[1, 2, 3, 4, 5].map(i => (
+                                <div key={i} className="p-3 rounded-lg border">
+                                    <div className="flex items-start gap-3">
+                                        <Skeleton className="h-10 w-10 rounded-full" />
+                                        <div className="flex-1 space-y-2">
+                                            <Skeleton className="h-4 w-full" />
+                                            <Skeleton className="h-3 w-20" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
+
                     <div className="flex-1 overflow-y-auto">
                         <div className="max-w-5xl mx-auto p-6 space-y-8">
                             {/* Overview Section Skeleton */}
@@ -126,7 +138,7 @@ export default function BranchDetailPage() {
                     ]}
                 />
                 <div className="flex flex-1 overflow-hidden">
-                    <ChannelSidebar />
+                    <ChannelSidebar branchId={branchId} side="left" mode="inline" />
                     <div className="flex-1 overflow-y-auto">
                         <div className="max-w-5xl mx-auto p-6">
                             <Alert variant="destructive">
@@ -150,14 +162,18 @@ export default function BranchDetailPage() {
                     { label: branch.name, icon: <Building2 className="h-4 w-4" /> },
                 ]}
             />
-            {/* Layout: TOC column between app sidebar and content */}
+            {/* Layout: Channel Sidebar on left, Content on right */}
             <div className="flex flex-1 overflow-hidden">
-                <ChannelSidebar />
+                {/* Channel Sidebar - fetches channels from API based on branchId */}
+                <ChannelSidebar branchId={branchId} side="left" mode="inline" />
+
+                {/* Main Content */}
                 <div className="flex-1 overflow-y-auto">
                     <div className="max-w-5xl mx-auto p-6">
                         <section id="overview" className="mb-12 scroll-mt-20">
                             <h1 className="text-4xl font-bold mb-2">{branch.name}</h1>
                             <p className="text-muted-foreground mb-8">{branch.description}</p>
+
                             <div id="statistics" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 scroll-mt-20">
                                 <div className="p-6 rounded-lg border bg-card hover:shadow-md transition-shadow">
                                     <div className="flex items-center justify-between mb-2">
@@ -167,6 +183,7 @@ export default function BranchDetailPage() {
                                     <p className="text-3xl font-bold">{branch.teamsCount || 0}</p>
                                     <p className="text-xs text-muted-foreground mt-1">Total teams in branch</p>
                                 </div>
+
                                 <div className="p-6 rounded-lg border bg-card hover:shadow-md transition-shadow">
                                     <div className="flex items-center justify-between mb-2">
                                         <h3 className="text-sm font-medium text-muted-foreground">Channels</h3>
@@ -175,6 +192,7 @@ export default function BranchDetailPage() {
                                     <p className="text-3xl font-bold">{branch.channelsCount || 0}</p>
                                     <p className="text-xs text-muted-foreground mt-1">YouTube channels</p>
                                 </div>
+
                                 <div id="location" className="p-6 rounded-lg border bg-card hover:shadow-md transition-shadow scroll-mt-20">
                                     <div className="flex items-center justify-between mb-2">
                                         <h3 className="text-sm font-medium text-muted-foreground">Location</h3>
@@ -185,6 +203,7 @@ export default function BranchDetailPage() {
                                 </div>
                             </div>
                         </section>
+
                         <section id="teams" className="mb-12 scroll-mt-20">
                             <h1 className="text-3xl font-bold mb-6">Teams</h1>
                             <div id="team-list" className="scroll-mt-20">
@@ -214,33 +233,46 @@ export default function BranchDetailPage() {
                                 )}
                             </div>
                         </section>
+
                         <section id="channels" className="mb-12 scroll-mt-20">
                             <h1 className="text-3xl font-bold mb-6">Channels</h1>
                             <div id="channel-list" className="scroll-mt-20">
                                 <h2 className="text-xl font-semibold mb-4">Channel List</h2>
-                                {branch.channels && branch.channels.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-4 rounded-lg border bg-blue-50 border-blue-200 text-blue-900">
+                                    <div className="flex items-start gap-3">
+                                        <Youtube className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="font-medium mb-1">Danh sách kênh trong sidebar</p>
+                                            <p className="text-sm">
+                                                Danh sách tất cả kênh của chi nhánh này được hiển thị ở sidebar bên trái.
+                                                Click vào từng kênh để xem thông tin chi tiết bao gồm thống kê, analytics,
+                                                team assignment và recent videos.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Optional: Still show channel count from branch data */}
+                                {branch.channels && branch.channels.length > 0 && (
+                                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {branch.channels.map((channel) => (
                                             <div key={channel._id} className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow">
                                                 <div className="flex items-start gap-3">
                                                     <Youtube className="h-8 w-8 text-red-500 shrink-0" />
                                                     <div className="flex-1 min-w-0">
                                                         <h3 className="font-semibold truncate">{channel.name}</h3>
-                                                        <p className="text-sm text-muted-foreground">{channel.subscriberCount?.toLocaleString() || 0} subscribers</p>
-                                                        {/* Team relation not in channel type; omit display */}
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {channel.subscriberCount?.toLocaleString() || 0} subscribers
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                ) : (
-                                    <div className="p-8 rounded-lg border border-dashed bg-muted/30 text-center">
-                                        <Youtube className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                                        <p className="text-muted-foreground">No channels found in this branch</p>
-                                    </div>
                                 )}
                             </div>
                         </section>
+
                         <section id="performance" className="mb-12 scroll-mt-20">
                             <h1 className="text-3xl font-bold mb-6">Performance</h1>
                             <div id="metrics" className="scroll-mt-20">

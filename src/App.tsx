@@ -38,13 +38,13 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <div className="flex h-screen w-full overflow-hidden p-2 gap-2" style={{ backgroundColor: '#F7F7F7' }}>
         {/* Sidebar column (fixed) */}
-        <div className="w-[280px] h-[calc(100vh-1rem)] overflow-y-auto" style={{ backgroundColor: '#F7F7F7' }}>
+        <div className="w-60 h-[calc(100vh-1rem)] overflow-y-auto" style={{ backgroundColor: '#F7F7F7' }}>
           <AppSidebar />
         </div>
 
         {/* Main panel */}
         <div className="flex-1 rounded-2xl border shadow-sm overflow-hidden flex flex-col" style={{ backgroundColor: '#FFFFFF' }}>
-          <SiteHeader />
+          {/* <SiteHeader /> */}
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>
