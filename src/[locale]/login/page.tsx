@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Eye, EyeOff, Mail, Lock, LogIn, Youtube, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { BackgroundLogin } from "@/pages/auth/BackgroundLogin";
 
@@ -81,10 +81,10 @@ export function LoginForm() {
   };
 
   return (
-    <div className="relative w-full max-w-[400px]">
+    <div className="relative w-full max-w-[500px]">
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 rounded-2xl border border-gray-200/50 bg-white/98 backdrop-blur-md p-5 shadow-2xl shadow-gray-300/20 relative z-10"
+        className="space-y-5 rounded-3xl border border-gray-200/50 bg-white/98 backdrop-blur-md p-8 shadow-2xl shadow-gray-300/20 relative z-10"
       >
         {/* Header with Icon */}
         <div className="text-center">
@@ -208,8 +208,8 @@ export default function LoginPage() {
       </div>
 
       {/* Content */}
-      <div className="min-h-screen flex items-center justify-center p-2 py-4 relative z-10">
-        <div className="w-full max-w-[400px]">
+      <div className="min-h-screen flex items-center justify-center p-4 py-8 relative z-10">
+        <div className="w-full max-w-[440px]">
           {/* Logo - EXACTLY like the image */}
 
           {/* Login Form */}

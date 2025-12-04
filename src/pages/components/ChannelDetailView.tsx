@@ -1,8 +1,3 @@
-// src/pages/components/ChannelDetailView.tsx
-/**
- * Component hiển thị chi tiết kênh ở content area
- * Thay thế cho dialog popup
- */
 
 import * as React from "react"
 import { Youtube, Users, Eye, Video, TrendingUp, ExternalLink, ArrowLeft, RefreshCw } from "lucide-react"
