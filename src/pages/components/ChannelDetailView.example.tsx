@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { ChannelSidebar } from "@/pages/components/ChannelSidebar"
-import { ChannelDetailView } from "@/pages/components/ChannelDetailView"
+import { ChannelDetailView } from "@/pages/channel-analytics/ChannelDetailView"
 import type { Channel } from "@/types/channel.types"
 
 export default function BranchDetailPageExample() {

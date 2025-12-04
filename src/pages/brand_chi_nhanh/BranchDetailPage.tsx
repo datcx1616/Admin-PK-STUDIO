@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 import { useBranch } from "@/hooks/useBranches"
 import { ContentHeader } from "@/pages/components/ContentHeader"
 import { ChannelSidebar } from "@/pages/components/ChannelSidebar"
-import { ChannelDetailView } from "@/pages/components/ChannelDetailView"
+import { ChannelDetailView } from "@/pages/channel-analytics/ChannelDetailView"
 import type { Channel } from "@/types/channel.types"
 import {
     Building2, Users, Youtube, TrendingUp, Home,

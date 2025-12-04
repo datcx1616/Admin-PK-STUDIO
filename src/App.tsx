@@ -28,6 +28,7 @@ import ChannelAnalyticsPage from "@/dashboard/ChannelAnalyticsPage";
 import HomePage from "@/pages/HomePage"
 import BranchDetailPagee from "@/pages/brand_chi_nhanh/BranchDetailPage"
 import TeamDetailPagee from "@/pages/teams_chi_nhanh/TeamDetailPage"
+import { ChannelDetailView } from "@/pages/channel-analytics/ChannelDetailView";
 
 import './i18n';
 import "./style/App.css";
@@ -249,6 +250,16 @@ export default function App() {
           <PrivateRoute>
             <AdminLayout>
               <TeamDetailPagee />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/channels/:channelId/analytics"
+        element={
+          <PrivateRoute>
+            <AdminLayout>
+              <ChannelDetailView />
             </AdminLayout>
           </PrivateRoute>
         }
