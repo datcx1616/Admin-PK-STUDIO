@@ -1,4 +1,3 @@
-// src/pages/TeamDetailPage.tsx - REDESIGNED WITH FULL DATA AND BEAUTIFUL UI
 import * as React from "react"
 import { useParams } from "react-router-dom"
 import { ContentHeader } from "@/pages/components/ContentHeader"
@@ -1350,15 +1349,13 @@ function MetricRow({
     )
 }
 
-// Detail Row Component for Details Tab
-// Moved to components/DetailRow
+
 import { DetailRow } from "./components/DetailRow"
 
-// Average Card Component
-// Moved to components/AverageCard
+
 import { AverageCard } from "./components/AverageCard"
 
-// Empty State Component
+
 function EmptyState({
     icon: Icon,
     title,

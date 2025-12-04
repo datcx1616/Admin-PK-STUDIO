@@ -1,407 +1,217 @@
-// src/pages/BranchDetailPage.tsx - COMPREHENSIVE BRANCH DETAIL PAGE
 import * as React from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { useBranch } from "@/hooks/useBranches"
 import { ContentHeader } from "@/pages/components/ContentHeader"
 import { ChannelSidebar } from "@/pages/components/ChannelSidebar"
 import {
-    Building2, Users, Youtube, TrendingUp, MapPin, Home,
+    Building2, Users, Youtube, TrendingUp, Home,
     Activity, Clock, Eye, DollarSign, Video,
-    Calendar, ArrowUpRight, ArrowDownRight,
-    BarChart3, PieChart, RefreshCw
+    BarChart3, RefreshCw, Download, Printer
 } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardHeader } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
-import { apiClient } from "@/lib/api-client"
 import { toast } from "sonner"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-// ============================================================================
-// INTERFACES
-// ============================================================================
+// Import new components
+import { LoadingSkeleton } from "./components/LoadingSkeleton"
+import { MetricCard } from "./components/MetricCard"
+import { OverviewTab } from "./components/OverviewTab"
+import { EngagementTab } from "./components/EngagementTab"
+import { RevenueTab } from "./components/RevenueTab"
+import { AudienceTab } from "./components/AudienceTab"
+import { ContentTab } from "./components/ContentTab"
+import { AdvancedTab } from "./components/AdvancedTab"
 
-interface BranchAnalytics {
-    summary: {
-        totalChannels: number
-        totalTeams: number
-        totalSubscribers: number
-        totalViews: number
-        totalVideos: number
-    }
-    analytics: {
-        views: number
-        watchTime: number
-        estimatedRevenue: number
-        subscribersGained: number
-        subscribersLost?: number
-        subscribersNet?: number
-    }
-    dailyBreakdown?: Array<{
-        date: string
-        views: number
-        watchTime: number
-        subscribersGained: number
-    }>
-}
-
-interface TeamWithStats {
-    _id: string
-    name: string
-    description?: string
-    membersCount: number
-    channelsCount?: number
-    leader?: {
-        _id: string
-        name: string
-        email: string
-    }
-    stats?: {
-        totalViews: number
-        totalSubscribers: number
-    }
-}
-
-interface ChannelWithStats {
-    _id: string
-    name: string
-    youtubeChannelId: string
-    subscriberCount: number
-    viewCount: number
-    videoCount?: number
-    thumbnailUrl?: string
-    team?: {
-        _id: string
-        name: string
-    }
-}
-
-// ============================================================================
-// COMPONENTS
-// ============================================================================
-
-function LoadingSkeleton() {
-    return (
-        <div className="flex flex-col h-full">
-            {/* Skeleton Breadcrumb */}
-            <div className="border-b px-6 py-4 bg-background/50 backdrop-blur">
-                <div className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-4" />
-                    <Skeleton className="h-4 w-20" />
-                    <span className="text-muted-foreground">/</span>
-                    <Skeleton className="h-4 w-16" />
-                    <span className="text-muted-foreground">/</span>
-                    <Skeleton className="h-4 w-24" />
-                </div>
-            </div>
-
-            <div className="flex flex-1 overflow-hidden">
-                {/* Channel Sidebar Skeleton */}
-                <div className="w-[480px] border-r bg-background">
-                    <div className="p-4 border-b">
-                        <Skeleton className="h-5 w-32 mb-2" />
-                        <Skeleton className="h-3 w-20" />
-                    </div>
-                    <div className="p-3 space-y-2">
-                        {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className="p-3 rounded-lg border">
-                                <div className="flex items-start gap-3">
-                                    <Skeleton className="h-10 w-10 rounded-full" />
-                                    <div className="flex-1 space-y-2">
-                                        <Skeleton className="h-4 w-full" />
-                                        <Skeleton className="h-3 w-20" />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto">
-                    <div className="max-w-7xl mx-auto p-6 space-y-8">
-                        {/* Header Skeleton */}
-                        <div className="space-y-4">
-                            <Skeleton className="h-10 w-72" />
-                            <Skeleton className="h-5 w-64" />
-                        </div>
-
-                        {/* Stats Grid Skeleton */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {[1, 2, 3, 4].map(i => (
-                                <Card key={i}>
-                                    <CardContent className="p-6">
-                                        <Skeleton className="h-4 w-24 mb-4" />
-                                        <Skeleton className="h-8 w-20 mb-2" />
-                                        <Skeleton className="h-3 w-32" />
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-
-                        {/* Content Skeleton */}
-                        <Card>
-                            <CardHeader>
-                                <Skeleton className="h-6 w-40" />
-                            </CardHeader>
-                            <CardContent>
-                                <Skeleton className="h-64 w-full" />
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-function MetricCard({
-    icon: Icon,
-    title,
-    value,
-    subtitle,
-    trend,
-    trendValue,
-    gradient,
-    onClick
-}: {
-    icon: any
-    title: string
-    value: string
-    subtitle?: string
-    trend?: 'up' | 'down' | 'neutral'
-    trendValue?: string
-    gradient: string
-    onClick?: () => void
-}) {
-    return (
-        <Card
-            className={cn(
-                "relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all",
-                onClick && "cursor-pointer"
-            )}
-            onClick={onClick}
-        >
-            <div className={cn("absolute inset-0 bg-gradient-to-br opacity-90", gradient)} />
-            <CardContent className="relative p-6 text-white">
-                <div className="flex items-start justify-between mb-3">
-                    <Icon className="h-6 w-6 opacity-80" />
-                    {trend && (
-                        <div className="flex items-center gap-1">
-                            {trend === 'up' && <ArrowUpRight className="h-4 w-4" />}
-                            {trend === 'down' && <ArrowDownRight className="h-4 w-4" />}
-                            {trendValue && (
-                                <span className="text-xs font-medium">{trendValue}</span>
-                            )}
-                        </div>
-                    )}
-                </div>
-                <div className="space-y-1">
-                    <p className="text-sm font-medium opacity-90">{title}</p>
-                    <p className="text-3xl font-bold tracking-tight">{value}</p>
-                    {subtitle && (
-                        <p className="text-xs opacity-75">{subtitle}</p>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
-
-function TeamCard({ team, onClick }: { team: TeamWithStats; onClick: () => void }) {
-    return (
-        <Card
-            className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-blue-500"
-            onClick={onClick}
-        >
-            <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Users className="h-5 w-5 text-blue-500" />
-                            <h3 className="font-semibold text-lg">{team.name}</h3>
-                        </div>
-                        {team.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                                {team.description}
-                            </p>
-                        )}
-                    </div>
-                    <Badge variant="secondary" className="ml-2">
-                        {team.membersCount} members
-                    </Badge>
-                </div>
-
-                <Separator className="my-3" />
-
-                <div className="grid grid-cols-3 gap-4 text-center">
-                    <div>
-                        <p className="text-xs text-muted-foreground mb-1">Channels</p>
-                        <p className="text-lg font-bold">{team.channelsCount || 0}</p>
-                    </div>
-                    <div>
-                        <p className="text-xs text-muted-foreground mb-1">Views</p>
-                        <p className="text-lg font-bold">
-                            {team.stats?.totalViews ? formatNumber(team.stats.totalViews) : '0'}
-                        </p>
-                    </div>
-                    <div>
-                        <p className="text-xs text-muted-foreground mb-1">Subs</p>
-                        <p className="text-lg font-bold">
-                            {team.stats?.totalSubscribers ? formatNumber(team.stats.totalSubscribers) : '0'}
-                        </p>
-                    </div>
-                </div>
-
-                {team.leader && (
-                    <div className="mt-4 pt-3 border-t">
-                        <div className="flex items-center gap-2">
-                            <Avatar className="h-6 w-6">
-                                <AvatarFallback className="text-xs bg-blue-100 text-blue-700">
-                                    {team.leader.name.substring(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-xs text-muted-foreground">Team Leader</p>
-                                <p className="text-sm font-medium truncate">{team.leader.name}</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-    )
-}
-
-function ChannelCard({ channel, onClick }: { channel: ChannelWithStats; onClick: () => void }) {
-    return (
-        <Card
-            className="hover:shadow-md transition-shadow cursor-pointer"
-            onClick={onClick}
-        >
-            <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                    <Avatar className="h-12 w-12">
-                        <AvatarImage src={channel.thumbnailUrl} alt={channel.name} />
-                        <AvatarFallback className="bg-red-100 text-red-700">
-                            <Youtube className="h-6 w-6" />
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate mb-1">{channel.name}</h3>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                                <Users className="h-3 w-3" />
-                                {formatNumber(channel.subscriberCount)}
-                            </div>
-                            <div className="flex items-center gap-1">
-                                <Eye className="h-3 w-3" />
-                                {formatNumber(channel.viewCount)}
-                            </div>
-                            {channel.videoCount !== undefined && (
-                                <div className="flex items-center gap-1">
-                                    <Video className="h-3 w-3" />
-                                    {channel.videoCount}
-                                </div>
-                            )}
-                        </div>
-                        {channel.team && (
-                            <Badge variant="outline" className="mt-2 text-xs">
-                                {channel.team.name}
-                            </Badge>
-                        )}
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
-
-function formatNumber(num: number): string {
-    if (num >= 1000000) {
-        return `${(num / 1000000).toFixed(1)}M`
-    }
-    if (num >= 1000) {
-        return `${(num / 1000).toFixed(1)}K`
-    }
-    return num.toString()
-}
-
-function formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-        minimumFractionDigits: 0
-    }).format(amount)
-}
-
-function formatDuration(seconds: number): string {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-
-    if (hours > 0) {
-        return `${hours}h ${minutes}m`
-    }
-    return `${minutes}m`
-}
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
+// Import utils and types
+import { formatNumber } from "./utils/formatters"
+import { type BranchAnalytics, type TeamWithStats, type ChannelWithStats } from "./types"
 
 export default function BranchDetailPagee() {
     const { branchId } = useParams<{ branchId: string }>()
-    const navigate = useNavigate()
-    const { branch, loading, error, refetch } = useBranch(branchId!)
+    const { branch, loading, error } = useBranch(branchId!)
 
-    // State
     const [analytics, setAnalytics] = React.useState<BranchAnalytics | null>(null)
     const [teams, setTeams] = React.useState<TeamWithStats[]>([])
     const [channels, setChannels] = React.useState<ChannelWithStats[]>([])
     const [loadingAnalytics, setLoadingAnalytics] = React.useState(false)
+    const [selectedDays, setSelectedDays] = React.useState(30)
     const [dateRange, setDateRange] = React.useState({
         startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         endDate: new Date().toISOString().split('T')[0]
     })
 
-    // Fetch analytics data
+    const handleDaysChange = (days: number) => {
+        setSelectedDays(days)
+        const endDate = new Date()
+        const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+        setDateRange({
+            startDate: startDate.toISOString().split('T')[0],
+            endDate: endDate.toISOString().split('T')[0]
+        })
+    }
+
     const fetchAnalytics = React.useCallback(async () => {
         if (!branchId) return
 
         setLoadingAnalytics(true)
-        try {
-            const [analyticsData, teamsData, channelsData] = await Promise.all([
-                apiClient.getBranchAnalytics(branchId, dateRange),
-                apiClient.getTeams({ branchId }),
-                apiClient.getChannelsForAnalytics({ branchId })
-            ])
+        console.log('🔄 Fetching analytics for branch:', branchId, 'Date range:', dateRange)
 
-            setAnalytics(analyticsData)
-            setTeams(teamsData.teams || teamsData.data || teamsData || [])
-            setChannels(channelsData.channels || channelsData.data || channelsData || [])
-        } catch (err: any) {
+        try {
+            // ✅ FIX 1: Dùng 'authToken' thay vì 'token'
+            const token = localStorage.getItem('authToken')
+
+            // ✅ FIX 2: Validate token exists
+            if (!token) {
+                console.error('❌ No auth token found in localStorage')
+                toast.error('Vui lòng đăng nhập lại')
+                setLoadingAnalytics(false)
+                return
+            }
+
+            const API_URL = import.meta.env.VITE_API_URL || 'https://api.nexachannel.com/api';
+            const params = new URLSearchParams({
+                startDate: dateRange.startDate,
+                endDate: dateRange.endDate
+            })
+
+            const apiEndpoint = `${API_URL}/youtube/analytics/branch/${branchId}?${params.toString()}`
+            console.log('📡 API Request:', apiEndpoint)
+            console.log('🔑 Token exists:', !!token)
+            console.log('🔑 Token preview:', token.substring(0, 20) + '...')
+
+            const analyticsRes = await fetch(apiEndpoint, {
+                headers: {
+                    // ✅ FIX 3: Dùng 'Authorization: Bearer' format thay vì 'x-access-token'
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            // Check analytics response
+            console.log('📊 Analytics status:', analyticsRes.status, analyticsRes.statusText)
+
+            if (analyticsRes.ok) {
+                const contentType = analyticsRes.headers.get('content-type')
+                console.log('🔍 Content-Type:', contentType)
+
+                // Clone response để có thể đọc text nếu cần
+                const responseClone = analyticsRes.clone()
+
+                // Thử parse JSON trước
+                try {
+                    const response = await analyticsRes.json()
+                    console.log('✅ Analytics response:', response)
+                    console.log('📈 Data structure:', {
+                        hasSuccess: !!response.success,
+                        hasData: !!response.data,
+                        dataKeys: response.data ? Object.keys(response.data) : []
+                    })
+
+                    if (response.success && response.data) {
+                        // Map backend structure to frontend expected structure
+                        const data = response.data
+
+                        // Extract teams and channels from API response
+                        const channelsList = data.channels || []
+                        console.log('📺 Channels from API:', channelsList.length)
+                        setChannels(channelsList)
+
+                        // Teams are not directly in the response, but we have totalTeams
+                        // We'll fetch teams separately if needed, or use the data we already have
+                        setTeams([]) // Backend analytics API doesn't return full team details
+
+                        const mappedData: BranchAnalytics = {
+                            summary: {
+                                totalChannels: data.totalChannels || channelsList.length,
+                                totalTeams: data.totalTeams || 0,
+                                totalSubscribers: 0, // Will be calculated from channels
+                                totalViews: data.basic?.totals?.totalViews || 0,
+                                totalVideos: 0, // Will be calculated if available
+                                totalWatchTime: data.basic?.totals?.totalWatchTimeMinutes ? data.basic.totals.totalWatchTimeMinutes * 60 : 0,
+                                averageViewDuration: data.basic?.totals?.averageViewDuration || 0,
+                                totalSubscribersNet: data.basic?.totals?.totalSubscribersNet || 0,
+                                totalLikes: data.engagement?.totals?.totalLikes || 0,
+                                totalComments: data.engagement?.totals?.totalComments || 0,
+                                totalShares: data.engagement?.totals?.totalShares || 0,
+                                engagementRate: data.engagement?.totals?.engagementRate || 0
+                            },
+                            analytics: {
+                                views: data.basic?.totals?.totalViews || 0,
+                                watchTime: data.basic?.totals?.totalWatchTimeMinutes ? data.basic.totals.totalWatchTimeMinutes * 60 : 0,
+                                estimatedRevenue: data.revenue?.totals?.estimatedRevenue || 0,
+                                subscribersGained: data.basic?.totals?.totalSubscribersGained || 0,
+                                subscribersLost: data.basic?.totals?.totalSubscribersLost || 0,
+                                subscribersNet: data.basic?.totals?.totalSubscribersNet || 0,
+                                averageViewDuration: data.basic?.totals?.averageViewDuration || 0,
+                                likes: data.engagement?.totals?.totalLikes || 0,
+                                comments: data.engagement?.totals?.totalComments || 0,
+                                shares: data.engagement?.totals?.totalShares || 0,
+                                engagementRate: data.engagement?.totals?.engagementRate || 0
+                            },
+                            revenue: {
+                                estimatedRevenue: data.revenue?.totals?.estimatedRevenue || 0,
+                                adRevenue: data.revenue?.totals?.estimatedAdRevenue || 0,
+                                rpm: data.revenue?.totals?.rpm || 0,
+                                cpm: data.revenue?.totals?.cpm || 0,
+                                monetizedPlaybacks: data.revenue?.totals?.monetizedPlaybacks || 0,
+                                adImpressions: data.revenue?.totals?.adImpressions || 0
+                            },
+                            channels: channelsList
+                        }
+                        console.log('📝 Mapped analytics data:', mappedData)
+                        setAnalytics(mappedData)
+                        toast.success('Analytics loaded successfully')
+                    } else {
+                        console.warn('⚠️ Unexpected analytics response format:', response)
+                        toast.warning('Dữ liệu analytics không đúng định dạng')
+                    }
+                } catch (jsonError) {
+                    // Nếu không parse được JSON, đọc text
+                    const text = await responseClone.text()
+                    console.error('❌ Failed to parse JSON. Response text (first 500 chars):', text.substring(0, 500))
+                    console.error('JSON parse error:', jsonError)
+                    toast.error('Lỗi parse dữ liệu analytics')
+                }
+            } else if (analyticsRes.status === 401) {
+                // ✅ Handle 401 specifically
+                console.error('❌ 401 Unauthorized - Token invalid or expired')
+                toast.error('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!')
+
+                // Clear token and redirect to login
+                localStorage.removeItem('authToken')
+                localStorage.removeItem('user')
+
+                setTimeout(() => {
+                    window.location.href = '/login'
+                }, 2000)
+            } else {
+                const errorText = await analyticsRes.text()
+                console.warn('❌ Analytics API failed:', analyticsRes.status, analyticsRes.statusText, errorText)
+                toast.error(`Lỗi tải analytics: ${analyticsRes.status} ${analyticsRes.statusText}`)
+            }
+        } catch (err) {
             console.error('Error fetching analytics:', err)
-            toast.error('Failed to load analytics data')
+            // Only show toast if it's not a JSON parse error (which we've already handled)
+            if (err instanceof Error && !err.message?.includes('JSON')) {
+                toast.error('Lỗi khi tải dữ liệu analytics')
+            }
         } finally {
             setLoadingAnalytics(false)
         }
     }, [branchId, dateRange])
+
+    React.useEffect(() => {
+        // Reset channels khi branchId thay đổi
+        if (branchId) {
+            setChannels([])
+            setTeams([])
+            setAnalytics(null)
+        }
+    }, [branchId])
 
     React.useEffect(() => {
         if (branchId && branch) {
@@ -409,20 +219,27 @@ export default function BranchDetailPagee() {
         }
     }, [branchId, branch, fetchAnalytics])
 
-    // Loading state
+    const totalStats = {
+        teams: teams.length,
+        channels: analytics?.summary?.totalChannels || channels.length,
+        members: teams.reduce((sum, team) => sum + team.membersCount, 0),
+        subscribers: analytics?.summary?.totalSubscribers || channels.reduce((sum, ch) => sum + ch.subscriberCount, 0),
+        views: analytics?.summary?.totalViews || channels.reduce((sum, ch) => sum + ch.viewCount, 0),
+        videos: analytics?.summary?.totalVideos || channels.reduce((sum, ch) => sum + (ch.videoCount || 0), 0)
+    }
+
     if (loading) {
         return <LoadingSkeleton />
     }
 
-    // Error state
     if (error || !branch) {
         return (
             <div className="flex flex-col h-full overflow-hidden">
                 <ContentHeader
                     breadcrumbs={[
-                        { label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
-                        { label: "Branches", href: "/brand" },
-                        { label: "Error", icon: <Building2 className="h-4 w-4" /> },
+                        { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
+                        { label: "Chi nhánh", href: "/brand" },
+                        { label: "Lỗi", icon: <Building2 className="h-4 w-4" /> },
                     ]}
                 />
                 <div className="flex flex-1 overflow-hidden">
@@ -431,7 +248,7 @@ export default function BranchDetailPagee() {
                         <div className="max-w-7xl mx-auto p-6">
                             <Alert variant="destructive">
                                 <AlertDescription>
-                                    {error || "Branch not found"}
+                                    {error || "Không tìm thấy chi nhánh"}
                                 </AlertDescription>
                             </Alert>
                         </div>
@@ -441,90 +258,143 @@ export default function BranchDetailPagee() {
         )
     }
 
-    // Calculate totals
-    const totalStats = {
-        teams: teams.length,
-        channels: channels.length,
-        members: teams.reduce((sum, team) => sum + team.membersCount, 0),
-        subscribers: analytics?.summary?.totalSubscribers ||
-            channels.reduce((sum, ch) => sum + ch.subscriberCount, 0),
-        views: analytics?.summary?.totalViews ||
-            channels.reduce((sum, ch) => sum + ch.viewCount, 0),
-        videos: analytics?.summary?.totalVideos ||
-            channels.reduce((sum, ch) => sum + (ch.videoCount || 0), 0)
-    }
-
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            {/* Header */}
             <ContentHeader
                 breadcrumbs={[
-                    { label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
-                    { label: "Branches", href: "/brand" },
+                    { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
+                    { label: "Chi nhánh", href: "/brand" },
                     { label: branch.name, icon: <Building2 className="h-4 w-4" /> },
                 ]}
             />
 
-            {/* Layout: Channel Sidebar + Main Content */}
             <div className="flex flex-1 overflow-hidden">
-                {/* Channel Sidebar */}
                 <ChannelSidebar branchId={branchId} side="left" mode="inline" />
 
-                {/* Main Content */}
                 <div className="flex-1 overflow-y-auto">
                     <div className="max-w-7xl mx-auto p-6 space-y-8">
                         {/* Branch Header Card */}
-                        <Card className="border-0 shadow-md bg-gradient-to-br from-primary/5 via-primary/3 to-background">
-                            <CardHeader>
-                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 rounded-lg bg-primary/10">
-                                                <Building2 className="h-6 w-6 text-primary" />
-                                            </div>
-                                            <div>
-                                                <CardTitle className="text-3xl font-bold">
-                                                    {branch.name}
-                                                </CardTitle>
-                                                {branch.code && (
-                                                    <Badge variant="secondary" className="mt-1">
-                                                        {branch.code}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </div>
-                                        {branch.description && (
-                                            <CardDescription className="text-base">
-                                                {branch.description}
-                                            </CardDescription>
-                                        )}
-                                        {branch.location && (
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <MapPin className="h-4 w-4" />
-                                                {branch.location}
-                                            </div>
+                        <Card className="border rounded-lg">
+                            <CardHeader className="space-y-3">
+                                {/* First Row: Icon + Branch name + Code + Date range selector (all in one line) */}
+                                <div className="flex items-center justify-between gap-6">
+                                    <div className="flex items-center gap-3">
+                                        <Building2 className="h-6 w-6" />
+                                        <h1 className="text-2xl font-bold">{branch.name}</h1>
+                                        {branch.code && (
+                                            <Badge variant="secondary" className="text-sm font-normal">
+                                                {branch.code}
+                                            </Badge>
                                         )}
                                     </div>
 
+                                    {/* Date range selector - right side of first row */}
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm text-muted-foreground">Khoảng thời gian:</span>
+                                        <div className="flex items-center gap-1 border rounded-md p-1">
+                                            <Button
+                                                variant={selectedDays === 7 ? "secondary" : "ghost"}
+                                                size="sm"
+                                                className="h-8 px-3 text-sm"
+                                                onClick={() => handleDaysChange(7)}
+                                            >
+                                                7 ngày
+                                            </Button>
+                                            <Button
+                                                variant={selectedDays === 30 ? "secondary" : "ghost"}
+                                                size="sm"
+                                                className="h-8 px-3 text-sm"
+                                                onClick={() => handleDaysChange(30)}
+                                            >
+                                                30 ngày
+                                            </Button>
+                                            <Button
+                                                variant={selectedDays === 90 ? "secondary" : "ghost"}
+                                                size="sm"
+                                                className="h-8 px-3 text-sm"
+                                                onClick={() => handleDaysChange(90)}
+                                            >
+                                                90 ngày
+                                            </Button>
+                                            <Button
+                                                variant={selectedDays === 180 ? "secondary" : "ghost"}
+                                                size="sm"
+                                                className="h-8 px-3 text-sm"
+                                                onClick={() => handleDaysChange(180)}
+                                            >
+                                                180 ngày
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Second Row: Branch info + Director + Action buttons */}
+                                <div className="flex items-center justify-between gap-6 text-sm text-muted-foreground">
+                                    {/* Branch name and channels list */}
+                                    <div className="flex items-center gap-2">
+                                        <Users className="h-4 w-4" />
+                                        <span>{branch.name}</span>
+                                        <span>·</span>
+                                        {channels.length > 0 ? (
+                                            <div className="flex items-center gap-1">
+                                                {channels.slice(0, 3).map((ch, idx) => (
+                                                    <span key={ch._id}>
+                                                        {ch.name}
+                                                        {idx < channels.slice(0, 3).length - 1 && ', '}
+                                                    </span>
+                                                ))}
+                                                {channels.length > 3 && (
+                                                    <span className="text-muted-foreground">
+                                                        +{channels.length - 3} khác
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span>{totalStats.channels} kênh</span>
+                                        )}
+                                    </div>
+
+                                    {/* Director info */}
+                                    <div className="flex items-center gap-2 ml-auto">
+                                        <span>Trưởng nhóm:</span>
+                                        <span className="text-foreground">{branch.director?.name || 'Chưa chỉ định'}</span>
+                                    </div>
+
+                                    {/* Action buttons */}
                                     <div className="flex items-center gap-2">
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             onClick={() => fetchAnalytics()}
                                             disabled={loadingAnalytics}
+                                            className="gap-2"
                                         >
-                                            <RefreshCw className={cn(
-                                                "h-4 w-4 mr-2",
-                                                loadingAnalytics && "animate-spin"
-                                            )} />
-                                            Refresh
+                                            <RefreshCw className={cn("h-4 w-4", loadingAnalytics && "animate-spin")} />
+                                            Làm mới
                                         </Button>
-                                        <Badge
-                                            variant={branch.isActive ? "default" : "secondary"}
-                                            className="px-3 py-1"
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="gap-2"
+                                            onClick={() => {
+                                                toast.info('Chức năng xuất CSV đang được phát triển')
+                                            }}
                                         >
-                                            {branch.isActive ? "Active" : "Inactive"}
-                                        </Badge>
+                                            <Download className="h-4 w-4" />
+                                            Xuất CSV
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="gap-2"
+                                            onClick={() => {
+                                                window.print()
+                                            }}
+                                        >
+                                            <Printer className="h-4 w-4" />
+                                            In/PDF
+                                        </Button>
                                     </div>
                                 </div>
                             </CardHeader>
@@ -534,416 +404,90 @@ export default function BranchDetailPagee() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <MetricCard
                                 icon={Users}
-                                title="Total Teams"
+                                title="Tổng Teams"
                                 value={totalStats.teams.toString()}
-                                subtitle={`${totalStats.members} total members`}
-                                gradient="from-blue-500 to-indigo-600"
-                                onClick={() => document.getElementById('teams-section')?.scrollIntoView({ behavior: 'smooth' })}
+                                subtitle={`${totalStats.members} thành viên`}
+                                gradient="bg-gradient-to-br from-blue-500 to-indigo-600"
                             />
                             <MetricCard
                                 icon={Youtube}
-                                title="Total Channels"
+                                title="Tổng Kênh"
                                 value={totalStats.channels.toString()}
                                 subtitle={`${formatNumber(totalStats.subscribers)} subscribers`}
-                                gradient="from-red-500 to-rose-600"
-                                onClick={() => document.getElementById('channels-section')?.scrollIntoView({ behavior: 'smooth' })}
+                                gradient="bg-gradient-to-br from-red-500 to-rose-600"
                             />
                             <MetricCard
                                 icon={Eye}
-                                title="Total Views"
+                                title="Tổng Lượt Xem"
                                 value={formatNumber(totalStats.views)}
                                 subtitle={`${totalStats.videos} videos`}
-                                gradient="from-emerald-500 to-teal-600"
+                                gradient="bg-gradient-to-br from-emerald-500 to-teal-600"
                             />
                             <MetricCard
                                 icon={TrendingUp}
-                                title="Performance"
-                                value={analytics ? formatNumber(analytics.analytics.views) : '0'}
-                                subtitle={`Last ${Math.floor((new Date(dateRange.endDate).getTime() - new Date(dateRange.startDate).getTime()) / (1000 * 60 * 60 * 24))} days`}
-                                gradient="from-amber-500 to-orange-600"
-                                onClick={() => document.getElementById('analytics-section')?.scrollIntoView({ behavior: 'smooth' })}
+                                title="Hiệu Suất"
+                                value={formatNumber(analytics?.analytics?.views || 0)}
+                                subtitle={`Trong khoảng thời gian`}
+                                gradient="bg-gradient-to-br from-amber-500 to-orange-600"
                             />
                         </div>
 
                         {/* Tabs Content */}
                         <Tabs defaultValue="overview" className="space-y-6">
-                            <TabsList className="inline-flex h-auto w-full items-center justify-center rounded-lg bg-muted p-1 gap-1">
-                                <TabsTrigger
-                                    value="overview"
-                                    className="flex-1 rounded-md px-3 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                                >
-                                    <Activity className="h-4 w-4 mr-2" />
-                                    Overview
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="teams"
-                                    className="flex-1 rounded-md px-3 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                                >
-                                    <Users className="h-4 w-4 mr-2" />
-                                    Teams ({totalStats.teams})
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="channels"
-                                    className="flex-1 rounded-md px-3 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                                >
-                                    <Youtube className="h-4 w-4 mr-2" />
-                                    Channels ({totalStats.channels})
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="analytics"
-                                    className="flex-1 rounded-md px-3 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                                >
+                            <TabsList className="inline-flex h-auto w-full items-center justify-start rounded-lg bg-muted p-1 gap-1 overflow-x-auto">
+                                <TabsTrigger value="overview" className="rounded-md px-3 py-2.5 whitespace-nowrap">
                                     <BarChart3 className="h-4 w-4 mr-2" />
-                                    Analytics
+                                    Tổng Quan
+                                </TabsTrigger>
+                                <TabsTrigger value="engagement" className="rounded-md px-3 py-2.5 whitespace-nowrap">
+                                    <Activity className="h-4 w-4 mr-2" />
+                                    Tương Tác
+                                </TabsTrigger>
+                                <TabsTrigger value="revenue" className="rounded-md px-3 py-2.5 whitespace-nowrap">
+                                    <DollarSign className="h-4 w-4 mr-2" />
+                                    Doanh Thu
+                                </TabsTrigger>
+                                <TabsTrigger value="audience" className="rounded-md px-3 py-2.5 whitespace-nowrap">
+                                    <Users className="h-4 w-4 mr-2" />
+                                    Khán Giả
+                                </TabsTrigger>
+                                <TabsTrigger value="content" className="rounded-md px-3 py-2.5 whitespace-nowrap">
+                                    <Video className="h-4 w-4 mr-2" />
+                                    Nội Dung
+                                </TabsTrigger>
+                                <TabsTrigger value="advanced" className="rounded-md px-3 py-2.5 whitespace-nowrap">
+                                    <TrendingUp className="h-4 w-4 mr-2" />
+                                    Nâng Cao
                                 </TabsTrigger>
                             </TabsList>
 
-                            {/* Overview Tab */}
+                            {/* Tab 1: Tổng Quan */}
                             <TabsContent value="overview" className="space-y-6">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <PieChart className="h-5 w-5" />
-                                            Branch Overview
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Complete summary of {branch.name}
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="rounded-md border">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow className="bg-muted/50">
-                                                        <TableHead className="font-semibold">Metric</TableHead>
-                                                        <TableHead className="font-semibold text-right">Value</TableHead>
-                                                        <TableHead className="font-semibold">Details</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    <TableRow>
-                                                        <TableCell className="flex items-center gap-2">
-                                                            <Users className="h-4 w-4 text-blue-600" />
-                                                            Teams
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-semibold">
-                                                            {totalStats.teams}
-                                                        </TableCell>
-                                                        <TableCell className="text-muted-foreground">
-                                                            {totalStats.members} members across all teams
-                                                        </TableCell>
-                                                    </TableRow>
-                                                    <TableRow>
-                                                        <TableCell className="flex items-center gap-2">
-                                                            <Youtube className="h-4 w-4 text-red-600" />
-                                                            Channels
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-semibold">
-                                                            {totalStats.channels}
-                                                        </TableCell>
-                                                        <TableCell className="text-muted-foreground">
-                                                            Active YouTube channels
-                                                        </TableCell>
-                                                    </TableRow>
-                                                    <TableRow>
-                                                        <TableCell className="flex items-center gap-2">
-                                                            <TrendingUp className="h-4 w-4 text-emerald-600" />
-                                                            Subscribers
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-semibold">
-                                                            {formatNumber(totalStats.subscribers)}
-                                                        </TableCell>
-                                                        <TableCell className="text-muted-foreground">
-                                                            Total across all channels
-                                                        </TableCell>
-                                                    </TableRow>
-                                                    <TableRow>
-                                                        <TableCell className="flex items-center gap-2">
-                                                            <Eye className="h-4 w-4 text-amber-600" />
-                                                            Views
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-semibold">
-                                                            {formatNumber(totalStats.views)}
-                                                        </TableCell>
-                                                        <TableCell className="text-muted-foreground">
-                                                            Total video views
-                                                        </TableCell>
-                                                    </TableRow>
-                                                    <TableRow>
-                                                        <TableCell className="flex items-center gap-2">
-                                                            <Video className="h-4 w-4 text-purple-600" />
-                                                            Videos
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-semibold">
-                                                            {totalStats.videos}
-                                                        </TableCell>
-                                                        <TableCell className="text-muted-foreground">
-                                                            Published videos
-                                                        </TableCell>
-                                                    </TableRow>
-                                                </TableBody>
-                                            </Table>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                <OverviewTab analytics={analytics} />
+                            </TabsContent>
+                            {/* Tab 2: Tương Tác */}
+                            <TabsContent value="engagement" className="space-y-6">
+                                <EngagementTab analytics={analytics} />
                             </TabsContent>
 
-                            {/* Teams Tab */}
-                            <TabsContent value="teams" className="space-y-6" id="teams-section">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Users className="h-5 w-5" />
-                                            Teams in {branch.name}
-                                        </CardTitle>
-                                        <CardDescription>
-                                            {totalStats.teams} teams with {totalStats.members} total members
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {teams.length > 0 ? (
-                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                                {teams.map((team) => (
-                                                    <TeamCard
-                                                        key={team._id}
-                                                        team={team}
-                                                        onClick={() => navigate(`/teams/${team._id}`)}
-                                                    />
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="p-8 rounded-lg border border-dashed bg-muted/30 text-center">
-                                                <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                                                <p className="text-muted-foreground">No teams found in this branch</p>
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                            {/* Tab 3: Doanh Thu */}
+                            <TabsContent value="revenue" className="space-y-6">
+                                <RevenueTab analytics={analytics} />
                             </TabsContent>
 
-                            {/* Channels Tab */}
-                            <TabsContent value="channels" className="space-y-6" id="channels-section">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Youtube className="h-5 w-5" />
-                                            Channels in {branch.name}
-                                        </CardTitle>
-                                        <CardDescription>
-                                            {totalStats.channels} channels with {formatNumber(totalStats.subscribers)} subscribers
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="mb-4 p-4 rounded-lg border bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100">
-                                            <div className="flex items-start gap-3">
-                                                <Youtube className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                                                <div>
-                                                    <p className="font-medium mb-1">Channels in Sidebar</p>
-                                                    <p className="text-sm">
-                                                        All channels for this branch are displayed in the left sidebar.
-                                                        Click on any channel to view detailed information including stats,
-                                                        analytics, team assignment, and recent videos.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {channels.length > 0 ? (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {channels.map((channel) => (
-                                                    <ChannelCard
-                                                        key={channel._id}
-                                                        channel={channel}
-                                                        onClick={() => navigate(`/channels/${channel._id}`)}
-                                                    />
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="p-8 rounded-lg border border-dashed bg-muted/30 text-center">
-                                                <Youtube className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                                                <p className="text-muted-foreground">No channels found in this branch</p>
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                            {/* Tab 4: Khán Giả (Teams) */}
+                            <TabsContent value="audience" className="space-y-6">
+                                <AudienceTab teams={teams} totalMembers={totalStats.members} />
                             </TabsContent>
 
-                            {/* Analytics Tab */}
-                            <TabsContent value="analytics" className="space-y-6" id="analytics-section">
-                                {loadingAnalytics ? (
-                                    <Card>
-                                        <CardContent className="p-12">
-                                            <div className="flex flex-col items-center gap-4">
-                                                <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-                                                <p className="text-muted-foreground">Loading analytics...</p>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                ) : analytics ? (
-                                    <>
-                                        {/* Performance Metrics */}
-                                        <Card>
-                                            <CardHeader>
-                                                <CardTitle className="flex items-center gap-2">
-                                                    <BarChart3 className="h-5 w-5" />
-                                                    Performance Metrics
-                                                </CardTitle>
-                                                <CardDescription>
-                                                    Analytics for {branch.name} from {dateRange.startDate} to {dateRange.endDate}
-                                                </CardDescription>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                    <Card className="border-2">
-                                                        <CardContent className="p-6">
-                                                            <div className="flex items-center gap-3 mb-4">
-                                                                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950">
-                                                                    <Eye className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-muted-foreground mb-1">Total Views</p>
-                                                            <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                                                                {formatNumber(analytics.analytics.views)}
-                                                            </p>
-                                                        </CardContent>
-                                                    </Card>
+                            {/* Tab 5: Nội Dung (Channels) */}
+                            <TabsContent value="content" className="space-y-6">
+                                <ContentTab channels={channels} totalSubscribers={totalStats.subscribers} />
+                            </TabsContent>
 
-                                                    <Card className="border-2">
-                                                        <CardContent className="p-6">
-                                                            <div className="flex items-center gap-3 mb-4">
-                                                                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-950">
-                                                                    <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-muted-foreground mb-1">Watch Time</p>
-                                                            <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">
-                                                                {formatDuration(analytics.analytics.watchTime)}
-                                                            </p>
-                                                        </CardContent>
-                                                    </Card>
-
-                                                    <Card className="border-2">
-                                                        <CardContent className="p-6">
-                                                            <div className="flex items-center gap-3 mb-4">
-                                                                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-950">
-                                                                    <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-muted-foreground mb-1">Subscribers Gained</p>
-                                                            <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                                                                +{formatNumber(analytics.analytics.subscribersGained)}
-                                                            </p>
-                                                        </CardContent>
-                                                    </Card>
-
-                                                    <Card className="border-2">
-                                                        <CardContent className="p-6">
-                                                            <div className="flex items-center gap-3 mb-4">
-                                                                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-950">
-                                                                    <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-sm font-medium text-muted-foreground mb-1">Est. Revenue</p>
-                                                            <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                                                                {formatCurrency(analytics.analytics.estimatedRevenue)}
-                                                            </p>
-                                                        </CardContent>
-                                                    </Card>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-
-                                        {/* Summary Statistics */}
-                                        <Card>
-                                            <CardHeader>
-                                                <CardTitle>Summary Statistics</CardTitle>
-                                                <CardDescription>
-                                                    Overall branch performance
-                                                </CardDescription>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="rounded-md border">
-                                                    <Table>
-                                                        <TableHeader>
-                                                            <TableRow className="bg-muted/50">
-                                                                <TableHead className="font-semibold">Metric</TableHead>
-                                                                <TableHead className="font-semibold text-right">Total</TableHead>
-                                                                <TableHead className="font-semibold text-right">Avg/Channel</TableHead>
-                                                            </TableRow>
-                                                        </TableHeader>
-                                                        <TableBody>
-                                                            <TableRow>
-                                                                <TableCell className="flex items-center gap-2">
-                                                                    <Youtube className="h-4 w-4 text-muted-foreground" />
-                                                                    Channels
-                                                                </TableCell>
-                                                                <TableCell className="text-right font-medium">
-                                                                    {analytics.summary.totalChannels}
-                                                                </TableCell>
-                                                                <TableCell className="text-right text-muted-foreground">-</TableCell>
-                                                            </TableRow>
-                                                            <TableRow>
-                                                                <TableCell className="flex items-center gap-2">
-                                                                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                                                                    Subscribers
-                                                                </TableCell>
-                                                                <TableCell className="text-right font-medium">
-                                                                    {formatNumber(analytics.summary.totalSubscribers)}
-                                                                </TableCell>
-                                                                <TableCell className="text-right text-muted-foreground">
-                                                                    {analytics.summary.totalChannels > 0
-                                                                        ? formatNumber(Math.round(analytics.summary.totalSubscribers / analytics.summary.totalChannels))
-                                                                        : '0'}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                            <TableRow>
-                                                                <TableCell className="flex items-center gap-2">
-                                                                    <Eye className="h-4 w-4 text-muted-foreground" />
-                                                                    Views
-                                                                </TableCell>
-                                                                <TableCell className="text-right font-medium">
-                                                                    {formatNumber(analytics.summary.totalViews)}
-                                                                </TableCell>
-                                                                <TableCell className="text-right text-muted-foreground">
-                                                                    {analytics.summary.totalChannels > 0
-                                                                        ? formatNumber(Math.round(analytics.summary.totalViews / analytics.summary.totalChannels))
-                                                                        : '0'}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                            <TableRow>
-                                                                <TableCell className="flex items-center gap-2">
-                                                                    <Video className="h-4 w-4 text-muted-foreground" />
-                                                                    Videos
-                                                                </TableCell>
-                                                                <TableCell className="text-right font-medium">
-                                                                    {analytics.summary.totalVideos}
-                                                                </TableCell>
-                                                                <TableCell className="text-right text-muted-foreground">
-                                                                    {analytics.summary.totalChannels > 0
-                                                                        ? Math.round(analytics.summary.totalVideos / analytics.summary.totalChannels)
-                                                                        : '0'}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        </TableBody>
-                                                    </Table>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </>
-                                ) : (
-                                    <Card>
-                                        <CardContent className="p-12">
-                                            <div className="text-center">
-                                                <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
-                                                <p className="text-muted-foreground mb-4">No analytics data available</p>
-                                                <Button onClick={fetchAnalytics} variant="outline">
-                                                    <RefreshCw className="h-4 w-4 mr-2" />
-                                                    Load Analytics
-                                                </Button>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                )}
+                            {/* Tab 6: Nâng Cao */}
+                            <TabsContent value="advanced" className="space-y-6">
+                                <AdvancedTab analytics={analytics} isLoading={loadingAnalytics} onRefresh={fetchAnalytics} />
                             </TabsContent>
                         </Tabs>
                     </div>

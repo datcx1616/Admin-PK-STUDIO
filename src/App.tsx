@@ -7,7 +7,6 @@ import LoginPage from "@/[locale]/login/page";
 import SignupPage from "@/[locale]/signup/page";
 import { PrivateRoute } from "@/pages/auth/PrivateRoute";
 import { AppSidebar } from "@/layouts/components/app-sidebar";
-import { SiteHeader } from "@/layouts/components/site-header";
 import DetailedAnalytics from "@/pages/analytics/page";
 import CreateVideoPage from "@/pages/videos/create/page";
 import MyVideosPage from "@/pages/videos/my/page";
@@ -27,7 +26,7 @@ import ChannelAnalyticsPage from "@/dashboard/ChannelAnalyticsPage";
 
 //
 import HomePage from "@/pages/HomePage"
-import BranchDetailPageEnhanced from "@/pages/brand_chi_nhanh/BranchDetailPageEnhanced"
+import BranchDetailPagee from "@/pages/brand_chi_nhanh/BranchDetailPage"
 import TeamDetailPagee from "@/pages/teams_chi_nhanh/TeamDetailPage"
 
 import './i18n';
@@ -239,7 +238,7 @@ export default function App() {
         element={
           <PrivateRoute>
             <AdminLayout>
-              <BranchDetailPageEnhanced />
+              <BranchDetailPagee />
             </AdminLayout>
           </PrivateRoute>
         }
