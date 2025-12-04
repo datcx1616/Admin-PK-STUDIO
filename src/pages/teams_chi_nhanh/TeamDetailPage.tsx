@@ -2,6 +2,8 @@ import * as React from "react"
 import { useParams } from "react-router-dom"
 import { ContentHeader } from "@/pages/components/ContentHeader"
 import { ChannelSidebar } from "@/pages/components/ChannelSidebar"
+import { ChannelDetailView } from "@/pages/components/ChannelDetailView"
+import type { Channel } from "@/types/channel.types"
 import {
     Home,
     Users,
@@ -302,6 +304,7 @@ export default function TeamDetailPage() {
     const [team, setTeam] = React.useState<TeamData | null>(null)
     const [overview, setOverview] = React.useState<OverviewData | null>(null)
     const [youtubeAnalytics, setYoutubeAnalytics] = React.useState<YouTubeAnalyticsData | null>(null)
+    const [selectedChannel, setSelectedChannel] = React.useState<Channel | null>(null)
     const [loading, setLoading] = React.useState(true)
     // Đã lược bỏ cờ loading chi tiết (overviewLoading, analyticsLoading) sau khi tách UI
     const [dateRange, setDateRange] = React.useState<'7' | '30' | '90' | '180'>('30')
@@ -480,7 +483,13 @@ export default function TeamDetailPage() {
                     ]}
                 />
                 <div className="flex flex-1 overflow-hidden">
-                    <ChannelSidebar teamId={teamId} side="left" mode="inline" />
+                    <ChannelSidebar
+                        teamId={teamId}
+                        side="left"
+                        mode="inline"
+                        onChannelSelect={setSelectedChannel}
+                        showDialog={false}
+                    />
                     <div className="flex-1 overflow-y-auto p-6">
                         <div className="text-center text-muted-foreground">Không tìm thấy đội</div>
                     </div>
@@ -540,764 +549,777 @@ export default function TeamDetailPage() {
             {/* Layout: Channel Sidebar on left, Content on right */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Channel Sidebar - fetches channels from API based on teamId */}
-                <ChannelSidebar teamId={teamId} side="left" mode="inline" />
+                <ChannelSidebar
+                    teamId={teamId}
+                    side="left"
+                    mode="inline"
+                    onChannelSelect={setSelectedChannel}
+                    showDialog={false}
+                />
 
                 {/* Main Content */}
                 <div className="flex-1 overflow-y-auto">
-                    <div className="max-w-7xl mx-auto p-6 space-y-6">
-                        {/* Modern Header - compact toolbar style */}
-                        <Card className="border shadow-sm">
-                            <CardHeader className="space-y-3">
-                                {/* Row 1: Title + channel count + range selector */}
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <div className="flex items-center gap-3">
-                                        <Users className="h-6 w-6 text-primary" />
-                                        <h1 className="text-2xl font-bold tracking-tight">{team.name}</h1>
-                                        <Badge variant="secondary" className="ml-1 gap-1">
-                                            <Dot className="h-4 w-4" />
-                                            {stats.totalChannels} kênh
-                                        </Badge>
-                                        {team.branch && (
-                                            <Badge variant="outline" className="gap-1.5">
-                                                <Building2 className="h-3 w-3" />
-                                                {team.branch.name}
+                    {selectedChannel ? (
+                        <ChannelDetailView
+                            channel={selectedChannel}
+                            onBack={() => setSelectedChannel(null)}
+                        />
+                    ) : (
+                        <div className="max-w-7xl mx-auto p-6 space-y-6">
+                            {/* Modern Header - compact toolbar style */}
+                            <Card className="border shadow-sm">
+                                <CardHeader className="space-y-3">
+                                    {/* Row 1: Title + channel count + range selector */}
+                                    <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <Users className="h-6 w-6 text-primary" />
+                                            <h1 className="text-2xl font-bold tracking-tight">{team.name}</h1>
+                                            <Badge variant="secondary" className="ml-1 gap-1">
+                                                <Dot className="h-4 w-4" />
+                                                {stats.totalChannels} kênh
                                             </Badge>
+                                            {team.branch && (
+                                                <Badge variant="outline" className="gap-1.5">
+                                                    <Building2 className="h-3 w-3" />
+                                                    {team.branch.name}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                                            <span className="text-sm text-muted-foreground">Khoảng thời gian:</span>
+                                            <ToggleGroup
+                                                type="single"
+                                                value={dateRange}
+                                                onValueChange={(v) => v && setDateRange(v as '7' | '30' | '90' | '180')}
+                                                variant="outline"
+                                                size="sm"
+                                                spacing={0}
+                                                className="border bg-background shadow-xs"
+                                                aria-label="Chọn khoảng thời gian"
+                                            >
+                                                <ToggleGroupItem value="7" className="px-4 font-semibold">7 ngày</ToggleGroupItem>
+                                                <ToggleGroupItem value="30" className="px-4 font-semibold">30 ngày</ToggleGroupItem>
+                                                <ToggleGroupItem value="90" className="px-4 font-semibold">90 ngày</ToggleGroupItem>
+                                                <ToggleGroupItem value="180" className="px-4 font-semibold">180 ngày</ToggleGroupItem>
+                                            </ToggleGroup>
+                                        </div>
+                                    </div>
+
+                                    {/* Row 2: Actions + Leader */}
+                                    <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <ButtonGroup>
+                                            <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
+                                                <RefreshCw className="h-4 w-4" />
+                                                Làm mới
+                                            </Button>
+                                            <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
+                                                <Download className="h-4 w-4" />
+                                                Xuất CSV
+                                            </Button>
+                                            <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2">
+                                                <Printer className="h-4 w-4" />
+                                                In/PDF
+                                            </Button>
+                                        </ButtonGroup>
+
+                                        {team.leader && (
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <span className="text-muted-foreground">Trưởng nhóm:</span>
+                                                <span className="font-medium">{team.leader.name}</span>
+                                            </div>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-sm text-muted-foreground">Khoảng thời gian:</span>
-                                        <ToggleGroup
-                                            type="single"
-                                            value={dateRange}
-                                            onValueChange={(v) => v && setDateRange(v as '7' | '30' | '90' | '180')}
-                                            variant="outline"
-                                            size="sm"
-                                            spacing={0}
-                                            className="border bg-background shadow-xs"
-                                            aria-label="Chọn khoảng thời gian"
+                                </CardHeader>
+                            </Card>
+
+                            {/* Khối thống kê tổng quan với các ô màu */}
+                            <OverviewSummary stats={stats} />
+
+                            {/* Tabs chi tiết */}
+                            <Tabs defaultValue="members" className="space-y-6">
+                                <TabsList className="inline-flex h-auto w-full items-center justify-start rounded-lg bg-muted p-1 gap-1">
+                                    <TabsTrigger
+                                        value="members"
+                                        className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                                    >
+                                        <User className="h-4 w-4 mr-2" />
+                                        Thành viên ({team.members?.length || 0})
+                                    </TabsTrigger>
+
+                                    <TabsTrigger
+                                        value="channels"
+                                        className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                                    >
+                                        <Youtube className="h-4 w-4 mr-2" />
+                                        Kênh ({team.channels?.length || 0})
+                                    </TabsTrigger>
+
+                                    {overview?.channelAssignments && overview.channelAssignments.length > 0 && (
+                                        <TabsTrigger
+                                            value="assignments"
+                                            className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                                         >
-                                            <ToggleGroupItem value="7" className="px-4 font-semibold">7 ngày</ToggleGroupItem>
-                                            <ToggleGroupItem value="30" className="px-4 font-semibold">30 ngày</ToggleGroupItem>
-                                            <ToggleGroupItem value="90" className="px-4 font-semibold">90 ngày</ToggleGroupItem>
-                                            <ToggleGroupItem value="180" className="px-4 font-semibold">180 ngày</ToggleGroupItem>
-                                        </ToggleGroup>
-                                    </div>
-                                </div>
-
-                                {/* Row 2: Actions + Leader */}
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <ButtonGroup>
-                                        <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
-                                            <RefreshCw className="h-4 w-4" />
-                                            Làm mới
-                                        </Button>
-                                        <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
-                                            <Download className="h-4 w-4" />
-                                            Xuất CSV
-                                        </Button>
-                                        <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2">
-                                            <Printer className="h-4 w-4" />
-                                            In/PDF
-                                        </Button>
-                                    </ButtonGroup>
-
-                                    {team.leader && (
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <span className="text-muted-foreground">Trưởng nhóm:</span>
-                                            <span className="font-medium">{team.leader.name}</span>
-                                        </div>
+                                            <UserCircle className="h-4 w-4 mr-2" />
+                                            Phân công
+                                        </TabsTrigger>
                                     )}
-                                </div>
-                            </CardHeader>
-                        </Card>
 
-                        {/* Khối thống kê tổng quan với các ô màu */}
-                        <OverviewSummary stats={stats} />
+                                    {overview?.recentVideos && overview.recentVideos.length > 0 && (
+                                        <TabsTrigger
+                                            value="videos"
+                                            className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                                        >
+                                            <Video className="h-4 w-4 mr-2" />
+                                            Video gần đây
+                                        </TabsTrigger>
+                                    )}
 
-                        {/* Tabs chi tiết */}
-                        <Tabs defaultValue="members" className="space-y-6">
-                            <TabsList className="inline-flex h-auto w-full items-center justify-start rounded-lg bg-muted p-1 gap-1">
-                                <TabsTrigger
-                                    value="members"
-                                    className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                                >
-                                    <User className="h-4 w-4 mr-2" />
-                                    Thành viên ({team.members?.length || 0})
-                                </TabsTrigger>
+                                    {ytData?.channelAnalytics && ytData.channelAnalytics.length > 0 && (
+                                        <TabsTrigger
+                                            value="analytics"
+                                            className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+                                        >
+                                            <BarChart3 className="h-4 w-4 mr-2" />
+                                            Phân tích theo kênh
+                                        </TabsTrigger>
+                                    )}
 
-                                <TabsTrigger
-                                    value="channels"
-                                    className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                                >
-                                    <Youtube className="h-4 w-4 mr-2" />
-                                    Kênh ({team.channels?.length || 0})
-                                </TabsTrigger>
-
-                                {overview?.channelAssignments && overview.channelAssignments.length > 0 && (
                                     <TabsTrigger
-                                        value="assignments"
-                                        className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                                    >
-                                        <UserCircle className="h-4 w-4 mr-2" />
-                                        Phân công
-                                    </TabsTrigger>
-                                )}
-
-                                {overview?.recentVideos && overview.recentVideos.length > 0 && (
-                                    <TabsTrigger
-                                        value="videos"
-                                        className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                                    >
-                                        <Video className="h-4 w-4 mr-2" />
-                                        Video gần đây
-                                    </TabsTrigger>
-                                )}
-
-                                {ytData?.channelAnalytics && ytData.channelAnalytics.length > 0 && (
-                                    <TabsTrigger
-                                        value="analytics"
+                                        value="details"
                                         className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                                     >
                                         <BarChart3 className="h-4 w-4 mr-2" />
-                                        Phân tích theo kênh
+                                        Chi tiết
                                     </TabsTrigger>
-                                )}
+                                </TabsList>
 
-                                <TabsTrigger
-                                    value="details"
-                                    className="flex-1 rounded-md px-4 py-2.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                                >
-                                    <BarChart3 className="h-4 w-4 mr-2" />
-                                    Chi tiết
-                                </TabsTrigger>
-                            </TabsList>
-
-                            {/* Members Tab */}
-                            <TabsContent value="members" className="space-y-4">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <User className="h-5 w-5" />
-                                            Thành viên đội
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Tất cả thành viên trong đội
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {team.members && team.members.length > 0 ? (
-                                            <div className="rounded-md border">
-                                                <Table>
-                                                    <TableHeader>
-                                                        <TableRow className="bg-muted/50">
-                                                            <TableHead className="font-semibold">Thành viên</TableHead>
-                                                            <TableHead className="font-semibold">Email</TableHead>
-                                                            <TableHead className="font-semibold">Vai trò</TableHead>
-                                                            <TableHead className="font-semibold text-right">Trạng thái</TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {team.members.map((member: { _id: string; name: string; email: string; role: string }) => (
-                                                            <TableRow key={member._id} className="hover:bg-muted/50">
-                                                                <TableCell>
-                                                                    <div className="flex items-center gap-3">
-                                                                        <Avatar>
-                                                                            <AvatarFallback className="bg-linear-to-br from-blue-500 to-indigo-600 text-white">
-                                                                                {member.name?.charAt(0).toUpperCase()}
-                                                                            </AvatarFallback>
-                                                                        </Avatar>
-                                                                        <span className="font-medium">{member.name}</span>
-                                                                    </div>
-                                                                </TableCell>
-                                                                <TableCell className="text-muted-foreground">
-                                                                    {member.email}
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Badge variant="secondary">
-                                                                        {member.role}
-                                                                    </Badge>
-                                                                </TableCell>
-                                                                <TableCell className="text-right">
-                                                                    {team.leader?._id === member._id && (
-                                                                        <Badge className="bg-amber-500 hover:bg-amber-600">
-                                                                            <Award className="h-3 w-3 mr-1" />
-                                                                            Trưởng nhóm
-                                                                        </Badge>
-                                                                    )}
-                                                                </TableCell>
+                                {/* Members Tab */}
+                                <TabsContent value="members" className="space-y-4">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <User className="h-5 w-5" />
+                                                Thành viên đội
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Tất cả thành viên trong đội
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {team.members && team.members.length > 0 ? (
+                                                <div className="rounded-md border">
+                                                    <Table>
+                                                        <TableHeader>
+                                                            <TableRow className="bg-muted/50">
+                                                                <TableHead className="font-semibold">Thành viên</TableHead>
+                                                                <TableHead className="font-semibold">Email</TableHead>
+                                                                <TableHead className="font-semibold">Vai trò</TableHead>
+                                                                <TableHead className="font-semibold text-right">Trạng thái</TableHead>
                                                             </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
-                                            </div>
-                                        ) : (
-                                            <EmptyState
-                                                icon={User}
-                                                title="Chưa có thành viên"
-                                                description="Đội này chưa có thành viên"
-                                            />
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
-
-                            {/* Channels Tab */}
-                            <TabsContent value="channels" className="space-y-4">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Youtube className="h-5 w-5" />
-                                            Kênh YouTube
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Tất cả kênh do đội quản lý
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {team.channels && team.channels.length > 0 ? (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {team.channels.map((channel: { _id: string; name: string; youtubeChannelId: string; subscriberCount?: number; isConnected: boolean }) => (
-                                                    <Card key={channel._id} className="border-2 hover:border-primary transition-colors">
-                                                        <CardContent className="p-6">
-                                                            <div className="flex items-start gap-4">
-                                                                <div className="flex items-center justify-center h-14 w-14 rounded-full bg-linear-to-br from-red-500 to-pink-600 shrink-0">
-                                                                    <Youtube className="h-7 w-7 text-white" />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h3 className="font-semibold text-lg mb-1 truncate">
-                                                                        {channel.name}
-                                                                    </h3>
-                                                                    <p className="text-xs text-muted-foreground mb-3 font-mono truncate">
-                                                                        {channel.youtubeChannelId}
-                                                                    </p>
-                                                                    <div className="flex items-center justify-between">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <Users className="h-4 w-4 text-muted-foreground" />
-                                                                            <span className="text-sm font-medium">
-                                                                                {channel.subscriberCount?.toLocaleString() || 0}
-                                                                            </span>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {team.members.map((member: { _id: string; name: string; email: string; role: string }) => (
+                                                                <TableRow key={member._id} className="hover:bg-muted/50">
+                                                                    <TableCell>
+                                                                        <div className="flex items-center gap-3">
+                                                                            <Avatar>
+                                                                                <AvatarFallback className="bg-linear-to-br from-blue-500 to-indigo-600 text-white">
+                                                                                    {member.name?.charAt(0).toUpperCase()}
+                                                                                </AvatarFallback>
+                                                                            </Avatar>
+                                                                            <span className="font-medium">{member.name}</span>
                                                                         </div>
-                                                                        <Badge variant={channel.isConnected ? "default" : "secondary"}>
-                                                                            {channel.isConnected ? '✓ Đã kết nối' : 'Ngoại tuyến'}
+                                                                    </TableCell>
+                                                                    <TableCell className="text-muted-foreground">
+                                                                        {member.email}
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Badge variant="secondary">
+                                                                            {member.role}
                                                                         </Badge>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <EmptyState
-                                                icon={Youtube}
-                                                title="Chưa có kênh"
-                                                description="Đội này chưa có kênh YouTube"
-                                            />
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            </TabsContent>
+                                                                    </TableCell>
+                                                                    <TableCell className="text-right">
+                                                                        {team.leader?._id === member._id && (
+                                                                            <Badge className="bg-amber-500 hover:bg-amber-600">
+                                                                                <Award className="h-3 w-3 mr-1" />
+                                                                                Trưởng nhóm
+                                                                            </Badge>
+                                                                        )}
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+                                            ) : (
+                                                <EmptyState
+                                                    icon={User}
+                                                    title="Chưa có thành viên"
+                                                    description="Đội này chưa có thành viên"
+                                                />
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </TabsContent>
 
-                            {/* Channel Assignments Tab */}
-                            {
-                                overview?.channelAssignments && overview.channelAssignments.length > 0 && (
-                                    <TabsContent value="assignments" className="space-y-4">
-                                        <Card>
-                                            <CardHeader>
-                                                <CardTitle className="flex items-center gap-2">
-                                                    <UserCircle className="h-5 w-5" />
-                                                    Phân công kênh
-                                                </CardTitle>
-                                                <CardDescription>
-                                                    Phân công biên tập cho từng kênh
-                                                </CardDescription>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="space-y-4">
-                                                    {overview.channelAssignments.map((assignment) => (
-                                                        <Card key={assignment.channelId} className="border-2">
-                                                            <CardHeader className="pb-3">
-                                                                <div className="flex items-center justify-between">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-red-100">
-                                                                            <Youtube className="h-5 w-5 text-red-600" />
-                                                                        </div>
-                                                                        <div>
-                                                                            <CardTitle className="text-base">{assignment.channelName}</CardTitle>
-                                                                            <CardDescription className="text-xs">
-                                                                                {assignment.editorsAssigned} biên tập được phân công
-                                                                            </CardDescription>
-                                                                        </div>
+                                {/* Channels Tab */}
+                                <TabsContent value="channels" className="space-y-4">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <Youtube className="h-5 w-5" />
+                                                Kênh YouTube
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Tất cả kênh do đội quản lý
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {team.channels && team.channels.length > 0 ? (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {team.channels.map((channel: { _id: string; name: string; youtubeChannelId: string; subscriberCount?: number; isConnected: boolean }) => (
+                                                        <Card key={channel._id} className="border-2 hover:border-primary transition-colors">
+                                                            <CardContent className="p-6">
+                                                                <div className="flex items-start gap-4">
+                                                                    <div className="flex items-center justify-center h-14 w-14 rounded-full bg-linear-to-br from-red-500 to-pink-600 shrink-0">
+                                                                        <Youtube className="h-7 w-7 text-white" />
                                                                     </div>
-                                                                    <Badge variant="secondary" className="text-xs">
-                                                                        {assignment.editorsAssigned} Biên tập
-                                                                    </Badge>
-                                                                </div>
-                                                            </CardHeader>
-                                                            <CardContent>
-                                                                {assignment.editors && assignment.editors.length > 0 ? (
-                                                                    <div className="space-y-2">
-                                                                        {assignment.editors.map((editor) => (
-                                                                            <div
-                                                                                key={editor.userId}
-                                                                                className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-                                                                            >
-                                                                                <div className="flex items-center gap-3">
-                                                                                    <Avatar className="h-8 w-8">
-                                                                                        <AvatarFallback className="bg-linear-to-br from-blue-500 to-indigo-600 text-white text-xs">
-                                                                                            {editor.userName.charAt(0).toUpperCase()}
-                                                                                        </AvatarFallback>
-                                                                                    </Avatar>
-                                                                                    <div>
-                                                                                        <p className="font-medium text-sm">{editor.userName}</p>
-                                                                                        <p className="text-xs text-muted-foreground">{editor.email}</p>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div className="text-xs text-muted-foreground">
-                                                                                    {formatDate(editor.assignedAt)}
-                                                                                </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h3 className="font-semibold text-lg mb-1 truncate">
+                                                                            {channel.name}
+                                                                        </h3>
+                                                                        <p className="text-xs text-muted-foreground mb-3 font-mono truncate">
+                                                                            {channel.youtubeChannelId}
+                                                                        </p>
+                                                                        <div className="flex items-center justify-between">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <Users className="h-4 w-4 text-muted-foreground" />
+                                                                                <span className="text-sm font-medium">
+                                                                                    {channel.subscriberCount?.toLocaleString() || 0}
+                                                                                </span>
                                                                             </div>
-                                                                        ))}
+                                                                            <Badge variant={channel.isConnected ? "default" : "secondary"}>
+                                                                                {channel.isConnected ? '✓ Đã kết nối' : 'Ngoại tuyến'}
+                                                                            </Badge>
+                                                                        </div>
                                                                     </div>
-                                                                ) : (
-                                                                    <p className="text-sm text-muted-foreground text-center py-4">
-                                                                        Chưa phân công biên tập
-                                                                    </p>
-                                                                )}
+                                                                </div>
                                                             </CardContent>
                                                         </Card>
                                                     ))}
                                                 </div>
-                                            </CardContent>
-                                        </Card>
-                                    </TabsContent>
-                                )
-                            }
+                                            ) : (
+                                                <EmptyState
+                                                    icon={Youtube}
+                                                    title="Chưa có kênh"
+                                                    description="Đội này chưa có kênh YouTube"
+                                                />
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </TabsContent>
 
-                            {/* Recent Videos Tab */}
-                            {
-                                overview?.recentVideos && overview.recentVideos.length > 0 && (
-                                    <TabsContent value="videos" className="space-y-4">
-                                        <Card>
-                                            <CardHeader>
-                                                <CardTitle className="flex items-center gap-2">
-                                                    <Video className="h-5 w-5" />
-                                                    Video gần đây
-                                                </CardTitle>
-                                                <CardDescription>
-                                                    Các video mới nhất từ các kênh của đội
-                                                </CardDescription>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="space-y-3">
-                                                    {overview.recentVideos.map((video) => (
-                                                        <div
-                                                            key={video._id}
-                                                            className="flex items-start gap-4 p-4 border rounded-lg hover:bg-accent transition-colors"
-                                                        >
-                                                            <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-red-100 shrink-0">
-                                                                <Video className="h-6 w-6 text-red-600" />
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <h4 className="font-medium mb-1 line-clamp-2">
-                                                                    {video.title}
-                                                                </h4>
-                                                                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                                                    <Badge variant="outline" className="text-xs">
-                                                                        {video.status}
-                                                                    </Badge>
-                                                                    {video.channel && (
-                                                                        <span className="flex items-center gap-1">
-                                                                            <Youtube className="h-3 w-3" />
-                                                                            {video.channel.name}
-                                                                        </span>
+                                {/* Channel Assignments Tab */}
+                                {
+                                    overview?.channelAssignments && overview.channelAssignments.length > 0 && (
+                                        <TabsContent value="assignments" className="space-y-4">
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle className="flex items-center gap-2">
+                                                        <UserCircle className="h-5 w-5" />
+                                                        Phân công kênh
+                                                    </CardTitle>
+                                                    <CardDescription>
+                                                        Phân công biên tập cho từng kênh
+                                                    </CardDescription>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="space-y-4">
+                                                        {overview.channelAssignments.map((assignment) => (
+                                                            <Card key={assignment.channelId} className="border-2">
+                                                                <CardHeader className="pb-3">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-red-100">
+                                                                                <Youtube className="h-5 w-5 text-red-600" />
+                                                                            </div>
+                                                                            <div>
+                                                                                <CardTitle className="text-base">{assignment.channelName}</CardTitle>
+                                                                                <CardDescription className="text-xs">
+                                                                                    {assignment.editorsAssigned} biên tập được phân công
+                                                                                </CardDescription>
+                                                                            </div>
+                                                                        </div>
+                                                                        <Badge variant="secondary" className="text-xs">
+                                                                            {assignment.editorsAssigned} Biên tập
+                                                                        </Badge>
+                                                                    </div>
+                                                                </CardHeader>
+                                                                <CardContent>
+                                                                    {assignment.editors && assignment.editors.length > 0 ? (
+                                                                        <div className="space-y-2">
+                                                                            {assignment.editors.map((editor) => (
+                                                                                <div
+                                                                                    key={editor.userId}
+                                                                                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                                                                                >
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <Avatar className="h-8 w-8">
+                                                                                            <AvatarFallback className="bg-linear-to-br from-blue-500 to-indigo-600 text-white text-xs">
+                                                                                                {editor.userName.charAt(0).toUpperCase()}
+                                                                                            </AvatarFallback>
+                                                                                        </Avatar>
+                                                                                        <div>
+                                                                                            <p className="font-medium text-sm">{editor.userName}</p>
+                                                                                            <p className="text-xs text-muted-foreground">{editor.email}</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="text-xs text-muted-foreground">
+                                                                                        {formatDate(editor.assignedAt)}
+                                                                                    </div>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    ) : (
+                                                                        <p className="text-sm text-muted-foreground text-center py-4">
+                                                                            Chưa phân công biên tập
+                                                                        </p>
                                                                     )}
-                                                                    {video.createdAt && (
-                                                                        <span className="flex items-center gap-1">
-                                                                            <Clock className="h-3 w-3" />
-                                                                            {formatDate(video.createdAt)}
-                                                                        </span>
-                                                                    )}
+                                                                </CardContent>
+                                                            </Card>
+                                                        ))}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </TabsContent>
+                                    )
+                                }
+
+                                {/* Recent Videos Tab */}
+                                {
+                                    overview?.recentVideos && overview.recentVideos.length > 0 && (
+                                        <TabsContent value="videos" className="space-y-4">
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle className="flex items-center gap-2">
+                                                        <Video className="h-5 w-5" />
+                                                        Video gần đây
+                                                    </CardTitle>
+                                                    <CardDescription>
+                                                        Các video mới nhất từ các kênh của đội
+                                                    </CardDescription>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="space-y-3">
+                                                        {overview.recentVideos.map((video) => (
+                                                            <div
+                                                                key={video._id}
+                                                                className="flex items-start gap-4 p-4 border rounded-lg hover:bg-accent transition-colors"
+                                                            >
+                                                                <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-red-100 shrink-0">
+                                                                    <Video className="h-6 w-6 text-red-600" />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <h4 className="font-medium mb-1 line-clamp-2">
+                                                                        {video.title}
+                                                                    </h4>
+                                                                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                                                        <Badge variant="outline" className="text-xs">
+                                                                            {video.status}
+                                                                        </Badge>
+                                                                        {video.channel && (
+                                                                            <span className="flex items-center gap-1">
+                                                                                <Youtube className="h-3 w-3" />
+                                                                                {video.channel.name}
+                                                                            </span>
+                                                                        )}
+                                                                        {video.createdAt && (
+                                                                            <span className="flex items-center gap-1">
+                                                                                <Clock className="h-3 w-3" />
+                                                                                {formatDate(video.createdAt)}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </TabsContent>
-                                )
-                            }
+                                                        ))}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </TabsContent>
+                                    )
+                                }
 
-                            {/* Analytics by Channel Tab - Thống kê từ YouTube API */}
-                            {
-                                ytData?.channelAnalytics && ytData.channelAnalytics.length > 0 && (
-                                    <TabsContent value="analytics" className="space-y-4">
-                                        <Card>
-                                            <CardHeader>
-                                                <CardTitle className="flex items-center gap-2">
-                                                    <BarChart3 className="h-5 w-5" />
-                                                    Phân tích YouTube theo kênh
-                                                </CardTitle>
-                                                <CardDescription>
-                                                    Dữ liệu thống kê từ YouTube API ({ytData.dateRange?.startDate} - {ytData.dateRange?.endDate})
-                                                </CardDescription>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="space-y-4">
-                                                    {ytData.channelAnalytics.map((item: ChannelAnalyticsItem) => (
-                                                        <Card key={item.channelId} className="border-2">
-                                                            <CardHeader className="pb-3">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-red-100 shrink-0">
-                                                                        <Youtube className="h-5 w-5 text-red-600" />
+                                {/* Analytics by Channel Tab - Thống kê từ YouTube API */}
+                                {
+                                    ytData?.channelAnalytics && ytData.channelAnalytics.length > 0 && (
+                                        <TabsContent value="analytics" className="space-y-4">
+                                            <Card>
+                                                <CardHeader>
+                                                    <CardTitle className="flex items-center gap-2">
+                                                        <BarChart3 className="h-5 w-5" />
+                                                        Phân tích YouTube theo kênh
+                                                    </CardTitle>
+                                                    <CardDescription>
+                                                        Dữ liệu thống kê từ YouTube API ({ytData.dateRange?.startDate} - {ytData.dateRange?.endDate})
+                                                    </CardDescription>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="space-y-4">
+                                                        {ytData.channelAnalytics.map((item: ChannelAnalyticsItem) => (
+                                                            <Card key={item.channelId} className="border-2">
+                                                                <CardHeader className="pb-3">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-red-100 shrink-0">
+                                                                            <Youtube className="h-5 w-5 text-red-600" />
+                                                                        </div>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <CardTitle className="text-lg">{item.channelName}</CardTitle>
+                                                                            <CardDescription className="text-xs">
+                                                                                ID: {item.channelId}
+                                                                            </CardDescription>
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <CardTitle className="text-lg">{item.channelName}</CardTitle>
-                                                                        <CardDescription className="text-xs">
-                                                                            ID: {item.channelId}
-                                                                        </CardDescription>
+                                                                </CardHeader>
+                                                                <CardContent>
+                                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                                <Eye className="h-4 w-4" />
+                                                                                Lượt xem
+                                                                            </div>
+                                                                            <p className="text-2xl font-bold">{(item.basic?.totals?.totalViews || 0).toLocaleString()}</p>
+                                                                        </div>
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                                <Clock className="h-4 w-4" />
+                                                                                Thời gian xem
+                                                                            </div>
+                                                                            <p className="text-2xl font-bold">
+                                                                                {(item.basic?.totals?.totalWatchTimeHours || 0).toLocaleString()}h
+                                                                            </p>
+                                                                            <p className="text-xs text-muted-foreground">
+                                                                                {(item.basic?.totals?.totalWatchTimeMinutes || 0).toLocaleString()} phút
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                                <ThumbsUp className="h-4 w-4" />
+                                                                                Lượt thích
+                                                                            </div>
+                                                                            <p className="text-2xl font-bold">{(item.engagement?.totals?.totalLikes || 0).toLocaleString()}</p>
+                                                                        </div>
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                                <MessageSquare className="h-4 w-4" />
+                                                                                Bình luận
+                                                                            </div>
+                                                                            <p className="text-2xl font-bold">{(item.engagement?.totals?.totalComments || 0).toLocaleString()}</p>
+                                                                        </div>
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                                <Share2 className="h-4 w-4" />
+                                                                                Chia sẻ
+                                                                            </div>
+                                                                            <p className="text-2xl font-bold">{(item.engagement?.totals?.totalShares || 0).toLocaleString()}</p>
+                                                                        </div>
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                                <TrendingUp className="h-4 w-4 text-green-600" />
+                                                                                Subscriber tăng
+                                                                            </div>
+                                                                            <p className="text-2xl font-bold text-green-600">
+                                                                                +{(item.basic?.totals?.totalSubscribersGained || 0).toLocaleString()}
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                                <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
+                                                                                Subscriber giảm
+                                                                            </div>
+                                                                            <p className="text-2xl font-bold text-red-600">
+                                                                                -{(item.basic?.totals?.totalSubscribersLost || 0).toLocaleString()}
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                                                <Activity className="h-4 w-4" />
+                                                                                Thời lượng xem TB
+                                                                            </div>
+                                                                            <p className="text-2xl font-bold">
+                                                                                {Math.round(item.basic?.totals?.averageViewDuration || 0)}s
+                                                                            </p>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
+                                                                </CardContent>
+                                                            </Card>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Summary Card */}
+                                                    {ytData?.basic && ytData?.engagement && (
+                                                        <Card className="mt-6 border-2 border-primary/20 bg-primary/5">
+                                                            <CardHeader>
+                                                                <CardTitle className="flex items-center gap-2">
+                                                                    <Award className="h-5 w-5 text-primary" />
+                                                                    Tổng Hợp Toàn Team
+                                                                </CardTitle>
                                                             </CardHeader>
                                                             <CardContent>
-                                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                                                     <div className="space-y-1">
                                                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                                             <Eye className="h-4 w-4" />
-                                                                            Lượt xem
+                                                                            Tổng lượt xem
                                                                         </div>
-                                                                        <p className="text-2xl font-bold">{(item.basic?.totals?.totalViews || 0).toLocaleString()}</p>
+                                                                        <p className="text-3xl font-bold text-primary">
+                                                                            {(ytData.basic.totals.totalViews || 0).toLocaleString()}
+                                                                        </p>
                                                                     </div>
                                                                     <div className="space-y-1">
                                                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                                             <Clock className="h-4 w-4" />
                                                                             Thời gian xem
                                                                         </div>
-                                                                        <p className="text-2xl font-bold">
-                                                                            {(item.basic?.totals?.totalWatchTimeHours || 0).toLocaleString()}h
-                                                                        </p>
-                                                                        <p className="text-xs text-muted-foreground">
-                                                                            {(item.basic?.totals?.totalWatchTimeMinutes || 0).toLocaleString()} phút
+                                                                        <p className="text-3xl font-bold text-primary">
+                                                                            {(ytData.basic.totals.totalWatchTimeHours || 0).toLocaleString()}h
                                                                         </p>
                                                                     </div>
                                                                     <div className="space-y-1">
                                                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                                             <ThumbsUp className="h-4 w-4" />
-                                                                            Lượt thích
+                                                                            Tổng lượt thích
                                                                         </div>
-                                                                        <p className="text-2xl font-bold">{(item.engagement?.totals?.totalLikes || 0).toLocaleString()}</p>
-                                                                    </div>
-                                                                    <div className="space-y-1">
-                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                            <MessageSquare className="h-4 w-4" />
-                                                                            Bình luận
-                                                                        </div>
-                                                                        <p className="text-2xl font-bold">{(item.engagement?.totals?.totalComments || 0).toLocaleString()}</p>
-                                                                    </div>
-                                                                    <div className="space-y-1">
-                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                            <Share2 className="h-4 w-4" />
-                                                                            Chia sẻ
-                                                                        </div>
-                                                                        <p className="text-2xl font-bold">{(item.engagement?.totals?.totalShares || 0).toLocaleString()}</p>
-                                                                    </div>
-                                                                    <div className="space-y-1">
-                                                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                            <TrendingUp className="h-4 w-4 text-green-600" />
-                                                                            Subscriber tăng
-                                                                        </div>
-                                                                        <p className="text-2xl font-bold text-green-600">
-                                                                            +{(item.basic?.totals?.totalSubscribersGained || 0).toLocaleString()}
+                                                                        <p className="text-3xl font-bold text-primary">
+                                                                            {(ytData.engagement.totals.totalLikes || 0).toLocaleString()}
                                                                         </p>
                                                                     </div>
                                                                     <div className="space-y-1">
                                                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                            <TrendingUp className="h-4 w-4 text-red-600 rotate-180" />
-                                                                            Subscriber giảm
+                                                                            <TrendingUp className="h-4 w-4 text-green-600" />
+                                                                            Subscribers thuần
                                                                         </div>
-                                                                        <p className="text-2xl font-bold text-red-600">
-                                                                            -{(item.basic?.totals?.totalSubscribersLost || 0).toLocaleString()}
+                                                                        <p className={cn(
+                                                                            "text-3xl font-bold",
+                                                                            (ytData.basic.totals.totalSubscribersNet || 0) > 0 ? "text-green-600" : "text-red-600"
+                                                                        )}>
+                                                                            {(ytData.basic.totals.totalSubscribersNet || 0) > 0 ? '+' : ''}
+                                                                            {(ytData.basic.totals.totalSubscribersNet || 0).toLocaleString()}
                                                                         </p>
                                                                     </div>
                                                                     <div className="space-y-1">
                                                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                                             <Activity className="h-4 w-4" />
-                                                                            Thời lượng xem TB
+                                                                            Tỷ lệ tương tác
                                                                         </div>
-                                                                        <p className="text-2xl font-bold">
-                                                                            {Math.round(item.basic?.totals?.averageViewDuration || 0)}s
+                                                                        <p className="text-3xl font-bold text-primary">
+                                                                            {(ytData.engagement.totals.engagementRate || 0).toFixed(2)}%
                                                                         </p>
                                                                     </div>
                                                                 </div>
                                                             </CardContent>
                                                         </Card>
-                                                    ))}
-                                                </div>
+                                                    )}
+                                                </CardContent>
+                                            </Card>
+                                        </TabsContent>
+                                    )
+                                }
 
-                                                {/* Summary Card */}
-                                                {ytData?.basic && ytData?.engagement && (
-                                                    <Card className="mt-6 border-2 border-primary/20 bg-primary/5">
-                                                        <CardHeader>
-                                                            <CardTitle className="flex items-center gap-2">
-                                                                <Award className="h-5 w-5 text-primary" />
-                                                                Tổng Hợp Toàn Team
-                                                            </CardTitle>
-                                                        </CardHeader>
-                                                        <CardContent>
-                                                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                        <Eye className="h-4 w-4" />
-                                                                        Tổng lượt xem
-                                                                    </div>
-                                                                    <p className="text-3xl font-bold text-primary">
-                                                                        {(ytData.basic.totals.totalViews || 0).toLocaleString()}
-                                                                    </p>
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                        <Clock className="h-4 w-4" />
-                                                                        Thời gian xem
-                                                                    </div>
-                                                                    <p className="text-3xl font-bold text-primary">
-                                                                        {(ytData.basic.totals.totalWatchTimeHours || 0).toLocaleString()}h
-                                                                    </p>
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                        <ThumbsUp className="h-4 w-4" />
-                                                                        Tổng lượt thích
-                                                                    </div>
-                                                                    <p className="text-3xl font-bold text-primary">
-                                                                        {(ytData.engagement.totals.totalLikes || 0).toLocaleString()}
-                                                                    </p>
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                        <TrendingUp className="h-4 w-4 text-green-600" />
-                                                                        Subscribers thuần
-                                                                    </div>
-                                                                    <p className={cn(
-                                                                        "text-3xl font-bold",
-                                                                        (ytData.basic.totals.totalSubscribersNet || 0) > 0 ? "text-green-600" : "text-red-600"
-                                                                    )}>
-                                                                        {(ytData.basic.totals.totalSubscribersNet || 0) > 0 ? '+' : ''}
-                                                                        {(ytData.basic.totals.totalSubscribersNet || 0).toLocaleString()}
-                                                                    </p>
-                                                                </div>
-                                                                <div className="space-y-1">
-                                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                                        <Activity className="h-4 w-4" />
-                                                                        Tỷ lệ tương tác
-                                                                    </div>
-                                                                    <p className="text-3xl font-bold text-primary">
-                                                                        {(ytData.engagement.totals.engagementRate || 0).toFixed(2)}%
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                )}
-                                            </CardContent>
-                                        </Card>
-                                    </TabsContent>
-                                )
-                            }
-
-                            {/* Details Tab - Chi tiết tổng hợp */}
-                            <TabsContent value="details" className="space-y-4">
-                                {/* Statistics Summary Table */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <BarChart3 className="h-5 w-5" />
-                                            Bảng Chi Tiết Thống Kê
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Tổng hợp số liệu từ {stats.totalChannels} kênh
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="rounded-md border">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow className="bg-muted/50">
-                                                        <TableHead className="font-semibold">Chỉ số</TableHead>
-                                                        <TableHead className="font-semibold text-right">Tổng</TableHead>
-                                                        <TableHead className="font-semibold text-right">TB/Kênh</TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    <MetricRow
-                                                        icon={Eye}
-                                                        label="Lượt xem"
-                                                        total={stats.totalViews}
-                                                        avg={stats.totalChannels ? Math.round(stats.totalViews / stats.totalChannels) : 0}
-                                                    />
-                                                    <MetricRow
-                                                        icon={Clock}
-                                                        label="Thời gian xem (giờ)"
-                                                        total={stats.totalWatchTimeHours}
-                                                        avg={stats.totalChannels ? Math.round(stats.totalWatchTimeHours / stats.totalChannels) : 0}
-                                                    />
-                                                    <MetricRow
-                                                        icon={Activity}
-                                                        label="Thời lượng TB (giây)"
-                                                        total={Math.round(stats.averageViewDuration)}
-                                                        avg={stats.totalChannels && stats.averageViewDuration ? Math.round(stats.averageViewDuration) : 0}
-                                                    />
-                                                    <MetricRow
-                                                        icon={Users}
-                                                        label="Subscribers mới"
-                                                        total={stats.subscribersGained}
-                                                        avg={stats.totalChannels ? Math.round(stats.subscribersGained / stats.totalChannels) : 0}
-                                                        prefix="+"
-                                                        variant="success"
-                                                    />
-                                                    <MetricRow
-                                                        icon={Users}
-                                                        label="Subscribers mất"
-                                                        total={stats.subscribersLost}
-                                                        avg={stats.totalChannels ? Math.round(stats.subscribersLost / stats.totalChannels) : 0}
-                                                        prefix="-"
-                                                        variant="destructive"
-                                                    />
-                                                    <MetricRow
-                                                        icon={TrendingUp}
-                                                        label="Subscribers thuần"
-                                                        total={stats.subscribersNet}
-                                                        avg={stats.totalChannels ? Math.round(stats.subscribersNet / stats.totalChannels) : 0}
-                                                        highlight
-                                                    />
-                                                    <MetricRow
-                                                        icon={ThumbsUp}
-                                                        label="Lượt thích"
-                                                        total={stats.totalLikes}
-                                                        avg={stats.totalChannels ? Math.round(stats.totalLikes / stats.totalChannels) : 0}
-                                                    />
-                                                    <MetricRow
-                                                        icon={MessageSquare}
-                                                        label="Bình luận"
-                                                        total={stats.totalComments}
-                                                        avg={stats.totalChannels ? Math.round(stats.totalComments / stats.totalChannels) : 0}
-                                                    />
-                                                    <MetricRow
-                                                        icon={Share2}
-                                                        label="Chia sẻ"
-                                                        total={stats.totalShares}
-                                                        avg={stats.totalChannels ? Math.round(stats.totalShares / stats.totalChannels) : 0}
-                                                    />
-                                                    <TableRow className="bg-primary/5 font-medium">
-                                                        <TableCell className="flex items-center gap-2">
-                                                            <Activity className="h-4 w-4 text-primary" />
-                                                            Tỷ lệ tương tác
-                                                        </TableCell>
-                                                        <TableCell className="text-right font-semibold">
-                                                            {stats.engagementRate.toFixed(2)}%
-                                                        </TableCell>
-                                                        <TableCell />
-                                                    </TableRow>
-                                                </TableBody>
-                                            </Table>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Team Information Table */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Users className="h-5 w-5" />
-                                            Thông tin đội
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Thông tin đầy đủ về đội
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="rounded-md border">
-                                            <Table>
-                                                <TableBody>
-                                                    <DetailRow label="Mã đội" value={team._id} icon={BarChart3} />
-                                                    <DetailRow label="Tên đội" value={team.name} icon={Users} />
-                                                    <DetailRow label="Mô tả" value={team.description || 'Không có'} icon={MessageSquare} />
-                                                    <DetailRow
-                                                        label="Chi nhánh"
-                                                        value={team.branch ? `${team.branch.name}${team.branch.code ? ` (${team.branch.code})` : ''}` : 'Không có'}
-                                                        icon={Building2}
-                                                    />
-                                                    <DetailRow
-                                                        label="Trưởng nhóm"
-                                                        value={team.leader ? `${team.leader.name} (${team.leader.email})` : 'Chưa phân công'}
-                                                        icon={UserCircle}
-                                                    />
-                                                    <DetailRow
-                                                        label="Trạng thái"
-                                                        value={team.isActive ? 'Hoạt động' : 'Không hoạt động'}
-                                                        icon={Activity}
-                                                        highlight={team.isActive}
-                                                    />
-                                                    <DetailRow label="Ngày tạo" value={formatDate(team.createdAt)} icon={Calendar} />
-                                                    <DetailRow label="Ngày cập nhật" value={formatDate(team.updatedAt)} icon={Clock} />
-                                                    <DetailRow label="Tổng thành viên" value={team.members?.length || 0} icon={User} />
-                                                    <DetailRow label="Tổng kênh" value={team.channels?.length || 0} icon={Youtube} />
-                                                </TableBody>
-                                            </Table>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Average Performance Card */}
-                                {stats.totalChannels > 0 && (
+                                {/* Details Tab - Chi tiết tổng hợp */}
+                                <TabsContent value="details" className="space-y-4">
+                                    {/* Statistics Summary Table */}
                                     <Card>
                                         <CardHeader>
                                             <CardTitle className="flex items-center gap-2">
-                                                <Award className="h-5 w-5" />
-                                                Hiệu suất trung bình mỗi kênh
+                                                <BarChart3 className="h-5 w-5" />
+                                                Bảng Chi Tiết Thống Kê
                                             </CardTitle>
                                             <CardDescription>
-                                                Trung bình trên {stats.totalChannels} kênh YouTube
+                                                Tổng hợp số liệu từ {stats.totalChannels} kênh
                                             </CardDescription>
                                         </CardHeader>
                                         <CardContent>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                                <AverageCard
-                                                    icon={Eye}
-                                                    title="Lượt xem/Kênh"
-                                                    value={Math.round(stats.totalViews / stats.totalChannels).toLocaleString()}
-                                                    color="text-emerald-600"
-                                                    bgColor="bg-emerald-50 dark:bg-emerald-950"
-                                                />
-                                                <AverageCard
-                                                    icon={Clock}
-                                                    title="Thời gian xem/Kênh"
-                                                    value={`${Math.round(stats.totalWatchTimeHours / stats.totalChannels)}h`}
-                                                    color="text-rose-600"
-                                                    bgColor="bg-rose-50 dark:bg-rose-950"
-                                                />
-                                                <AverageCard
-                                                    icon={Users}
-                                                    title="Subscribers thuần/Kênh"
-                                                    value={Math.round(stats.subscribersNet / stats.totalChannels).toLocaleString()}
-                                                    color="text-sky-600"
-                                                    bgColor="bg-sky-50 dark:bg-sky-950"
-                                                />
-                                                <AverageCard
-                                                    icon={Activity}
-                                                    title="Tỷ lệ tương tác"
-                                                    value={`${stats.engagementRate.toFixed(2)}%`}
-                                                    color="text-indigo-600"
-                                                    bgColor="bg-indigo-50 dark:bg-indigo-950"
-                                                />
+                                            <div className="rounded-md border">
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow className="bg-muted/50">
+                                                            <TableHead className="font-semibold">Chỉ số</TableHead>
+                                                            <TableHead className="font-semibold text-right">Tổng</TableHead>
+                                                            <TableHead className="font-semibold text-right">TB/Kênh</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        <MetricRow
+                                                            icon={Eye}
+                                                            label="Lượt xem"
+                                                            total={stats.totalViews}
+                                                            avg={stats.totalChannels ? Math.round(stats.totalViews / stats.totalChannels) : 0}
+                                                        />
+                                                        <MetricRow
+                                                            icon={Clock}
+                                                            label="Thời gian xem (giờ)"
+                                                            total={stats.totalWatchTimeHours}
+                                                            avg={stats.totalChannels ? Math.round(stats.totalWatchTimeHours / stats.totalChannels) : 0}
+                                                        />
+                                                        <MetricRow
+                                                            icon={Activity}
+                                                            label="Thời lượng TB (giây)"
+                                                            total={Math.round(stats.averageViewDuration)}
+                                                            avg={stats.totalChannels && stats.averageViewDuration ? Math.round(stats.averageViewDuration) : 0}
+                                                        />
+                                                        <MetricRow
+                                                            icon={Users}
+                                                            label="Subscribers mới"
+                                                            total={stats.subscribersGained}
+                                                            avg={stats.totalChannels ? Math.round(stats.subscribersGained / stats.totalChannels) : 0}
+                                                            prefix="+"
+                                                            variant="success"
+                                                        />
+                                                        <MetricRow
+                                                            icon={Users}
+                                                            label="Subscribers mất"
+                                                            total={stats.subscribersLost}
+                                                            avg={stats.totalChannels ? Math.round(stats.subscribersLost / stats.totalChannels) : 0}
+                                                            prefix="-"
+                                                            variant="destructive"
+                                                        />
+                                                        <MetricRow
+                                                            icon={TrendingUp}
+                                                            label="Subscribers thuần"
+                                                            total={stats.subscribersNet}
+                                                            avg={stats.totalChannels ? Math.round(stats.subscribersNet / stats.totalChannels) : 0}
+                                                            highlight
+                                                        />
+                                                        <MetricRow
+                                                            icon={ThumbsUp}
+                                                            label="Lượt thích"
+                                                            total={stats.totalLikes}
+                                                            avg={stats.totalChannels ? Math.round(stats.totalLikes / stats.totalChannels) : 0}
+                                                        />
+                                                        <MetricRow
+                                                            icon={MessageSquare}
+                                                            label="Bình luận"
+                                                            total={stats.totalComments}
+                                                            avg={stats.totalChannels ? Math.round(stats.totalComments / stats.totalChannels) : 0}
+                                                        />
+                                                        <MetricRow
+                                                            icon={Share2}
+                                                            label="Chia sẻ"
+                                                            total={stats.totalShares}
+                                                            avg={stats.totalChannels ? Math.round(stats.totalShares / stats.totalChannels) : 0}
+                                                        />
+                                                        <TableRow className="bg-primary/5 font-medium">
+                                                            <TableCell className="flex items-center gap-2">
+                                                                <Activity className="h-4 w-4 text-primary" />
+                                                                Tỷ lệ tương tác
+                                                            </TableCell>
+                                                            <TableCell className="text-right font-semibold">
+                                                                {stats.engagementRate.toFixed(2)}%
+                                                            </TableCell>
+                                                            <TableCell />
+                                                        </TableRow>
+                                                    </TableBody>
+                                                </Table>
                                             </div>
                                         </CardContent>
                                     </Card>
-                                )}
-                            </TabsContent>
-                        </Tabs >
-                    </div >
+
+                                    {/* Team Information Table */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <Users className="h-5 w-5" />
+                                                Thông tin đội
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Thông tin đầy đủ về đội
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <div className="rounded-md border">
+                                                <Table>
+                                                    <TableBody>
+                                                        <DetailRow label="Mã đội" value={team._id} icon={BarChart3} />
+                                                        <DetailRow label="Tên đội" value={team.name} icon={Users} />
+                                                        <DetailRow label="Mô tả" value={team.description || 'Không có'} icon={MessageSquare} />
+                                                        <DetailRow
+                                                            label="Chi nhánh"
+                                                            value={team.branch ? `${team.branch.name}${team.branch.code ? ` (${team.branch.code})` : ''}` : 'Không có'}
+                                                            icon={Building2}
+                                                        />
+                                                        <DetailRow
+                                                            label="Trưởng nhóm"
+                                                            value={team.leader ? `${team.leader.name} (${team.leader.email})` : 'Chưa phân công'}
+                                                            icon={UserCircle}
+                                                        />
+                                                        <DetailRow
+                                                            label="Trạng thái"
+                                                            value={team.isActive ? 'Hoạt động' : 'Không hoạt động'}
+                                                            icon={Activity}
+                                                            highlight={team.isActive}
+                                                        />
+                                                        <DetailRow label="Ngày tạo" value={formatDate(team.createdAt)} icon={Calendar} />
+                                                        <DetailRow label="Ngày cập nhật" value={formatDate(team.updatedAt)} icon={Clock} />
+                                                        <DetailRow label="Tổng thành viên" value={team.members?.length || 0} icon={User} />
+                                                        <DetailRow label="Tổng kênh" value={team.channels?.length || 0} icon={Youtube} />
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Average Performance Card */}
+                                    {stats.totalChannels > 0 && (
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle className="flex items-center gap-2">
+                                                    <Award className="h-5 w-5" />
+                                                    Hiệu suất trung bình mỗi kênh
+                                                </CardTitle>
+                                                <CardDescription>
+                                                    Trung bình trên {stats.totalChannels} kênh YouTube
+                                                </CardDescription>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                                    <AverageCard
+                                                        icon={Eye}
+                                                        title="Lượt xem/Kênh"
+                                                        value={Math.round(stats.totalViews / stats.totalChannels).toLocaleString()}
+                                                        color="text-emerald-600"
+                                                        bgColor="bg-emerald-50 dark:bg-emerald-950"
+                                                    />
+                                                    <AverageCard
+                                                        icon={Clock}
+                                                        title="Thời gian xem/Kênh"
+                                                        value={`${Math.round(stats.totalWatchTimeHours / stats.totalChannels)}h`}
+                                                        color="text-rose-600"
+                                                        bgColor="bg-rose-50 dark:bg-rose-950"
+                                                    />
+                                                    <AverageCard
+                                                        icon={Users}
+                                                        title="Subscribers thuần/Kênh"
+                                                        value={Math.round(stats.subscribersNet / stats.totalChannels).toLocaleString()}
+                                                        color="text-sky-600"
+                                                        bgColor="bg-sky-50 dark:bg-sky-950"
+                                                    />
+                                                    <AverageCard
+                                                        icon={Activity}
+                                                        title="Tỷ lệ tương tác"
+                                                        value={`${stats.engagementRate.toFixed(2)}%`}
+                                                        color="text-indigo-600"
+                                                        bgColor="bg-indigo-50 dark:bg-indigo-950"
+                                                    />
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+                                </TabsContent>
+                            </Tabs >
+                        </div >
+                    )}
                 </div >
             </div >
         </div >

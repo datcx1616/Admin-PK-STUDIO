@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { channelsAPI } from "@/lib/channels-api"
+import { branchesAPI } from "@/lib/branches-api"
 import type { Channel, ChannelDetail } from "@/types/channel.types"
 import { toast } from "sonner"
 
@@ -25,6 +26,8 @@ interface ChannelSidebarProps {
     className?: string
     side?: "left" | "right"
     mode?: "fixed" | "inline"
+    onChannelSelect?: (channel: Channel) => void
+    showDialog?: boolean
 }
 
 export function ChannelSidebar({
@@ -32,7 +35,9 @@ export function ChannelSidebar({
     teamId,
     className,
     side = "left",
-    mode = "inline"
+    mode = "inline",
+    onChannelSelect,
+    showDialog = true
 }: ChannelSidebarProps) {
     const [isOpen, setIsOpen] = React.useState(true)
     const [channels, setChannels] = React.useState<Channel[]>([])
@@ -89,7 +94,8 @@ export function ChannelSidebar({
 
                 } else if (branchId) {
                     console.log('🔄 [ChannelSidebar] Fetching channels for BRANCH:', branchId)
-                    data = await channelsAPI.getByBranch(branchId)
+                    // Use the correct API endpoint: GET /api/branches/:branchId/channels
+                    data = await branchesAPI.getChannels(branchId) as Channel[]
                     console.log('✅ [ChannelSidebar] Fetched channels for branch:', data.length)
                 } else {
                     console.log('🔄 [ChannelSidebar] Fetching ALL channels')
@@ -111,6 +117,13 @@ export function ChannelSidebar({
 
     // Handle channel click - fetch detailed info
     const handleChannelClick = async (channel: Channel) => {
+        // If callback provided, use it instead of dialog
+        if (onChannelSelect && !showDialog) {
+            onChannelSelect(channel)
+            return
+        }
+
+        // Default behavior: show dialog
         setLoadingDetail(true)
         setDialogOpen(true)
 
