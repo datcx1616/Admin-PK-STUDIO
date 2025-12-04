@@ -540,8 +540,8 @@ export default function TeamDetailPage() {
             {/* Header */}
             <ContentHeader
                 breadcrumbs={[
-                    { label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
-                    { label: "Teams", href: "/teams" },
+                    { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
+                    { label: "Nhóm", href: "/teams" },
                     { label: team.name, icon: <Users className="h-4 w-4" /> },
                 ]}
             />

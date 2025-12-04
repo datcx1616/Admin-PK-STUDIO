@@ -1,5 +1,5 @@
 import * as React from "react"
-import { ChevronRight, MoreHorizontal } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { TableOfContents, type TableOfContentsItem } from "@/pages/components/TableOfContents"
 import { cn } from "@/lib/utils"
@@ -35,7 +35,7 @@ export function ContentHeader({ breadcrumbs, actions, className, tableOfContents
                         {breadcrumbs.map((item, index) => (
                             <React.Fragment key={index}>
                                 {index > 0 && (
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                    <span className="h-4 w-4 text-muted-foreground select-none">/</span>
                                 )}
 
                                 {item.href ? (
