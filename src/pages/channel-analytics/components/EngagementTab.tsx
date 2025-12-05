@@ -42,7 +42,7 @@ export function EngagementTab({ analytics }: EngagementTabProps) {
                             {formatNumber(analytics.engagement.totals.totalLikes)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            Ratio: {analytics.engagement.totals.likeDislikeRatio.toFixed(2)}:1
+                            Ratio: {typeof analytics.engagement.totals.likeDislikeRatio === 'number' && analytics.engagement.totals.likeDislikeRatio !== null ? analytics.engagement.totals.likeDislikeRatio.toFixed(2) : '0.00'}:1
                         </p>
                     </CardContent>
                 </Card>

@@ -26,6 +26,7 @@ interface ChannelSidebarProps {
     className?: string
     side?: "left" | "right"
     mode?: "fixed" | "inline"
+    onChannelSelect?: (channel: Channel) => void;
 }
 
 export function ChannelSidebar({
@@ -34,12 +35,13 @@ export function ChannelSidebar({
     className,
     side = "left",
     mode = "inline",
+    onChannelSelect,
 }: ChannelSidebarProps) {
     const [isOpen, setIsOpen] = React.useState(true);
     const [channels, setChannels] = React.useState<Channel[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     // Fetch channels based on branchId or teamId
     React.useEffect(() => {
@@ -115,8 +117,11 @@ export function ChannelSidebar({
     };
 
     const handleChannelClick = (channel: Channel) => {
-        // Navigate to ChannelDetailView page (đồng bộ với router)
-        navigate(`/channels/${channel._id}/analytics`);
+        if (onChannelSelect) {
+            onChannelSelect(channel);
+        }
+        // Nếu không có onChannelSelect thì có thể dùng navigate như cũ
+        // else navigate(`/channels/${channel._id}/analytics`);
     };
 
     return (

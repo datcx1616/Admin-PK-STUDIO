@@ -34,13 +34,11 @@ import { DevicesTab } from "@/pages/channel-analytics/components/DevicesTab";
 // Import utils
 import { formatNumber, formatCurrency, formatPercentage } from "./utils/formatters";
 
-export function ChannelDetailView() {
-    const { channelId } = useParams<{ channelId: string }>();
-    const { channel, loading: channelLoading } = useChannel(channelId!);
+export function ChannelDetailView({ channel, onBack }: { channel: any, onBack?: () => void }) {
     const [selectedDays, setSelectedDays] = React.useState(30);
 
     const { analytics, loading, error, dateRange, setDateRange, refetch } = useChannelAnalytics({
-        channelId: channelId!,
+        channelId: channel?._id,
         autoFetch: true
     });
 
@@ -67,16 +65,16 @@ export function ChannelDetailView() {
         window.print();
     };
 
-    if (channelLoading || loading) {
+    if (loading) {
         return (
             <div className="flex flex-col h-full overflow-hidden">
-                <ContentHeader
+                {/* <ContentHeader
                     breadcrumbs={[
                         { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                         { label: "Kênh", href: "/channels" },
                         { label: "Analytics", icon: <BarChart3 className="h-4 w-4" /> },
                     ]}
-                />
+                /> */}
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="max-w-7xl mx-auto space-y-6">
                         <Skeleton className="h-32" />
@@ -95,13 +93,13 @@ export function ChannelDetailView() {
     if (error || !analytics) {
         return (
             <div className="flex flex-col h-full overflow-hidden">
-                <ContentHeader
+                {/* <ContentHeader
                     breadcrumbs={[
                         { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                         { label: "Kênh", href: "/channels" },
                         { label: "Lỗi", icon: <BarChart3 className="h-4 w-4" /> },
                     ]}
-                />
+                /> */}
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="max-w-7xl mx-auto">
                         <Alert variant="destructive">
@@ -117,16 +115,22 @@ export function ChannelDetailView() {
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <ContentHeader
+            {/* <ContentHeader
                 breadcrumbs={[
                     { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                     { label: "Kênh", href: "/channels" },
                     { label: channel?.name || "Channel Analytics", icon: <BarChart3 className="h-4 w-4" /> },
                 ]}
-            />
-
+            /> */}
             <div className="flex-1 overflow-y-auto">
                 <div className="max-w-7xl mx-auto p-6 space-y-8">
+                    {/* Back button for sidebar layout */}
+                    {onBack && (
+                        <Button variant="ghost" size="sm" onClick={onBack} className="mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                            Quay lại
+                        </Button>
+                    )}
                     {/* Channel Header */}
                     <Card className="border rounded-lg">
                         <CardHeader className="space-y-4">
@@ -153,7 +157,6 @@ export function ChannelDetailView() {
                                         </div>
                                     </div>
                                 </div>
-
                                 {/* Date Range Selector */}
                                 <div className="flex items-center gap-2">
                                     <Clock className="h-4 w-4 text-muted-foreground" />
@@ -194,7 +197,6 @@ export function ChannelDetailView() {
                                     </div>
                                 </div>
                             </div>
-
                             {/* Row 2: Metadata + Actions */}
                             <div className="flex items-center justify-between gap-6 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-4">
@@ -215,7 +217,6 @@ export function ChannelDetailView() {
                                         </Badge>
                                     </div>
                                 </div>
-
                                 {/* Action Buttons */}
                                 <div className="flex items-center gap-2">
                                     {channel?.customUrl && (
@@ -257,7 +258,6 @@ export function ChannelDetailView() {
                             </div>
                         </CardHeader>
                     </Card>
-
                     {/* Key Metrics Overview */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <MetricCard
@@ -289,7 +289,6 @@ export function ChannelDetailView() {
                             gradient="bg-gradient-to-br from-amber-500 to-orange-600"
                         />
                     </div>
-
                     {/* Engagement Metrics */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <Card>
@@ -306,7 +305,6 @@ export function ChannelDetailView() {
                                 </p>
                             </CardContent>
                         </Card>
-
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">Comments</CardTitle>
@@ -321,7 +319,6 @@ export function ChannelDetailView() {
                                 </p>
                             </CardContent>
                         </Card>
-
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">Shares</CardTitle>
@@ -336,7 +333,6 @@ export function ChannelDetailView() {
                                 </p>
                             </CardContent>
                         </Card>
-
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
@@ -352,7 +348,6 @@ export function ChannelDetailView() {
                             </CardContent>
                         </Card>
                     </div>
-
                     {/* Detailed Analytics Tabs */}
                     <Tabs defaultValue="overview" className="space-y-6">
                         <TabsList className="inline-flex h-auto w-full items-center justify-start rounded-lg bg-muted p-1 gap-1 overflow-x-auto">
@@ -385,31 +380,24 @@ export function ChannelDetailView() {
                                 Thiết Bị
                             </TabsTrigger>
                         </TabsList>
-
                         <TabsContent value="overview" className="space-y-6">
                             <OverviewTab analytics={analytics} />
                         </TabsContent>
-
                         <TabsContent value="engagement" className="space-y-6">
                             <EngagementTab analytics={analytics} />
                         </TabsContent>
-
                         <TabsContent value="revenue" className="space-y-6">
                             <RevenueTab analytics={analytics} />
                         </TabsContent>
-
                         <TabsContent value="audience" className="space-y-6">
                             <AudienceTab analytics={analytics} />
                         </TabsContent>
-
                         <TabsContent value="content" className="space-y-6">
                             <ContentTab analytics={analytics} />
                         </TabsContent>
-
                         <TabsContent value="traffic" className="space-y-6">
                             <TrafficTab analytics={analytics} />
                         </TabsContent>
-
                         <TabsContent value="devices" className="space-y-6">
                             <DevicesTab analytics={analytics} />
                         </TabsContent>
