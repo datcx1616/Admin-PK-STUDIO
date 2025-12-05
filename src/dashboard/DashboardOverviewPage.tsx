@@ -180,45 +180,43 @@ export default function DashboardOverviewPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-            {/* Header */}
-            <div className="bg-white border-b border-slate-200 shadow-sm">
-                <div className="px-3 py-3">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                                Trang tổng quan
-                            </h1>
-                            <p className="text-slate-600 mt-1 flex items-center gap-2">
-                                <Calendar className="w-4 h-4" />
-                                Cập nhật lần cuối: {new Date().toLocaleDateString('vi-VN', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric'
-                                })}
-                            </p>
-                        </div>
-                        <div className="flex gap-3">
-                            {/* Admin Stats Button - Only for Admin/Director */}
-                            {['admin', 'director'].includes(userRole) && (
-                                <Button
-                                    onClick={() => navigate('/dashboard/admin-stats')}
-                                    variant="outline"
-                                    className="border-blue-200 hover:bg-blue-50"
-                                >
-                                    <BarChart3 className="w-4 h-4 mr-2" />
-                                    Thống kê
-                                </Button>
-                            )}
-                            <Button
-                                onClick={handleSyncAll}
-                                disabled={syncing}
-                                className="bg-gradient-to-r from-red-600 to-red-600 hover:red-blue-700 hover:to-red-700 shadow-lg shadow-blue-500/30"
-                            >
-                                <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
-                                {syncing ? 'Syncing...' : 'Sync All Channels'}
-                            </Button>
-                        </div>
+            {/* Header - styled like contentHeader */}
+            <div className="contentHeader flex items-center justify-between px-6 py-5 bg-white border-b border-slate-200 shadow-sm">
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-tight">
+                        Trang tổng quan
+                    </h1>
+                    <div className="flex items-center gap-2 text-slate-500 text-sm">
+                        <Calendar className="w-4 h-4" />
+                        <span>
+                            Cập nhật lần cuối: {new Date().toLocaleDateString('vi-VN', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric'
+                            })}
+                        </span>
                     </div>
+                </div>
+                <div className="flex gap-3 items-center">
+                    {/* Admin Stats Button - Only for Admin/Director */}
+                    {['admin', 'director'].includes(userRole) && (
+                        <Button
+                            onClick={() => navigate('/dashboard/admin-stats')}
+                            variant="outline"
+                            className="border-blue-200 hover:bg-blue-50 font-medium"
+                        >
+                            <BarChart3 className="w-4 h-4 mr-2" />
+                            Thống kê
+                        </Button>
+                    )}
+                    <Button
+                        onClick={handleSyncAll}
+                        disabled={syncing}
+                        className="bg-gradient-to-r from-red-600 to-red-600 hover:from-red-700 hover:to-red-700 shadow-lg shadow-blue-500/30 text-white font-medium"
+                    >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+                        {syncing ? 'Syncing...' : 'Sync All Channels'}
+                    </Button>
                 </div>
             </div>
 

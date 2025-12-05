@@ -1,3 +1,4 @@
+import { ContentHeader } from "../components/ContentHeader";
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -122,13 +123,12 @@ export default function BranchManagementPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <div className="bg-white border-b px-6 py-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Quản Lý Chi Nhánh</h1>
-                        <p className="text-sm text-slate-500 mt-1">Quản lý tất cả các chi nhánh trong hệ thống</p>
-                    </div>
+        <>
+            <ContentHeader
+                breadcrumbs={[
+                    { label: 'Quản Lý Chi Nhánh' }
+                ]}
+                actions={
                     <Button
                         onClick={() => setShowCreateModal(true)}
                         className="bg-red-600 hover:bg-red-700"
@@ -136,10 +136,11 @@ export default function BranchManagementPage() {
                         <Plus className="w-4 h-4 mr-2" />
                         Thêm Chi Nhánh
                     </Button>
-                </div>
-            </div>
+                }
+                className="border shadow-sm border-l-0 rounded-none"
+            />
 
-            <div className="px-6 py-6 space-y-6">
+            <div className="min-h-screen bg-slate-50 px-6 py-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <Card className="border-l-4 border-l-blue-500">
                         <CardContent className="pt-6">
@@ -523,6 +524,6 @@ export default function BranchManagementPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </div>
+        </>
     );
 }

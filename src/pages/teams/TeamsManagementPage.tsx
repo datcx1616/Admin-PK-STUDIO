@@ -47,6 +47,7 @@ import { EditTeamModal } from '@/pages/teams/components/EditTeamModal';
 import { TeamDetailsModal } from '@/pages/teams/components/TeamDetailsModal';
 import { DeleteTeamDialog } from '@/pages/teams/components/DeleteTeamDialog';
 import { ManageMembersModal } from '@/pages/teams/components/ManageMembersModal';
+import { ContentHeader } from "../components/ContentHeader";
 
 interface Branch {
     _id: string;
@@ -166,9 +167,22 @@ export default function TeamsManagementPage() {
     const totalChannels = teams.reduce((sum, team) => sum + (team.channels?.length || 0), 0);
 
     return (
-        <div className="w-full min-h-screen bg-slate-50 p-6">
+        <div className="w-full min-h-screen bg-slate-50">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <ContentHeader
+                breadcrumbs={[
+                    { label: 'Quản Lý Nhóm' }
+                ]}
+                actions={
+                    <Button onClick={() => setShowCreateModal(true)} className="bg-red-600 hover:bg-red-700">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Thêm Nhóm
+                    </Button>
+                }
+                className="border shadow-sm border-l-0 rounded-none"
+            />
+
+            {/* <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-slate-900">Quản Lý Nhóm</h1>
                     <p className="text-sm text-slate-500 mt-1">Quản lý các nhóm làm việc trong hệ thống</p>
@@ -177,10 +191,10 @@ export default function TeamsManagementPage() {
                     <Plus className="w-4 h-4 mr-2" />
                     Thêm Nhóm
                 </Button>
-            </div>
+            </div> */}
 
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-6">
                 <Card className="border-l-4 border-l-green-500">
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
@@ -225,137 +239,143 @@ export default function TeamsManagementPage() {
             </div>
 
             {/* Filters */}
-            <Card className="mb-6">
-                <CardHeader className="border-b">
-                    <CardTitle className="text-lg">Lọc và Tìm Kiếm</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6">
-                    <div className="grid gap-4 md:grid-cols-2">
-                        {/* Search */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                            <Input
-                                placeholder="Tìm kiếm nhóm, trưởng nhóm..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-9"
-                            />
-                        </div>
+            <div className="mb-6 p-6">
+                <Card >
+                    <CardHeader className="border-b">
+                        <CardTitle className="text-lg">Lọc và Tìm Kiếm</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <div className="grid gap-4 md:grid-cols-2">
+                            {/* Search */}
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                <Input
+                                    placeholder="Tìm kiếm nhóm, trưởng nhóm..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-9"
+                                />
+                            </div>
 
-                        {/* Branch Filter */}
-                        <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Chọn chi nhánh" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Tất cả chi nhánh</SelectItem>
-                                {branches.map((branch) => (
-                                    <SelectItem key={branch._id} value={branch._id}>
-                                        {branch.code} - {branch.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </CardContent>
-            </Card>
+                            {/* Branch Filter */}
+                            <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Chọn chi nhánh" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Tất cả chi nhánh</SelectItem>
+                                    {branches.map((branch) => (
+                                        <SelectItem key={branch._id} value={branch._id}>
+                                            {branch.code} - {branch.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
 
             {/* Teams Table */}
-            <Card>
-                <CardContent className="p-0">
-                    {loading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                        </div>
-                    ) : filteredTeams.length === 0 ? (
-                        <Alert className="m-6">
-                            <Building2 className="h-4 w-4" />
-                            <AlertDescription>
-                                {searchQuery || selectedBranch !== 'all'
-                                    ? 'Không tìm thấy nhóm nào phù hợp với bộ lọc'
-                                    : 'Chưa có nhóm nào. Hãy tạo nhóm đầu tiên!'}
-                            </AlertDescription>
-                        </Alert>
-                    ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow className="bg-slate-50">
-                                    <TableHead className="font-semibold">Tên Nhóm</TableHead>
-                                    <TableHead className="font-semibold">Chi Nhánh</TableHead>
-                                    <TableHead className="font-semibold">Trưởng Nhóm</TableHead>
-                                    <TableHead className="font-semibold text-center">Thành Viên</TableHead>
-                                    <TableHead className="font-semibold text-center">Kênh</TableHead>
-                                    <TableHead className="font-semibold text-center">Trạng Thái</TableHead>
-                                    <TableHead className="font-semibold text-right">Hành Động</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredTeams.map((team) => (
-                                    <TableRow key={team._id} className="hover:bg-slate-50">
-                                        <TableCell>
-                                            <div>
-                                                <div className="font-medium">{team.name}</div>
-                                                {team.description && (
-                                                    <div className="text-xs text-slate-500 truncate max-w-xs">{team.description}</div>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline">
-                                                {team.branch.code || ''} - {team.branch.name}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div>
-                                                <div className="text-sm font-medium">{team.leader?.name || '—'}</div>
-                                                {team.leader?.email && <div className="text-xs text-slate-500">{team.leader.email}</div>}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <Badge variant="secondary">{team.members?.length || 0}</Badge>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <Badge variant="secondary">{team.channels?.length || 0}</Badge>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <Badge variant={team.isActive ? 'default' : 'secondary'} className={team.isActive ? 'bg-green-600' : ''}>
-                                                {team.isActive ? 'Hoạt động' : 'Không hoạt động'}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="sm">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={() => openDetailsModal(team)}>
-                                                        <Eye className="h-4 w-4 mr-2" />
-                                                        Xem chi tiết
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => openMembersModal(team)}>
-                                                        <UserPlus className="h-4 w-4 mr-2" />
-                                                        Quản lý thành viên
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => openEditModal(team)}>
-                                                        <Edit className="h-4 w-4 mr-2" />
-                                                        Chỉnh sửa
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => openDeleteDialog(team)} className="text-red-600">
-                                                        <Trash2 className="h-4 w-4 mr-2" />
-                                                        Xóa
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
+            <div className="mb-6 p-6">
+                <Card>
+                    <CardContent className="p-0">
+                        {loading ? (
+                            <div className="flex items-center justify-center py-12">
+                                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                            </div>
+                        ) : filteredTeams.length === 0 ? (
+                            <Alert className="m-6">
+                                <Building2 className="h-4 w-4" />
+                                <AlertDescription>
+                                    {searchQuery || selectedBranch !== 'all'
+                                        ? 'Không tìm thấy nhóm nào phù hợp với bộ lọc'
+                                        : 'Chưa có nhóm nào. Hãy tạo nhóm đầu tiên!'}
+                                </AlertDescription>
+                            </Alert>
+                        ) : (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow className="bg-slate-50">
+                                        <TableHead className="font-semibold">Tên Nhóm</TableHead>
+                                        <TableHead className="font-semibold">Chi Nhánh</TableHead>
+                                        <TableHead className="font-semibold">Trưởng Nhóm</TableHead>
+                                        <TableHead className="font-semibold text-center">Thành Viên</TableHead>
+                                        <TableHead className="font-semibold text-center">Kênh</TableHead>
+                                        <TableHead className="font-semibold text-center">Trạng Thái</TableHead>
+                                        <TableHead className="font-semibold text-right">Hành Động</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    )}
-                </CardContent>
-            </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredTeams.map((team) => (
+                                        <TableRow key={team._id} className="hover:bg-slate-50">
+                                            <TableCell>
+                                                <div>
+                                                    <div className="font-medium">{team.name}</div>
+                                                    {team.description && (
+                                                        <div className="text-xs text-slate-500 truncate max-w-xs">{team.description}</div>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="outline">
+                                                    {team.branch.code || ''} - {team.branch.name}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div>
+                                                    <div className="text-sm font-medium">{team.leader?.name || '—'}</div>
+                                                    {team.leader?.email && <div className="text-xs text-slate-500">{team.leader.email}</div>}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <Badge variant="secondary">{team.members?.length || 0}</Badge>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <Badge variant="secondary">{team.channels?.length || 0}</Badge>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <Badge variant={team.isActive ? 'default' : 'secondary'} className={team.isActive ? 'bg-green-600' : ''}>
+                                                    {team.isActive ? 'Hoạt động' : 'Không hoạt động'}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="sm">
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => openDetailsModal(team)}>
+                                                            <Eye className="h-4 w-4 mr-2" />
+                                                            Xem chi tiết
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => openMembersModal(team)}>
+                                                            <UserPlus className="h-4 w-4 mr-2" />
+                                                            Quản lý thành viên
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => openEditModal(team)}>
+                                                            <Edit className="h-4 w-4 mr-2" />
+                                                            Chỉnh sửa
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => openDeleteDialog(team)} className="text-red-600">
+                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                            Xóa
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+
 
             {/* Modals */}
             <CreateTeamModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onSuccess={handleCreateSuccess} />
