@@ -31,7 +31,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import axios from 'axios'
+import axiosInstance from '@/lib/axios-instance'
 
 interface Member {
     _id: string

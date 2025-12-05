@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserPlus, X, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react'
-import axios from 'axios'
+import axiosInstance from '@/lib/axios-instance'
 
 interface Branch {
     _id: string
@@ -84,15 +84,11 @@ export function AddUserModal({ open, onClose, onSuccess }: AddUserModalProps) {
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
             // Fetch branches
-            const branchesResponse = await axios.get(`${API_URL}/branches`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
+            const branchesResponse = await axiosInstance.get(`${API_URL}/branches`)
             setBranches(branchesResponse.data.branches || [])
 
             // Fetch teams
-            const teamsResponse = await axios.get(`${API_URL}/teams`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
+            const teamsResponse = await axiosInstance.get(`${API_URL}/teams`)
             setTeams(teamsResponse.data.teams || [])
 
         } catch (error) {

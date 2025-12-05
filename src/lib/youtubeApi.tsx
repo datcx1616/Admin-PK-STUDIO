@@ -1,5 +1,5 @@
 // src/lib/youtubeApi.ts
-import axios from 'axios';
+import axiosInstance from '@/lib/axios-instance';
 
 const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/youtube`;
 
@@ -40,11 +40,7 @@ export const youtubeApi = {
             console.log('📡 Calling /api/youtube/auth...');
 
             // Gọi API với token
-            const response = await axios.get<AuthResponse>(`${API_URL}/auth`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const response = await axiosInstance.get<AuthResponse>(`${API_URL}/auth`);
 
             console.log('✅ Response:', response.data);
 
@@ -131,16 +127,16 @@ Click OK để reload và xem kênh mới.
                 }
             }, 5 * 60 * 1000);
 
-        } catch (error) {
+        } catch (err) {
+            const error = err as any;
             console.error('❌ OAuth error:', error);
-
-            if (axios.isAxiosError(error)) {
-                if (error.response?.status === 401) {
+            if (error && error.response) {
+                if (error.response.status === 401) {
                     alert('🔒 Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user');
                     window.location.href = '/login';
-                } else if (error.response?.status === 500) {
+                } else if (error.response.status === 500) {
                     alert('❌ Lỗi server: ' + (error.response.data?.error || 'Lỗi không xác định'));
                 } else if (error.code === 'ERR_NETWORK') {
                     alert('❌ Không kết nối được backend.\n\nKiểm tra:\n1. Backend có chạy không?\n2. URL có đúng không?\n3. CORS có được cấu hình không?');
@@ -150,7 +146,6 @@ Click OK để reload và xem kênh mới.
             } else {
                 alert('❌ Lỗi không xác định: ' + (error as Error).message);
             }
-
             throw error;
         }
     },
@@ -167,13 +162,10 @@ Click OK để reload và xem kênh mới.
                 throw new Error('Chưa đăng nhập');
             }
 
-            const response = await axios.get<ChannelAnalytics>(
+            const response = await axiosInstance.get<ChannelAnalytics>(
                 `${API_URL}/analytics`,
                 {
-                    params: { channelId, startDate, endDate },
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    params: { channelId, startDate, endDate }
                 }
             );
             return response.data;
@@ -195,11 +187,7 @@ Click OK để reload và xem kênh mới.
                 };
             }
 
-            const response = await axios.get(`${API_URL}/status`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const response = await axiosInstance.get(`${API_URL}/status`);
             return response.data;
         } catch (error) {
             console.error('Error fetching status:', error);

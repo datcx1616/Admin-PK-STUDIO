@@ -1,11 +1,9 @@
 // lib/api-client.ts - FIXED VERSION
 import { toast } from "sonner";
+import axiosInstance from './axios-instance';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-interface ApiError {
-  error: string;
-}
 
 interface LoginResponse {
   message: string;
@@ -50,35 +48,28 @@ interface YouTubeStatusResponse {
 }
 
 class ApiClient {
-  private getHeaders() {
-    const token = localStorage.getItem("authToken");
-    return {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-  }
-
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async request<T>(endpoint: string, options: any = {}): Promise<T> {
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers: {
-          ...this.getHeaders(),
-          ...options.headers,
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorData = data as ApiError;
-        throw new Error(errorData.error || "An error occurred");
+      const method = options.method ? options.method.toLowerCase() : 'get';
+      const url = `${API_BASE_URL}${endpoint}`;
+      let response;
+      if (method === 'get') {
+        response = await axiosInstance.get(url, { params: options.params });
+      } else if (method === 'post') {
+        response = await axiosInstance.post(url, options.body ? JSON.parse(options.body) : undefined);
+      } else if (method === 'put') {
+        response = await axiosInstance.put(url, options.body ? JSON.parse(options.body) : undefined);
+      } else if (method === 'delete') {
+        response = await axiosInstance.delete(url, { data: options.body ? JSON.parse(options.body) : undefined });
+      } else if (method === 'patch') {
+        response = await axiosInstance.patch(url, options.body ? JSON.parse(options.body) : undefined);
+      } else {
+        throw new Error(`Unsupported method: ${method}`);
       }
-
-      return data as T;
-    } catch (error) {
+      return response.data as T;
+    } catch (error: any) {
       console.error("API Request Failed:", error);
-      toast.error(error instanceof Error ? error.message : "API Request Failed");
+      toast.error(error?.message || "API Request Failed");
       throw error;
     }
   }

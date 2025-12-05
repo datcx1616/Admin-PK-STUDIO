@@ -4,6 +4,7 @@
  * Implements all endpoints from API 4.5 Channel APIs
  */
 
+import axiosInstance from './axios-instance';
 import type {
   Channel,
   ChannelDetail,
@@ -65,12 +66,8 @@ export const channelsAPI = {
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/channels?${queryString}` : '/channels';
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-
-    const data = await handleResponse<ChannelsResponse>(response);
+    const response = await axiosInstance.get(`${API_BASE_URL}${endpoint}`);
+    const data = response.data;
     return data.channels || data.data || (Array.isArray(data) ? data : []);
   },
 
@@ -80,12 +77,8 @@ export const channelsAPI = {
    * Permission: All authenticated users
    */
   async getMyChannels(): Promise<Channel[]> {
-    const response = await fetch(`${API_BASE_URL}/channels/my-channels`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-
-    const data = await handleResponse<ChannelsResponse>(response);
+    const response = await axiosInstance.get(`${API_BASE_URL}/channels/my-channels`);
+    const data = response.data;
     return data.channels || data.data || (Array.isArray(data) ? data : []);
   },
 
@@ -95,17 +88,11 @@ export const channelsAPI = {
    * Permission: All authenticated users
    */
   async getById(channelId: string): Promise<ChannelDetail> {
-    const response = await fetch(`${API_BASE_URL}/channels/${channelId}`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-
-    const data = await handleResponse<ChannelResponse>(response);
-    
+    const response = await axiosInstance.get(`${API_BASE_URL}/channels/${channelId}`);
+    const data = response.data;
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');
     }
-    
     return data.channel || data.data!;
   },
 
@@ -115,17 +102,11 @@ export const channelsAPI = {
    * Permission: All authenticated users
    */
   async getDetail(channelId: string): Promise<ChannelDetail> {
-    const response = await fetch(`${API_BASE_URL}/channels/${channelId}/detail`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-
-    const data = await handleResponse<ChannelResponse>(response);
-    
+    const response = await axiosInstance.get(`${API_BASE_URL}/channels/${channelId}/detail`);
+    const data = response.data;
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');
     }
-    
     return data.channel || data.data!;
   },
 
@@ -135,18 +116,11 @@ export const channelsAPI = {
    * Permission: All authenticated users
    */
   async create(channelData: CreateChannelRequest): Promise<Channel> {
-    const response = await fetch(`${API_BASE_URL}/channels`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(channelData),
-    });
-
-    const data = await handleResponse<ChannelActionResponse>(response);
-    
+    const response = await axiosInstance.post(`${API_BASE_URL}/channels`, channelData);
+    const data = response.data;
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');
     }
-    
     return data.channel || data.data!;
   },
 
@@ -160,26 +134,12 @@ export const channelsAPI = {
     console.log('📤 [API] Update data:', channelData);
     console.log('🔗 [API] URL:', `${API_BASE_URL}/channels/${channelId}`);
     
-    const response = await fetch(`${API_BASE_URL}/channels/${channelId}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(channelData),
-    });
-
-    console.log('📡 [API] Response status:', response.status);
-
-    const data = await handleResponse<ChannelActionResponse>(response);
-    
-    console.log('✅ [API] Response data:', data);
-    
+    const response = await axiosInstance.put(`${API_BASE_URL}/channels/${channelId}`, channelData);
+    const data = response.data;
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');
     }
-    
-    const updatedChannel = data.channel || data.data!;
-    console.log('📊 [API] Updated channel team:', updatedChannel.team);
-    
-    return updatedChannel;
+    return data.channel || data.data!;
   },
 
   /**
@@ -188,12 +148,7 @@ export const channelsAPI = {
    * Permission: Admin, Director, Branch Director
    */
   async delete(channelId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/channels/${channelId}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-    });
-
-    await handleResponse<ChannelActionResponse>(response);
+    await axiosInstance.delete(`${API_BASE_URL}/channels/${channelId}`);
   },
 
   /**
@@ -212,22 +167,11 @@ export const channelsAPI = {
     console.log('📤 [API] Request body:', requestBody);
     console.log('🔗 [API] URL:', `${API_BASE_URL}/channels/${channelId}/assign`);
     
-    const response = await fetch(`${API_BASE_URL}/channels/${channelId}/assign`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(requestBody),
-    });
-
-    console.log('📡 [API] Response status:', response.status);
-    
-    const data = await handleResponse<ChannelActionResponse>(response);
-    
-    console.log('✅ [API] Response data:', data);
-    
+    const response = await axiosInstance.post(`${API_BASE_URL}/channels/${channelId}/assign`, requestBody);
+    const data = response.data;
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');
     }
-    
     return data.channel || data.data!;
   },
 
@@ -237,12 +181,7 @@ export const channelsAPI = {
    * Permission: Admin, Director, Branch Director, Manager
    */
   async removeEditor(channelId: string, userId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/channels/${channelId}/members/${userId}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(),
-    });
-
-    await handleResponse<ChannelActionResponse>(response);
+    await axiosInstance.delete(`${API_BASE_URL}/channels/${channelId}/members/${userId}`);
   },
 
   /**
@@ -251,18 +190,11 @@ export const channelsAPI = {
    * Permission: Admin, Director, Branch Director
    */
   async moveToTeam(channelId: string, moveData: MoveChannelRequest): Promise<Channel> {
-    const response = await fetch(`${API_BASE_URL}/channels/${channelId}/move`, {
-      method: 'PATCH',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(moveData),
-    });
-
-    const data = await handleResponse<ChannelActionResponse>(response);
-    
+    const response = await axiosInstance.patch(`${API_BASE_URL}/channels/${channelId}/move`, moveData);
+    const data = response.data;
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');
     }
-    
     return data.channel || data.data!;
   },
 
@@ -272,17 +204,11 @@ export const channelsAPI = {
    * Permission: Admin, Director, Branch Director
    */
   async unassignFromTeam(channelId: string): Promise<Channel> {
-    const response = await fetch(`${API_BASE_URL}/channels/${channelId}/unassign`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-    });
-
-    const data = await handleResponse<ChannelActionResponse>(response);
-    
+    const response = await axiosInstance.post(`${API_BASE_URL}/channels/${channelId}/unassign`);
+    const data = response.data;
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');
     }
-    
     return data.channel || data.data!;
   },
 
@@ -292,17 +218,11 @@ export const channelsAPI = {
    * Permission: Admin only
    */
   async restore(channelId: string): Promise<Channel> {
-    const response = await fetch(`${API_BASE_URL}/channels/${channelId}/restore`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-    });
-
-    const data = await handleResponse<ChannelActionResponse>(response);
-    
+    const response = await axiosInstance.post(`${API_BASE_URL}/channels/${channelId}/restore`);
+    const data = response.data;
     if (!data.channel && !data.data) {
       throw new Error('Channel not found in response');
     }
-    
     return data.channel || data.data!;
   },
 
@@ -312,12 +232,8 @@ export const channelsAPI = {
    * Permission: All authenticated users
    */
   async checkTeam(): Promise<CheckTeamResponse> {
-    const response = await fetch(`${API_BASE_URL}/channels/check-team`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-    });
-
-    return handleResponse<CheckTeamResponse>(response);
+    const response = await axiosInstance.post(`${API_BASE_URL}/channels/check-team`);
+    return response.data;
   },
 
   /**

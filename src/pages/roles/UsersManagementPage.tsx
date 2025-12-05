@@ -29,7 +29,7 @@ import { UserFormDialog } from '@/pages/roles/components/UserFormDialog';
 import { useUsers } from '@/hooks/useUsers';
 import type { User } from '@/types/user.types';
 import { ROLE_CONFIG } from '@/types/user.types';
-import axios from 'axios';
+import axiosInstance from '@/lib/axios-instance';
 import { toast } from 'sonner';
 
 interface Branch {
@@ -83,9 +83,7 @@ export default function UsersManagementPage() {
             const token = localStorage.getItem('authToken');
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-            const response = await axios.get(`${API_URL}/branches`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const response = await axiosInstance.get(`${API_URL}/branches`);
 
             setBranches(response.data.branches || response.data.data || response.data || []);
         } catch (error) {
@@ -98,9 +96,7 @@ export default function UsersManagementPage() {
             const token = localStorage.getItem('authToken');
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-            const response = await axios.get(`${API_URL}/teams`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const response = await axiosInstance.get(`${API_URL}/teams`);
 
             setTeams(response.data.teams || response.data.data || response.data || []);
         } catch (error) {

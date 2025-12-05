@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useChannels } from '@/hooks/useChannels';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import axios from 'axios';
+import axiosInstance from '@/lib/axios-instance';
 import { channelsAPI } from '@/lib/channels-api';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';

@@ -3,8 +3,10 @@ import axios from 'axios';
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000',
-  // Không cần withCredentials vì sử dụng JWT token trong header
-  // withCredentials: true
+  timeout: 30000, // 30 seconds timeout
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // Tự động thêm JWT token vào mọi request
@@ -23,21 +25,47 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Xử lý 401 - redirect to login
+// Xử lý response và error
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token hết hạn hoặc không hợp lệ
+    const status = error.response?.status;
+    
+    // Xử lý token không hợp lệ hoặc hết hạn (401, 403)
+    if (status === 401 || status === 403) {
+      // Xóa dữ liệu authentication
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       
-      // Chỉ redirect nếu không phải đang ở trang login
-      if (!window.location.pathname.includes('/login')) {
+      // Kiểm tra xem có đang ở trang public không
+      const publicPaths = ['/login', '/register', '/forgot-password', '/reset-password'];
+      const isPublicPath = publicPaths.some(path => 
+        window.location.pathname.includes(path)
+      );
+      
+      // Chỉ redirect nếu không phải trang public
+      if (!isPublicPath) {
+        // Lưu URL hiện tại để redirect lại sau khi login
+        const currentPath = window.location.pathname + window.location.search;
+        sessionStorage.setItem('redirectAfterLogin', currentPath);
+        
+        // Hiển thị thông báo
         alert('🔒 Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại!');
+        
+        // Redirect về login
         window.location.href = '/login';
       }
     }
+    
+    // Xử lý các lỗi khác
+    if (status === 500) {
+      console.error('Server error:', error.response?.data?.message);
+    }
+    
+    if (status === 404) {
+      console.error('Resource not found:', error.config?.url);
+    }
+    
     return Promise.reject(error);
   }
 );

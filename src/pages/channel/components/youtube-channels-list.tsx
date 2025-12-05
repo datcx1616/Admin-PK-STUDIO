@@ -28,7 +28,7 @@ import {
     ChevronsLeft, ChevronsRight, Building2, Users2
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import axiosInstance from '@/lib/axios-instance'
 import { ChannelAssignment } from '../../analytics/components/channel-assignment'
 
 interface Channel {

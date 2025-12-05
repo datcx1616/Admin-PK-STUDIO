@@ -19,7 +19,7 @@ import {
     TabsTrigger,
 } from "@/components/ui/tabs"
 import { SiteHeader } from "@/pages/roles/components/site-header"
-import axios from 'axios'
+import axiosInstance from '@/lib/axios-instance'
 
 interface Branch {
     _id: string

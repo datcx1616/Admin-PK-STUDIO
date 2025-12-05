@@ -20,7 +20,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { useEffect, useState } from "react"
-import axios from "axios"
+import axiosInstance from '@/lib/axios-instance'
 
 interface AdminStatsResponse {
     success: boolean
