@@ -227,7 +227,7 @@ export function EditBranchModal({ open, branch, onClose, onSuccess }: EditBranch
                         </Button>
                         <Button
                             type="submit"
-                            className="bg-blue-600 hover:bg-blue-700"
+                            className="bg-[#C10007] hover:bg-[#a80006]"
                             disabled={loading}
                         >
                             {loading ? (

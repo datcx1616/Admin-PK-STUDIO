@@ -318,7 +318,7 @@ export function EditTeamModal({ open, team, onClose, onSuccess }: EditTeamModalP
                         <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
                             Hủy
                         </Button>
-                        <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={loading}>
+                        <Button type="submit" className="bg-[#C10007] hover:bg-[#a80006]" disabled={loading}>
                             {loading ? (
                                 <>
                                     <Loader2 className="w-4 h-4 animate-spin mr-2" />

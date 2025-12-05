@@ -111,10 +111,9 @@ export function DeleteTeamDialog({ open, team, onClose, onSuccess }: DeleteTeamD
                             handleDelete();
                         }}
                         disabled={loading || !canDelete} // ✅ Disable nếu không thể xóa
-                        className={`${canDelete
-                            ? 'bg-red-600 hover:bg-red-700'
-                            : 'bg-gray-400 cursor-not-allowed hover:bg-gray-400'
-                            }`}
+                        className={
+                            'bg-[#C10007] hover:bg-[#a80006] cursor-not-allowed disabled:opacity-50'
+                        }
                     >
                         {loading ? (
                             <>

@@ -1,3 +1,20 @@
+/* Default input style: red border and shadow on focus */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input:not([type]) {
+  border: 2px solid #e2e8f0; /* gray-200 */
+  box-shadow: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input:focus {
+  border-color: #e53e3e; /* red-600 */
+  box-shadow: 0 0 0 2px #feb2b2; /* red-200 shadow */
+  outline: none;
+}
 @import "tailwindcss";
 @import "tw-animate-css";
 

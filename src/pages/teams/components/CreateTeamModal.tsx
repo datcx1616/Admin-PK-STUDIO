@@ -402,7 +402,7 @@ export function CreateTeamModal({ open, onClose, onSuccess, branchId }: CreateTe
                         <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
                             Hủy
                         </Button>
-                        <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={loading || branches.length === 0}>
+                        <Button type="submit" className="bg-[#C10007] hover:bg-[#a80006]" disabled={loading || branches.length === 0}>
                             {loading ? (
                                 <>
                                     <Loader2 className="w-4 h-4 animate-spin mr-2" />

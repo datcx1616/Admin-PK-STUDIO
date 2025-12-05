@@ -1,6 +1,5 @@
 import * as React from "react"
-import { MoreHorizontal } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { DropdownMenuAdvanced } from "@/components/ui/dropdown-menu-advanced"
 import { TableOfContents, type TableOfContentsItem } from "@/pages/components/TableOfContents"
 import { cn } from "@/lib/utils"
 
@@ -61,9 +60,7 @@ export function ContentHeader({ breadcrumbs, actions, className, tableOfContents
                         <TableOfContents items={tableOfContents} />
                     )}
                     {actions || (
-                        <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                        <DropdownMenuAdvanced />
                     )}
                 </div>
             </div>

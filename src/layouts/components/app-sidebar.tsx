@@ -176,11 +176,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 <div className="w-12 h-12 rounded-lg bg-red-600 flex items-center justify-center">
                                     <Youtube className="w-6 h-6 text-white" />
                                 </div>
-                                <div className="flex flex-col items-start gap-0.5">
+                                <div className="flex flex-col items-start gap-0.5 w-full">
                                     <span className="text-gray-900 font-bold text-sm">YT Manager</span>
-                                    <span className="text-gray-500 text-sm">
-                                        {user?.role === 'editor' ? 'Kênh của tôi' : 'Thống Kê'}
-                                    </span>
+                                    <div className="flex items-center w-full">
+                                        <span className="text-gray-500 text-sm">
+                                            {user?.role === 'editor' ? 'Kênh của tôi' : 'Thống Kê'}
+                                        </span>
+                                        <div className="flex-1" />
+                                        <div className="flex items-center gap-2">
+                                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-gray-300 text-gray-500 text-lg bg-white">
+                                                ?
+                                            </span>
+                                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-gray-300 text-lg bg-white">
+                                                <span role='img' aria-label='smile'>😊</span>
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </Button>
                         </SidebarMenuButton>

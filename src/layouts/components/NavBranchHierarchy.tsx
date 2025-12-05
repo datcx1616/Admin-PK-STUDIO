@@ -1,8 +1,8 @@
-// src/pages/examples/layout/components/NavBranchHierarchy.tsx
-// VERSION 6: Hover Chevron REPLACE Icon + Navigation
+// src/layouts/components/NavBranchHierarchy.tsx
+// VERSION 6: Hover Chevron REPLACE Icon + Navigation - FIXED
 import * as React from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { ChevronRight, Building2, Users2, User2, Plus, Pencil, BarChart3, Trash2, Users, Youtube } from "lucide-react"
+import { ChevronRight, Building2, Users2, User2, Plus, Pencil, Trash2, Users, Youtube } from "lucide-react"
 
 import {
     Collapsible,
@@ -125,7 +125,7 @@ function HierarchySkeleton() {
 }
 
 export function NavBranchHierarchy() {
-    const navigate = useNavigate()  // ✅ THÊM navigate hook
+    const navigate = useNavigate()
     const location = useLocation()
     const [branches, setBranches] = React.useState<BranchWithTeams[]>([])
     const [loading, setLoading] = React.useState(true)
@@ -340,8 +340,8 @@ export function NavBranchHierarchy() {
 
     return (
         <SidebarGroup className="bg-[#F7F7F7] border-0" style={{ border: 'none' }}>
-            <div className="flex items-center justify-between px-2 mb-1 group hover:bg-accent rounded transition-colors cursor-pointer">
-                <SidebarGroupLabel className="mb-0">Tổ chức</SidebarGroupLabel>
+            <div className="flex items-center justify-between px-0 mb-1 group hover:bg-accent rounded transition-colors cursor-pointer">
+                <SidebarGroupLabel className="mb-0 pl-0">Tổ chức</SidebarGroupLabel>
                 <button
                     onClick={() => setShowCreateModal(true)}
                     className="h-5 w-5 rounded hover:bg-accent flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 group-hover:scale-110 active:scale-95"
@@ -350,7 +350,7 @@ export function NavBranchHierarchy() {
                     <Plus className="h-3.5 w-3.5 transition-transform" />
                 </button>
             </div>
-            <SidebarMenu className="border-0" style={{ border: 'none' }}>
+            <SidebarMenu className="border-0 pl-0" style={{ border: 'none' }}>
                 {branches.map((branch) => {
                     const isBranchExpanded = expandedBranches.has(branch._id)
                     const hasTeams = branch.teams && branch.teams.length > 0
@@ -361,7 +361,7 @@ export function NavBranchHierarchy() {
                             open={isBranchExpanded}
                             onOpenChange={() => toggleBranch(branch._id)}
                         >
-                            <SidebarMenuItem>
+                            <SidebarMenuItem className="pl-2">
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton
                                         className={cn(
@@ -369,7 +369,6 @@ export function NavBranchHierarchy() {
                                             location.pathname === `/branches/${branch._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
                                         )}
                                         onClick={(e) => {
-                                            // ✅ THÊM Navigation khi click vào branch
                                             if (!e.defaultPrevented) {
                                                 navigate(`/branches/${branch._id}`)
                                             }
@@ -402,10 +401,10 @@ export function NavBranchHierarchy() {
                                                     tabIndex={0}
                                                     onClick={(e) => {
                                                         e.stopPropagation()
-                                                        e.preventDefault()  // ✅ THÊM preventDefault
+                                                        e.preventDefault()
                                                     }}
                                                     className={cn(
-                                                        "absolute right-2 p-0.5 rounded hover:bg-accent",
+                                                        "absolute right-2 p-0.5 rounded hover:bg-accent cursor-pointer",
                                                         "opacity-0 group-hover:opacity-100 transition-opacity"
                                                     )}
                                                 >
@@ -469,195 +468,191 @@ export function NavBranchHierarchy() {
                                                         onOpenChange={() => toggleTeam(team._id)}
                                                     >
                                                         <SidebarMenuSubItem className="border-0" style={{ border: 'none' }}>
-                                                            <CollapsibleTrigger asChild>
-                                                                <SidebarMenuSubButton
-                                                                    className={cn(
-                                                                        "group relative w-full border-0",
-                                                                        !hasMembers && "cursor-default",
-                                                                        location.pathname === `/teams/${team._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
-                                                                    )}
-                                                                    onClick={(e) => {
-                                                                        // ✅ THÊM Navigation khi click vào team
-                                                                        if (!e.defaultPrevented) {
-                                                                            navigate(`/teams/${team._id}`)
-                                                                        }
-                                                                    }}
-                                                                >
-                                                                    {hasMembers ? (
-                                                                        // Team CÓ members - có hover effect
-                                                                        <div className="h-3.5 w-3.5 shrink-0 relative">
-                                                                            {/* Original icon - ẩn khi hover */}
-                                                                            <Users2 className={cn(
-                                                                                "h-3.5 w-3.5 absolute inset-0 transition-opacity",
-                                                                                "group-hover:opacity-0"
-                                                                            )} />
+                                                            {/* Cấp 2: Team thụt vào */}
+                                                            <div className="pl-4">
+                                                                <CollapsibleTrigger asChild>
+                                                                    <SidebarMenuSubButton
+                                                                        className={cn(
+                                                                            "group relative w-full border-0",
+                                                                            !hasMembers && "cursor-default",
+                                                                            location.pathname === `/teams/${team._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
+                                                                        )}
+                                                                        onClick={(e) => {
+                                                                            if (!e.defaultPrevented) {
+                                                                                navigate(`/teams/${team._id}`)
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        {hasMembers ? (
+                                                                            // Team CÓ members - có hover effect
+                                                                            <div className="h-3.5 w-3.5 shrink-0 relative">
+                                                                                {/* Original icon - ẩn khi hover */}
+                                                                                <Users2 className={cn(
+                                                                                    "h-3.5 w-3.5 absolute inset-0 transition-opacity",
+                                                                                    "group-hover:opacity-0"
+                                                                                )} />
 
-                                                                            {/* Chevron - hiện khi hover hoặc expanded */}
-                                                                            <ChevronRight className={cn(
-                                                                                "h-3.5 w-3.5 absolute inset-0 transition-all",
-                                                                                "opacity-0 group-hover:opacity-100",
-                                                                                isTeamExpanded && "rotate-90 opacity-100"
-                                                                            )} />
-                                                                        </div>
-                                                                    ) : (
-                                                                        // Team KHÔNG có members - giữ nguyên icon, không hover effect
-                                                                        <Users2 className="h-3.5 w-3.5 shrink-0" />
-                                                                    )}
+                                                                                {/* Chevron - hiện khi hover hoặc expanded */}
+                                                                                <ChevronRight className={cn(
+                                                                                    "h-3.5 w-3.5 absolute inset-0 transition-all",
+                                                                                    "opacity-0 group-hover:opacity-100",
+                                                                                    isTeamExpanded && "rotate-90 opacity-100"
+                                                                                )} />
+                                                                            </div>
+                                                                        ) : (
+                                                                            // Team KHÔNG có members - giữ nguyên icon, không hover effect
+                                                                            <Users2 className="h-3.5 w-3.5 shrink-0" />
+                                                                        )}
 
-                                                                    <span className="flex-1 truncate pr-6">{team.name}</span>
+                                                                        <span className="flex-1 truncate pr-6">{team.name}</span>
 
-                                                                    {/* More icon - hiện khi hover */}
-                                                                    <DropdownMenu>
-                                                                        <DropdownMenuTrigger asChild>
-                                                                            <span
-                                                                                role="button"
-                                                                                tabIndex={0}
-                                                                                onClick={(e) => {
-                                                                                    e.stopPropagation()
-                                                                                    e.preventDefault()  // ✅ THÊM preventDefault
-                                                                                }}
-                                                                                className={cn(
-                                                                                    "absolute right-2 p-0.5 rounded hover:bg-accent",
-                                                                                    "opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                                )}
-                                                                            >
-                                                                                <svg
-                                                                                    className="h-3.5 w-3.5"
-                                                                                    fill="currentColor"
-                                                                                    viewBox="0 0 16 16"
+                                                                        {/* More icon - hiện khi hover */}
+                                                                        <DropdownMenu>
+                                                                            <DropdownMenuTrigger asChild>
+                                                                                <span
+                                                                                    role="button"
+                                                                                    tabIndex={0}
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation()
+                                                                                        e.preventDefault()
+                                                                                    }}
+                                                                                    className={cn(
+                                                                                        "absolute right-2 p-0.5 rounded hover:bg-accent cursor-pointer",
+                                                                                        "opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                    )}
                                                                                 >
-                                                                                    <circle cx="8" cy="3" r="1.5" />
-                                                                                    <circle cx="8" cy="8" r="1.5" />
-                                                                                    <circle cx="8" cy="13" r="1.5" />
-                                                                                </svg>
-                                                                            </span>
-                                                                        </DropdownMenuTrigger>
-                                                                        <DropdownMenuContent align="end" className="w-48">
-                                                                            <DropdownMenuItem
-                                                                                onClick={async () => {
-                                                                                    try {
-                                                                                        const fullTeam = await teamsAPI.getById(team._id)
-                                                                                        setSelectedTeam(fullTeam)
-                                                                                        setShowManageMembersModal(true)
-                                                                                    } catch (error) {
-                                                                                        console.error('Error fetching team:', error)
-                                                                                    }
-                                                                                }}
-                                                                            >
-                                                                                <Users className="mr-2 h-4 w-4" />
-                                                                                <span>Quản Lý Thành Viên</span>
-                                                                            </DropdownMenuItem>
-                                                                            <DropdownMenuItem
-                                                                                onClick={async () => {
-                                                                                    try {
-                                                                                        const fullTeam = await teamsAPI.getById(team._id)
-                                                                                        setSelectedTeam(fullTeam)
-                                                                                        setShowEditTeamModal(true)
-                                                                                    } catch (error) {
-                                                                                        console.error('Error fetching team:', error)
-                                                                                    }
-                                                                                }}
-                                                                            >
-                                                                                <Pencil className="mr-2 h-4 w-4" />
-                                                                                <span>Chỉnh Sửa</span>
-                                                                            </DropdownMenuItem>
-
-                                                                            <DropdownMenuSeparator />
-                                                                            <DropdownMenuItem
-                                                                                onClick={async () => {
-                                                                                    try {
-                                                                                        const fullTeam = await teamsAPI.getById(team._id)
-                                                                                        setSelectedTeam(fullTeam)
-                                                                                        setShowDeleteTeamDialog(true)
-                                                                                    } catch (error) {
-                                                                                        console.error('Error fetching team:', error)
-                                                                                    }
-                                                                                }}
-                                                                                className="text-red-600 focus:text-red-600"
-                                                                            >
-                                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                                <span>Xóa</span>
-                                                                            </DropdownMenuItem>
-                                                                        </DropdownMenuContent>
-                                                                    </DropdownMenu>
-                                                                </SidebarMenuSubButton>
-                                                            </CollapsibleTrigger>
+                                                                                    <svg
+                                                                                        className="h-3.5 w-3.5"
+                                                                                        fill="currentColor"
+                                                                                        viewBox="0 0 16 16"
+                                                                                    >
+                                                                                        <circle cx="8" cy="3" r="1.5" />
+                                                                                        <circle cx="8" cy="8" r="1.5" />
+                                                                                        <circle cx="8" cy="13" r="1.5" />
+                                                                                    </svg>
+                                                                                </span>
+                                                                            </DropdownMenuTrigger>
+                                                                            <DropdownMenuContent align="end" className="w-48">
+                                                                                <DropdownMenuItem
+                                                                                    onClick={async () => {
+                                                                                        try {
+                                                                                            const fullTeam = await teamsAPI.getById(team._id)
+                                                                                            setSelectedTeam(fullTeam)
+                                                                                            setShowManageMembersModal(true)
+                                                                                        } catch (error) {
+                                                                                            console.error('Error fetching team:', error)
+                                                                                        }
+                                                                                    }}
+                                                                                >
+                                                                                    <Users className="mr-2 h-4 w-4" />
+                                                                                    <span>Quản Lý Thành Viên</span>
+                                                                                </DropdownMenuItem>
+                                                                                <DropdownMenuItem
+                                                                                    onClick={async () => {
+                                                                                        try {
+                                                                                            const fullTeam = await teamsAPI.getById(team._id)
+                                                                                            setSelectedTeam(fullTeam)
+                                                                                            setShowEditTeamModal(true)
+                                                                                        } catch (error) {
+                                                                                            console.error('Error fetching team:', error)
+                                                                                        }
+                                                                                    }}
+                                                                                >
+                                                                                    <Pencil className="mr-2 h-4 w-4" />
+                                                                                    <span>Chỉnh Sửa</span>
+                                                                                </DropdownMenuItem>
+                                                                                <DropdownMenuSeparator />
+                                                                                <DropdownMenuItem
+                                                                                    onClick={async () => {
+                                                                                        try {
+                                                                                            const fullTeam = await teamsAPI.getById(team._id)
+                                                                                            setSelectedTeam(fullTeam)
+                                                                                            setShowDeleteTeamDialog(true)
+                                                                                        } catch (error) {
+                                                                                            console.error('Error fetching team:', error)
+                                                                                        }
+                                                                                    }}
+                                                                                    className="text-red-600 focus:text-red-600"
+                                                                                >
+                                                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                                                    <span>Xóa</span>
+                                                                                </DropdownMenuItem>
+                                                                            </DropdownMenuContent>
+                                                                        </DropdownMenu>
+                                                                    </SidebarMenuSubButton>
+                                                                </CollapsibleTrigger>
+                                                            </div>
 
                                                             {hasMembers && (
                                                                 <CollapsibleContent>
                                                                     <SidebarMenuSub className="px-0 mx-0 border-0" style={{ border: 'none' }}>
                                                                         {(team.members ?? []).map((member) => (
                                                                             <SidebarMenuSubItem key={member._id} className="border-0" style={{ border: 'none' }}>
-                                                                                <SidebarMenuSubButton
-                                                                                    className="pl-8 group relative w-full border-0"
-                                                                                >
-                                                                                    {/* Icon container với transition */}
-                                                                                    <div className="h-3.5 w-3.5 shrink-0 relative">
-                                                                                        {/* Original icon - ẩn khi hover */}
-                                                                                        <User2 className={cn(
-                                                                                            "h-3.5 w-3.5 absolute inset-0 transition-opacity",
-                                                                                            "group-hover:opacity-0"
-                                                                                        )} />
+                                                                                {/* Cấp 3: Member thụt vào sâu hơn */}
+                                                                                <div className="pl-8">
+                                                                                    <SidebarMenuSubButton
+                                                                                        className="group relative w-full border-0"
+                                                                                    >
+                                                                                        {/* Icon container với transition */}
+                                                                                        <div className="h-3.5 w-3.5 shrink-0 relative">
+                                                                                            {/* Icon user luôn hiện, không ẩn khi hover */}
+                                                                                            <User2 className="h-3.5 w-3.5 absolute inset-0" />
+                                                                                            {/* ChevronRight icon ẩn hoàn toàn ở cấp member */}
+                                                                                        </div>
 
-                                                                                        {/* Chevron - hiện khi hover */}
-                                                                                        <ChevronRight className={cn(
-                                                                                            "h-3.5 w-3.5 absolute inset-0 transition-opacity",
-                                                                                            "opacity-0 group-hover:opacity-100"
-                                                                                        )} />
-                                                                                    </div>
+                                                                                        <span className="truncate text-xs pr-6">
+                                                                                            {member.name}
+                                                                                        </span>
 
-                                                                                    <span className="truncate text-xs pr-6">
-                                                                                        {member.name}
-                                                                                    </span>
-
-                                                                                    {/* More icon - hiện khi hover */}
-                                                                                    <DropdownMenu>
-                                                                                        <DropdownMenuTrigger asChild>
-                                                                                            <span
-                                                                                                role="button"
-                                                                                                tabIndex={0}
-                                                                                                onClick={(e) => {
-                                                                                                    e.stopPropagation()
-                                                                                                    e.preventDefault()  // ✅ THÊM preventDefault
-                                                                                                }}
-                                                                                                className={cn(
-                                                                                                    "absolute right-2 p-0.5 rounded hover:bg-accent",
-                                                                                                    "opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                                                )}
-                                                                                            >
-                                                                                                <svg
-                                                                                                    className="h-3.5 w-3.5"
-                                                                                                    fill="currentColor"
-                                                                                                    viewBox="0 0 16 16"
+                                                                                        {/* More icon - hiện khi hover */}
+                                                                                        <DropdownMenu>
+                                                                                            <DropdownMenuTrigger asChild>
+                                                                                                <span
+                                                                                                    role="button"
+                                                                                                    tabIndex={0}
+                                                                                                    onClick={(e) => {
+                                                                                                        e.stopPropagation()
+                                                                                                        e.preventDefault()
+                                                                                                    }}
+                                                                                                    className={cn(
+                                                                                                        "absolute right-2 p-0.5 rounded hover:bg-accent cursor-pointer",
+                                                                                                        "opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                                    )}
                                                                                                 >
-                                                                                                    <circle cx="8" cy="3" r="1.5" />
-                                                                                                    <circle cx="8" cy="8" r="1.5" />
-                                                                                                    <circle cx="8" cy="13" r="1.5" />
-                                                                                                </svg>
-                                                                                            </span>
-                                                                                        </DropdownMenuTrigger>
-                                                                                        <DropdownMenuContent align="end" className="w-48">
-                                                                                            <DropdownMenuItem
-                                                                                                onClick={() => {
-                                                                                                    console.log('Assign channel to member:', member._id)
-                                                                                                }}
-                                                                                            >
-                                                                                                <Youtube className="mr-2 h-4 w-4" />
-                                                                                                <span>Gán Kênh</span>
-                                                                                            </DropdownMenuItem>
-                                                                                            <DropdownMenuSeparator />
-                                                                                            <DropdownMenuItem
-                                                                                                onClick={() => {
-                                                                                                    console.log('Delete member:', member._id)
-                                                                                                }}
-                                                                                                className="text-red-600 focus:text-red-600"
-                                                                                            >
-                                                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                                                <span>Xóa</span>
-                                                                                            </DropdownMenuItem>
-                                                                                        </DropdownMenuContent>
-                                                                                    </DropdownMenu>
-                                                                                </SidebarMenuSubButton>
+                                                                                                    <svg
+                                                                                                        className="h-3.5 w-3.5"
+                                                                                                        fill="currentColor"
+                                                                                                        viewBox="0 0 16 16"
+                                                                                                    >
+                                                                                                        <circle cx="8" cy="3" r="1.5" />
+                                                                                                        <circle cx="8" cy="8" r="1.5" />
+                                                                                                        <circle cx="8" cy="13" r="1.5" />
+                                                                                                    </svg>
+                                                                                                </span>
+                                                                                            </DropdownMenuTrigger>
+                                                                                            <DropdownMenuContent align="end" className="w-48">
+                                                                                                <DropdownMenuItem
+                                                                                                    onClick={() => {
+                                                                                                        console.log('Assign channel to member:', member._id)
+                                                                                                    }}
+                                                                                                >
+                                                                                                    <Youtube className="mr-2 h-4 w-4" />
+                                                                                                    <span>Gán Kênh</span>
+                                                                                                </DropdownMenuItem>
+                                                                                                <DropdownMenuSeparator />
+                                                                                                <DropdownMenuItem
+                                                                                                    onClick={() => {
+                                                                                                        console.log('Delete member:', member._id)
+                                                                                                    }}
+                                                                                                    className="text-red-600 focus:text-red-600"
+                                                                                                >
+                                                                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                                                                    <span>Xóa</span>
+                                                                                                </DropdownMenuItem>
+                                                                                            </DropdownMenuContent>
+                                                                                        </DropdownMenu>
+                                                                                    </SidebarMenuSubButton>
+                                                                                </div>
                                                                             </SidebarMenuSubItem>
                                                                         ))}
                                                                     </SidebarMenuSub>
@@ -676,6 +671,7 @@ export function NavBranchHierarchy() {
                 })}
             </SidebarMenu>
 
+            {/* Modals */}
             <CreateBranchModal
                 open={showCreateModal}
                 onClose={() => setShowCreateModal(false)}
