@@ -284,8 +284,8 @@ export function ChannelDetailView({ channel, onBack }: { channel: any, onBack?: 
                         <MetricCard
                             icon={DollarSign}
                             title="Doanh Thu"
-                            value={formatCurrency(analytics.revenue.totals.estimatedRevenue)}
-                            subtitle={`CPM: ${formatCurrency(analytics.revenue.totals.cpm)} | RPM: ${formatCurrency(analytics.revenue.totals.rpm)}`}
+                            value={formatCurrency(analytics.revenue?.totals?.estimatedRevenue ?? 0)}
+                            subtitle={`CPM: ${formatCurrency(analytics.revenue?.totals?.cpm ?? 0)} | RPM: ${formatCurrency(analytics.revenue?.totals?.rpm ?? 0)}`}
                             gradient="bg-gradient-to-br from-amber-500 to-orange-600"
                         />
                     </div>

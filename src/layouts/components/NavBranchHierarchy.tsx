@@ -350,7 +350,7 @@ export function NavBranchHierarchy() {
                     <Plus className="h-3.5 w-3.5 transition-transform" />
                 </button>
             </div>
-            <SidebarMenu className="border-0 pl-0" style={{ border: 'none' }}>
+            <SidebarMenu className="border-0" style={{ border: 'none' }}>
                 {branches.map((branch) => {
                     const isBranchExpanded = expandedBranches.has(branch._id)
                     const hasTeams = branch.teams && branch.teams.length > 0
@@ -361,7 +361,7 @@ export function NavBranchHierarchy() {
                             open={isBranchExpanded}
                             onOpenChange={() => toggleBranch(branch._id)}
                         >
-                            <SidebarMenuItem className="pl-2">
+                            <SidebarMenuItem className="mr-4">
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton
                                         className={cn(
@@ -473,7 +473,7 @@ export function NavBranchHierarchy() {
                                                                 <CollapsibleTrigger asChild>
                                                                     <SidebarMenuSubButton
                                                                         className={cn(
-                                                                            "group relative w-full border-0",
+                                                                            "group relative w-full border-0 cursor-pointer",
                                                                             !hasMembers && "cursor-default",
                                                                             location.pathname === `/teams/${team._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
                                                                         )}
@@ -591,7 +591,7 @@ export function NavBranchHierarchy() {
                                                                                 {/* Cấp 3: Member thụt vào sâu hơn */}
                                                                                 <div className="pl-8">
                                                                                     <SidebarMenuSubButton
-                                                                                        className="group relative w-full border-0"
+                                                                                        className="group relative w-full border-0 cursor-pointer"
                                                                                     >
                                                                                         {/* Icon container với transition */}
                                                                                         <div className="h-3.5 w-3.5 shrink-0 relative">
