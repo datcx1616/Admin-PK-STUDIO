@@ -13,7 +13,7 @@ export function DropdownMenuAdvanced() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="rounded-full w-8 h-8 flex items-center justify-center hover:bg-gray-100">
+                <button className="relative rounded-lg w-8 h-7 hover:bg-gray-100  p-0 flex items-center justify-center pb-3">
                     <span className="text-2xl">...</span>
                 </button>
             </DropdownMenuTrigger>

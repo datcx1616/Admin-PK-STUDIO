@@ -344,7 +344,7 @@ export function NavBranchHierarchy() {
                 <SidebarGroupLabel className="mb-0 pl-0">Tổ chức</SidebarGroupLabel>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="h-5 w-5 rounded hover:bg-accent flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 group-hover:scale-110 active:scale-95"
+                    className="h-5 w-5 rounded hover:bg-accent flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 group-hover:scale-110 active:scale-95 mr-2"
                     title="Thêm chi nhánh"
                 >
                     <Plus className="h-3.5 w-3.5 transition-transform" />
@@ -361,12 +361,15 @@ export function NavBranchHierarchy() {
                             open={isBranchExpanded}
                             onOpenChange={() => toggleBranch(branch._id)}
                         >
-                            <SidebarMenuItem className="mr-4">
+                            <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
                                     <SidebarMenuButton
                                         className={cn(
-                                            "group h-auto py-1 px-2 relative hover:text-accent-foreground",
-                                            location.pathname === `/branches/${branch._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
+                                            "group h-auto py-1 px-0 relative hover:text-accent-foreground",
+                                            location.pathname === `/branches/${branch._id}`
+                                                ? "bg-[#DEDFE3] pl-2"
+                                                : "hover:bg-[#F7F7F7]",
+                                            location.pathname === `/branches/${branch._id}` && "bg-[#DEDFE3] pl-2"
                                         )}
                                         onClick={(e) => {
                                             if (!e.defaultPrevented) {
@@ -475,7 +478,8 @@ export function NavBranchHierarchy() {
                                                                         className={cn(
                                                                             "group relative w-full border-0 cursor-pointer",
                                                                             !hasMembers && "cursor-default",
-                                                                            location.pathname === `/teams/${team._id}` ? "bg-[#DEDFE3]" : "hover:bg-accent"
+                                                                            location.pathname === `/teams/${team._id}` ? "bg-[#DEDFE3]" : "hover:bg-[#F7F7F7]",
+                                                                            location.pathname === `/teams/${team._id}` && "bg-[#DEDFE3]"
                                                                         )}
                                                                         onClick={(e) => {
                                                                             if (!e.defaultPrevented) {
@@ -591,7 +595,11 @@ export function NavBranchHierarchy() {
                                                                                 {/* Cấp 3: Member thụt vào sâu hơn */}
                                                                                 <div className="pl-8">
                                                                                     <SidebarMenuSubButton
-                                                                                        className="group relative w-full border-0 cursor-pointer"
+                                                                                        className={cn(
+                                                                                            "group relative w-full border-0 cursor-pointer hover:bg-[#F7F7F7]",
+                                                                                            location.pathname === `/users/${member._id}` ? "bg-[#DEDFE3]" : "",
+                                                                                            location.pathname === `/users/${member._id}` && "bg-[#DEDFE3]"
+                                                                                        )}
                                                                                     >
                                                                                         {/* Icon container với transition */}
                                                                                         <div className="h-3.5 w-3.5 shrink-0 relative">

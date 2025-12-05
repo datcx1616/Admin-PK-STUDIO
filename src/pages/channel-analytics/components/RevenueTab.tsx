@@ -7,25 +7,72 @@ import { LineChart, Line, BarChart, Bar, ComposedChart, Area, XAxis, YAxis, Cart
 import { formatNumber, formatCurrency, formatPercentage } from "../utils/formatters";
 import { prepareTimeSeriesData, CHART_COLORS } from "../utils/chartHelpers";
 import type { ChannelAnalyticsData } from "@/types/channel-analytics.types";
-import { DollarSign, TrendingUp, Eye, BarChart3 } from "lucide-react";
+import { DollarSign, TrendingUp, Eye, BarChart3, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface RevenueTabProps {
     analytics: ChannelAnalyticsData;
 }
 
 export function RevenueTab({ analytics }: RevenueTabProps) {
+    // ✅ DEFENSIVE PROGRAMMING: Check if revenue data exists
+    if (!analytics?.revenue?.totals || !analytics?.revenue?.dailyData) {
+        return (
+            <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                    Dữ liệu doanh thu không khả dụng. Kênh có thể chưa bật kiếm tiền hoặc chưa có đủ dữ liệu.
+                </AlertDescription>
+            </Alert>
+        );
+    }
+
+    // ✅ Safe defaults for all values
+    const totals = analytics.revenue.totals;
+    const estimatedRevenue = totals.estimatedRevenue ?? 0;
+    const estimatedAdRevenue = totals.estimatedAdRevenue ?? 0;
+    const cpm = totals.cpm ?? 0;
+    const rpm = totals.rpm ?? 0;
+    const grossRevenue = totals.grossRevenue ?? 0;
+    const monetizedPlaybacks = totals.monetizedPlaybacks ?? 0;
+    const adImpressions = totals.adImpressions ?? 0;
+    const monetizationStatus = analytics.revenue.monetizationStatus ?? 'disabled';
+    const currency = analytics.revenue.currency ?? 'USD';
+
+    // ✅ Filter out invalid daily data
+    const validDailyData = analytics.revenue.dailyData.filter(day =>
+        day && day.date && typeof day.estimatedRevenue === 'number'
+    );
+
+    if (validDailyData.length === 0) {
+        return (
+            <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                    Không có dữ liệu doanh thu cho khoảng thời gian này.
+                </AlertDescription>
+            </Alert>
+        );
+    }
+
+    // ✅ Prepare chart data safely
     const revenueData = prepareTimeSeriesData(
-        analytics.revenue.dailyData,
+        validDailyData,
         'date',
         ['estimatedRevenue', 'estimatedAdRevenue', 'cpm', 'rpm']
     );
 
     const monetizationData = prepareTimeSeriesData(
-        analytics.revenue.dailyData,
+        validDailyData,
         'date',
         ['monetizedPlaybacks', 'adImpressions']
     );
+
+    // ✅ Safe calculations
+    const totalViews = analytics.basic?.totals?.totalViews ?? 1; // Avoid division by zero
+    const totalWatchTimeHours = parseFloat(analytics.basic?.totals?.totalWatchTimeHours ?? '1'); // Avoid division by zero
+    const avgRevenuePerDay = validDailyData.length > 0 ? estimatedRevenue / validDailyData.length : 0;
 
     return (
         <div className="space-y-6">
@@ -40,10 +87,10 @@ export function RevenueTab({ analytics }: RevenueTabProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-green-600">
-                            {formatCurrency(analytics.revenue.totals.estimatedRevenue)}
+                            {formatCurrency(estimatedRevenue)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            Ad: {formatCurrency(analytics.revenue.totals.estimatedAdRevenue)}
+                            Ad: {formatCurrency(estimatedAdRevenue)}
                         </p>
                     </CardContent>
                 </Card>
@@ -57,7 +104,7 @@ export function RevenueTab({ analytics }: RevenueTabProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-blue-600">
-                            {formatCurrency(analytics.revenue.totals.cpm)}
+                            {formatCurrency(cpm)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                             Cost Per Mille
@@ -74,7 +121,7 @@ export function RevenueTab({ analytics }: RevenueTabProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-purple-600">
-                            {formatCurrency(analytics.revenue.totals.rpm)}
+                            {formatCurrency(rpm)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                             Revenue Per Mille
@@ -91,13 +138,13 @@ export function RevenueTab({ analytics }: RevenueTabProps) {
                     </CardHeader>
                     <CardContent>
                         <Badge
-                            variant={analytics.revenue.monetizationStatus === 'enabled' ? 'default' : 'secondary'}
+                            variant={monetizationStatus === 'default' ? 'default' : 'secondary'}
                             className="text-sm"
                         >
-                            {analytics.revenue.monetizationStatus === 'enabled' ? 'Đã bật kiếm tiền' : 'Chưa bật'}
+                            {monetizationStatus === 'enabled' ? 'Đã bật kiếm tiền' : 'Chưa bật'}
                         </Badge>
                         <p className="text-xs text-muted-foreground mt-2">
-                            Currency: {analytics.revenue.currency}
+                            Currency: {currency}
                         </p>
                     </CardContent>
                 </Card>
@@ -121,7 +168,10 @@ export function RevenueTab({ analytics }: RevenueTabProps) {
                             tickFormatter={(value) => `$${value.toFixed(0)}`}
                         />
                         <Tooltip
-                            formatter={(value: any) => `$${value.toFixed(2)}`}
+                            formatter={(value: any) => {
+                                const numValue = Number(value);
+                                return isNaN(numValue) ? '$0.00' : `$${numValue.toFixed(2)}`;
+                            }}
                         />
                         <Legend />
                         <Area
@@ -163,7 +213,10 @@ export function RevenueTab({ analytics }: RevenueTabProps) {
                             tickFormatter={(value) => `$${value.toFixed(1)}`}
                         />
                         <Tooltip
-                            formatter={(value: any) => `$${value.toFixed(2)}`}
+                            formatter={(value: any) => {
+                                const numValue = Number(value);
+                                return isNaN(numValue) ? '$0.00' : `$${numValue.toFixed(2)}`;
+                            }}
                         />
                         <Legend />
                         <Line
@@ -240,25 +293,25 @@ export function RevenueTab({ analytics }: RevenueTabProps) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {analytics.revenue.dailyData.slice(-7).reverse().map((day, index) => (
+                                {validDailyData.slice(-7).reverse().map((day, index) => (
                                     <tr key={index} className="border-b hover:bg-accent/50">
                                         <td className="py-3 px-4">
                                             {new Date(day.date).toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })}
                                         </td>
                                         <td className="text-right py-3 px-4 font-medium text-green-600">
-                                            {formatCurrency(day.estimatedRevenue)}
+                                            {formatCurrency(day.estimatedRevenue ?? 0)}
                                         </td>
                                         <td className="text-right py-3 px-4">
-                                            {formatCurrency(day.cpm)}
+                                            {formatCurrency(day.cpm ?? 0)}
                                         </td>
                                         <td className="text-right py-3 px-4">
-                                            {formatCurrency(day.rpm)}
+                                            {formatCurrency(day.rpm ?? 0)}
                                         </td>
                                         <td className="text-right py-3 px-4">
-                                            {formatNumber(day.monetizedPlaybacks)}
+                                            {formatNumber(day.monetizedPlaybacks ?? 0)}
                                         </td>
                                         <td className="text-right py-3 px-4">
-                                            {formatNumber(day.adImpressions)}
+                                            {formatNumber(day.adImpressions ?? 0)}
                                         </td>
                                     </tr>
                                 ))}
@@ -277,20 +330,20 @@ export function RevenueTab({ analytics }: RevenueTabProps) {
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-between py-2 border-b">
                             <span className="text-sm text-muted-foreground">Tổng doanh thu gộp</span>
-                            <span className="font-medium">{formatCurrency(analytics.revenue.totals.grossRevenue)}</span>
+                            <span className="font-medium">{formatCurrency(grossRevenue)}</span>
                         </div>
                         <div className="flex items-center justify-between py-2 border-b">
                             <span className="text-sm text-muted-foreground">Tổng lượt phát có kiếm tiền</span>
-                            <span className="font-medium">{formatNumber(analytics.revenue.totals.monetizedPlaybacks)}</span>
+                            <span className="font-medium">{formatNumber(monetizedPlaybacks)}</span>
                         </div>
                         <div className="flex items-center justify-between py-2 border-b">
                             <span className="text-sm text-muted-foreground">Tổng hiển thị quảng cáo</span>
-                            <span className="font-medium">{formatNumber(analytics.revenue.totals.adImpressions)}</span>
+                            <span className="font-medium">{formatNumber(adImpressions)}</span>
                         </div>
                         <div className="flex items-center justify-between py-2">
                             <span className="text-sm text-muted-foreground">Trung bình doanh thu/ngày</span>
                             <span className="font-medium text-green-600">
-                                {formatCurrency(analytics.revenue.totals.estimatedRevenue / analytics.revenue.dailyData.length)}
+                                {formatCurrency(avgRevenuePerDay)}
                             </span>
                         </div>
                     </CardContent>
@@ -304,25 +357,25 @@ export function RevenueTab({ analytics }: RevenueTabProps) {
                         <div className="flex items-center justify-between py-2 border-b">
                             <span className="text-sm text-muted-foreground">Tỷ lệ lượt phát có kiếm tiền</span>
                             <span className="font-medium">
-                                {formatPercentage((analytics.revenue.totals.monetizedPlaybacks / analytics.basic.totals.totalViews) * 100)}
+                                {totalViews > 0 ? formatPercentage((monetizedPlaybacks / totalViews) * 100) : '0.00%'}
                             </span>
                         </div>
                         <div className="flex items-center justify-between py-2 border-b">
                             <span className="text-sm text-muted-foreground">Quảng cáo / Lượt phát</span>
                             <span className="font-medium">
-                                {(analytics.revenue.totals.adImpressions / analytics.revenue.totals.monetizedPlaybacks).toFixed(2)}
+                                {monetizedPlaybacks > 0 ? (adImpressions / monetizedPlaybacks).toFixed(2) : '0.00'}
                             </span>
                         </div>
                         <div className="flex items-center justify-between py-2 border-b">
                             <span className="text-sm text-muted-foreground">Doanh thu / 1000 views</span>
                             <span className="font-medium">
-                                {formatCurrency((analytics.revenue.totals.estimatedRevenue / analytics.basic.totals.totalViews) * 1000)}
+                                {totalViews > 0 ? formatCurrency((estimatedRevenue / totalViews) * 1000) : '$0.00'}
                             </span>
                         </div>
                         <div className="flex items-center justify-between py-2">
                             <span className="text-sm text-muted-foreground">Doanh thu / giờ xem</span>
                             <span className="font-medium text-green-600">
-                                {formatCurrency(analytics.revenue.totals.estimatedRevenue / parseFloat(analytics.basic.totals.totalWatchTimeHours))}
+                                {totalWatchTimeHours > 0 ? formatCurrency(estimatedRevenue / totalWatchTimeHours) : '$0.00'}
                             </span>
                         </div>
                     </CardContent>

@@ -1,4 +1,10 @@
 import * as React from "react"
+
+const ChevronIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: 'middle' }}>
+        <path d="M6 4L10 8L6 12" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
 import { DropdownMenuAdvanced } from "@/components/ui/dropdown-menu-advanced"
 import { TableOfContents, type TableOfContentsItem } from "@/pages/components/TableOfContents"
 import { cn } from "@/lib/utils"
@@ -23,18 +29,18 @@ export function ContentHeader({ breadcrumbs, actions, className, tableOfContents
             // Bo tròn góc phải để thẳng hàng với layout bên trái
             " border shadow-sm",
             // Không dịch trái/phải để tránh lệch với cột TOC và sidebar
-            "px-6 py-3",
+            "px-6 py-2.5",
             // Bỏ viền trái để nhìn liền mạch với khu vực bên trái
             "border-l-0",
             className
         )}>
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
                     <nav className="flex items-center space-x-2 text-sm">
                         {breadcrumbs.map((item, index) => (
                             <React.Fragment key={index}>
                                 {index > 0 && (
-                                    <span className="h-4 w-4 text-muted-foreground select-none">/</span>
+                                    <span className="h-4 w-4 text-muted-foreground select-none"><ChevronIcon /></span>
                                 )}
 
                                 {item.href ? (

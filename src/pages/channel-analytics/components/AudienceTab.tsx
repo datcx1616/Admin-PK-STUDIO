@@ -7,28 +7,81 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Toolti
 import { formatNumber, formatPercentage } from "../utils/formatters";
 import { CHART_COLORS, getChartColor } from "../utils/chartHelpers";
 import type { ChannelAnalyticsData } from "@/types/channel-analytics.types";
-import { Users, Globe, UserCheck, UserX } from "lucide-react";
+import { Users, Globe, UserCheck, UserX, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AudienceTabProps {
     analytics: ChannelAnalyticsData;
 }
 
 export function AudienceTab({ analytics }: AudienceTabProps) {
-    const countriesData = analytics.demographics.topCountries.slice(0, 10);
+    // ✅ DEFENSIVE PROGRAMMING: Check if audience data exists
+    if (!analytics?.basic?.totals || !analytics?.demographics?.topCountries || !analytics?.subscriptionStatus) {
+        return (
+            <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                    Dữ liệu khán giả không khả dụng. Vui lòng thử lại sau.
+                </AlertDescription>
+            </Alert>
+        );
+    }
+
+    // ✅ Safe defaults for basic totals
+    const totalSubscribersGained = analytics.basic.totals.totalSubscribersGained ?? 0;
+    const totalSubscribersLost = analytics.basic.totals.totalSubscribersLost ?? 0;
+    const totalSubscribersNet = analytics.basic.totals.totalSubscribersNet ?? 0;
+
+    // ✅ Safe demographics data
+    const topCountries = analytics.demographics.topCountries || [];
+    const countriesData = topCountries.slice(0, 10);
+
+    // ✅ Safe subscription status
+    const subscribedPercentage = analytics.subscriptionStatus.subscribedPercentage
+        ? parseFloat(analytics.subscriptionStatus.subscribedPercentage)
+        : 0;
+    const unsubscribedPercentage = analytics.subscriptionStatus.unsubscribedPercentage
+        ? parseFloat(analytics.subscriptionStatus.unsubscribedPercentage)
+        : 0;
+
+    const statuses = analytics.subscriptionStatus.statuses || [];
+    const subscribedViews = statuses.find(s => s?.status === 'SUBSCRIBED')?.views ?? 0;
+    const unsubscribedViews = statuses.find(s => s?.status === 'UNSUBSCRIBED')?.views ?? 0;
 
     const subscriptionData = [
         {
             name: 'Đã đăng ký',
-            value: parseFloat(analytics.subscriptionStatus.subscribedPercentage),
-            count: analytics.subscriptionStatus.statuses.find(s => s.status === 'SUBSCRIBED')?.views || 0
+            value: subscribedPercentage,
+            count: subscribedViews
         },
         {
             name: 'Chưa đăng ký',
-            value: parseFloat(analytics.subscriptionStatus.unsubscribedPercentage),
-            count: analytics.subscriptionStatus.statuses.find(s => s.status === 'UNSUBSCRIBED')?.views || 0
+            value: unsubscribedPercentage,
+            count: unsubscribedViews
         }
     ];
+
+    // ✅ Safe retention data
+    const retention = analytics.retention || {};
+    const averageViewPercentage = retention.averageViewPercentage ?? 0;
+    const ctr = retention.ctr ?? 0;
+    const impressions = retention.impressions ?? 0;
+    const cardClickRate = retention.cardClickRate ?? 0;
+    const cardTeaserClickRate = retention.cardTeaserClickRate ?? 0;
+    const impressionClickThroughRate = retention.impressionClickThroughRate ?? 0;
+
+    // ✅ Check if we have minimum data to render
+    if (countriesData.length === 0 && statuses.length === 0) {
+        return (
+            <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                    Chưa có đủ dữ liệu khán giả để hiển thị. Vui lòng quay lại sau.
+                </AlertDescription>
+            </Alert>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -43,7 +96,7 @@ export function AudienceTab({ analytics }: AudienceTabProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-green-600">
-                            +{formatNumber(analytics.basic.totals.totalSubscribersGained)}
+                            +{formatNumber(totalSubscribersGained)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                             Gained trong kỳ
@@ -60,7 +113,7 @@ export function AudienceTab({ analytics }: AudienceTabProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-red-600">
-                            -{formatNumber(analytics.basic.totals.totalSubscribersLost)}
+                            -{formatNumber(totalSubscribersLost)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                             Lost trong kỳ
@@ -77,8 +130,8 @@ export function AudienceTab({ analytics }: AudienceTabProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-blue-600">
-                            {analytics.basic.totals.totalSubscribersNet >= 0 ? '+' : ''}
-                            {formatNumber(analytics.basic.totals.totalSubscribersNet)}
+                            {totalSubscribersNet >= 0 ? '+' : ''}
+                            {formatNumber(totalSubscribersNet)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                             Net gain
@@ -95,193 +148,201 @@ export function AudienceTab({ analytics }: AudienceTabProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-purple-600">
-                            {analytics.demographics.topCountries.length}
+                            {topCountries.length}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            Top: {analytics.demographics.topCountries[0]?.countryName}
+                            Top: {topCountries[0]?.countryName || 'N/A'}
                         </p>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Subscription Status */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ChartCard
-                    title="Trạng Thái Đăng Ký"
-                    description="Phân bố người xem theo trạng thái đăng ký"
-                >
-                    <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                            <Pie
-                                data={subscriptionData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                label={({ name, value }) => `${name}: ${value.toFixed(2)}%`}
-                                outerRadius={100}
-                                fill="#8884d8"
-                                dataKey="value"
-                            >
-                                <Cell fill={CHART_COLORS.green} />
-                                <Cell fill={CHART_COLORS.red} />
-                            </Pie>
-                            <Tooltip
-                                formatter={(value: any, name: string, props: any) => [
-                                    `${formatNumber(props.payload.count)} lượt xem (${value.toFixed(2)}%)`,
-                                    name
-                                ]}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </ChartCard>
+            {statuses.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <ChartCard
+                        title="Trạng Thái Đăng Ký"
+                        description="Phân bố người xem theo trạng thái đăng ký"
+                    >
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie
+                                    data={subscriptionData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={false}
+                                    label={({ name, value }) => `${name}: ${value.toFixed(2)}%`}
+                                    outerRadius={100}
+                                    fill="#8884d8"
+                                    dataKey="value"
+                                >
+                                    <Cell fill={CHART_COLORS.green} />
+                                    <Cell fill={CHART_COLORS.red} />
+                                </Pie>
+                                <Tooltip
+                                    formatter={(value: any, name: string, props: any) => [
+                                        `${formatNumber(props.payload.count)} lượt xem (${value.toFixed(2)}%)`,
+                                        name
+                                    ]}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Chi Tiết Đăng Ký</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {analytics.subscriptionStatus.statuses.map((status, index) => (
-                            <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        className="w-4 h-4 rounded-full"
-                                        style={{ backgroundColor: index === 0 ? CHART_COLORS.red : CHART_COLORS.green }}
-                                    />
-                                    <div>
-                                        <p className="text-sm font-medium">{status.statusName}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {formatNumber(status.views)} lượt xem
-                                        </p>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Chi Tiết Đăng Ký</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {statuses.map((status, index) => (
+                                <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="w-4 h-4 rounded-full"
+                                            style={{ backgroundColor: index === 0 ? CHART_COLORS.red : CHART_COLORS.green }}
+                                        />
+                                        <div>
+                                            <p className="text-sm font-medium">{status.statusName || 'Unknown'}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {formatNumber(status.views ?? 0)} lượt xem
+                                            </p>
+                                        </div>
                                     </div>
+                                    <Badge variant="outline">
+                                        {status.percentage ?? 0}%
+                                    </Badge>
                                 </div>
-                                <Badge variant="outline">
-                                    {status.percentage}%
-                                </Badge>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
-            </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
 
             {/* Geographic Distribution */}
-            <ChartCard
-                title="Phân Bố Địa Lý (Top 10 Quốc Gia)"
-                description="Lượt xem theo quốc gia"
-            >
-                <ResponsiveContainer width="100%" height={400}>
-                    <BarChart
-                        data={countriesData}
-                        layout="vertical"
-                        margin={{ left: 100 }}
+            {countriesData.length > 0 && (
+                <>
+                    <ChartCard
+                        title="Phân Bố Địa Lý (Top 10 Quốc Gia)"
+                        description="Lượt xem theo quốc gia"
                     >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis
-                            type="number"
-                            fontSize={12}
-                            tickFormatter={(value) => formatNumber(value)}
-                        />
-                        <YAxis
-                            type="category"
-                            dataKey="countryName"
-                            fontSize={12}
-                            width={100}
-                        />
-                        <Tooltip
-                            formatter={(value: any) => formatNumber(value)}
-                        />
-                        <Legend />
-                        <Bar
-                            dataKey="views"
-                            name="Lượt xem"
-                            fill={CHART_COLORS.blue}
-                        >
-                            {countriesData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={getChartColor(index)} />
-                            ))}
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
-            </ChartCard>
+                        <ResponsiveContainer width="100%" height={400}>
+                            <BarChart
+                                data={countriesData}
+                                layout="vertical"
+                                margin={{ left: 100 }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis
+                                    type="number"
+                                    fontSize={12}
+                                    tickFormatter={(value) => formatNumber(value)}
+                                />
+                                <YAxis
+                                    type="category"
+                                    dataKey="countryName"
+                                    fontSize={12}
+                                    width={100}
+                                />
+                                <Tooltip
+                                    formatter={(value: any) => formatNumber(value)}
+                                />
+                                <Legend />
+                                <Bar
+                                    dataKey="views"
+                                    name="Lượt xem"
+                                    fill={CHART_COLORS.blue}
+                                >
+                                    {countriesData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={getChartColor(index)} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </ChartCard>
 
-            {/* Country Details Table */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Chi Tiết Theo Quốc Gia</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b">
-                                    <th className="text-left py-3 px-4">Quốc Gia</th>
-                                    <th className="text-right py-3 px-4">Lượt Xem</th>
-                                    <th className="text-right py-3 px-4">% Tổng</th>
-                                    <th className="text-right py-3 px-4">Thời Gian Xem</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {analytics.demographics.topCountries.map((country, index) => (
-                                    <tr key={index} className="border-b hover:bg-accent/50">
-                                        <td className="py-3 px-4 font-medium">
-                                            {country.countryName}
-                                        </td>
-                                        <td className="text-right py-3 px-4">
-                                            {formatNumber(country.views)}
-                                        </td>
-                                        <td className="text-right py-3 px-4">
-                                            <Badge variant="outline">
-                                                {country.percentage.toFixed(2)}%
-                                            </Badge>
-                                        </td>
-                                        <td className="text-right py-3 px-4 text-muted-foreground">
-                                            {formatNumber(country.watchTimeMinutes)} phút
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </CardContent>
-            </Card>
+                    {/* Country Details Table */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Chi Tiết Theo Quốc Gia</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="border-b">
+                                            <th className="text-left py-3 px-4">Quốc Gia</th>
+                                            <th className="text-right py-3 px-4">Lượt Xem</th>
+                                            <th className="text-right py-3 px-4">% Tổng</th>
+                                            <th className="text-right py-3 px-4">Thời Gian Xem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {topCountries.map((country, index) => (
+                                            <tr key={index} className="border-b hover:bg-accent/50">
+                                                <td className="py-3 px-4 font-medium">
+                                                    {country.countryName || 'Unknown'}
+                                                </td>
+                                                <td className="text-right py-3 px-4">
+                                                    {formatNumber(country.views ?? 0)}
+                                                </td>
+                                                <td className="text-right py-3 px-4">
+                                                    <Badge variant="outline">
+                                                        {(country.percentage ?? 0).toFixed(2)}%
+                                                    </Badge>
+                                                </td>
+                                                <td className="text-right py-3 px-4 text-muted-foreground">
+                                                    {formatNumber(country.watchTimeMinutes ?? 0)} phút
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </>
+            )}
 
             {/* Audience Retention */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Thông Tin Giữ Chân Khán Giả</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between py-2 border-b">
-                                <span className="text-sm text-muted-foreground">% Xem trung bình</span>
-                                <span className="font-medium">{analytics.retention.averageViewPercentage.toFixed(2)}%</span>
+            {(averageViewPercentage > 0 || ctr > 0 || impressions > 0) && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Thông Tin Giữ Chân Khán Giả</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between py-2 border-b">
+                                    <span className="text-sm text-muted-foreground">% Xem trung bình</span>
+                                    <span className="font-medium">{averageViewPercentage.toFixed(2)}%</span>
+                                </div>
+                                <div className="flex items-center justify-between py-2 border-b">
+                                    <span className="text-sm text-muted-foreground">Click-through Rate</span>
+                                    <span className="font-medium">{ctr.toFixed(2)}%</span>
+                                </div>
+                                <div className="flex items-center justify-between py-2">
+                                    <span className="text-sm text-muted-foreground">Impressions</span>
+                                    <span className="font-medium">{formatNumber(impressions)}</span>
+                                </div>
                             </div>
-                            <div className="flex items-center justify-between py-2 border-b">
-                                <span className="text-sm text-muted-foreground">Click-through Rate</span>
-                                <span className="font-medium">{analytics.retention.ctr.toFixed(2)}%</span>
-                            </div>
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-sm text-muted-foreground">Impressions</span>
-                                <span className="font-medium">{formatNumber(analytics.retention.impressions)}</span>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between py-2 border-b">
+                                    <span className="text-sm text-muted-foreground">Card Click Rate</span>
+                                    <span className="font-medium">{cardClickRate.toFixed(2)}%</span>
+                                </div>
+                                <div className="flex items-center justify-between py-2 border-b">
+                                    <span className="text-sm text-muted-foreground">Card Teaser Click</span>
+                                    <span className="font-medium">{cardTeaserClickRate.toFixed(2)}%</span>
+                                </div>
+                                <div className="flex items-center justify-between py-2">
+                                    <span className="text-sm text-muted-foreground">Impression CTR</span>
+                                    <span className="font-medium">{impressionClickThroughRate.toFixed(2)}%</span>
+                                </div>
                             </div>
                         </div>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between py-2 border-b">
-                                <span className="text-sm text-muted-foreground">Card Click Rate</span>
-                                <span className="font-medium">{analytics.retention.cardClickRate.toFixed(2)}%</span>
-                            </div>
-                            <div className="flex items-center justify-between py-2 border-b">
-                                <span className="text-sm text-muted-foreground">Card Teaser Click</span>
-                                <span className="font-medium">{analytics.retention.cardTeaserClickRate.toFixed(2)}%</span>
-                            </div>
-                            <div className="flex items-center justify-between py-2">
-                                <span className="text-sm text-muted-foreground">Impression CTR</span>
-                                <span className="font-medium">{analytics.retention.impressionClickThroughRate.toFixed(2)}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            )}
         </div>
     );
 }
