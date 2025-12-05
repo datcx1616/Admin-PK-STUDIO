@@ -33,7 +33,7 @@ export function NavMain({
                                 onClick={() => navigate(item.url)}
                                 className={[
                                     "cursor-pointer",
-                                    location.pathname === item.url ? "bg-[#DEDFE3]" : "hover:bg-gray-100",
+                                    location.pathname === item.url ? "bg-[#DEDFE3]" : "hover:bg-[#EAEBEE]",
                                 ].join(" ")}
                             >
                                 {item.icon && <item.icon />}

@@ -367,8 +367,8 @@ export function NavBranchHierarchy() {
                                         className={cn(
                                             "group h-auto py-1 px-0 relative hover:text-accent-foreground",
                                             location.pathname === `/branches/${branch._id}`
-                                                ? "bg-[#DEDFE3] pl-2"
-                                                : "hover:bg-[#F7F7F7]",
+                                                ? "bg-[#F7F7F7] pl-2"
+                                                : "hover:bg-[#EAEBEE]",
                                             location.pathname === `/branches/${branch._id}` && "bg-[#DEDFE3] pl-2"
                                         )}
                                         onClick={(e) => {
@@ -478,7 +478,7 @@ export function NavBranchHierarchy() {
                                                                         className={cn(
                                                                             "group relative w-full border-0 cursor-pointer",
                                                                             !hasMembers && "cursor-default",
-                                                                            location.pathname === `/teams/${team._id}` ? "bg-[#DEDFE3]" : "hover:bg-[#F7F7F7]",
+                                                                            location.pathname === `/teams/${team._id}` ? "bg-[#F7F7F7]" : "hover:bg-[#EAEBEE]",
                                                                             location.pathname === `/teams/${team._id}` && "bg-[#DEDFE3]"
                                                                         )}
                                                                         onClick={(e) => {
@@ -596,9 +596,9 @@ export function NavBranchHierarchy() {
                                                                                 <div className="pl-8">
                                                                                     <SidebarMenuSubButton
                                                                                         className={cn(
-                                                                                            "group relative w-full border-0 cursor-pointer hover:bg-[#F7F7F7]",
-                                                                                            location.pathname === `/users/${member._id}` ? "bg-[#DEDFE3]" : "",
-                                                                                            location.pathname === `/users/${member._id}` && "bg-[#DEDFE3]"
+                                                                                            "group relative w-full border-0 cursor-pointer hover:bg-[#EAEBEE]",
+                                                                                            location.pathname === `/users/${member._id}` ? "bg-[#F7F7F7" : "",
+                                                                                            location.pathname === `/users/${member._id}` && "bg-[#F7F7F7]"
                                                                                         )}
                                                                                     >
                                                                                         {/* Icon container với transition */}

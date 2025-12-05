@@ -157,7 +157,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarHeader>
 
             <SidebarContent className="p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                <NavMain items={navMain} />
+                <NavMain
+                    items={navMain}
+                    itemClassName="hover:bg-[#EAEBEE]"
+                />
                 <NavBranchHierarchy />
             </SidebarContent>
 
