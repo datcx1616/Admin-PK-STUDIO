@@ -44,7 +44,7 @@ export function EngagementTab({ analytics }: EngagementTabProps) {
                     icon={ThumbsUp}
                     title="Tổng Likes"
                     value={formatNumber(totals.totalLikes)}
-                    subtitle={`Ratio: ${totals.likeDislikeRatio.toFixed(1)}x`}
+                    subtitle={`Ratio: ${typeof totals.likeDislikeRatio === 'number' && totals.likeDislikeRatio !== null ? totals.likeDislikeRatio.toFixed(1) : '0.0'}x`}
                     gradient="bg-gradient-to-br from-blue-500 to-blue-600"
                 />
                 <MetricCard
@@ -175,7 +175,7 @@ export function EngagementTab({ analytics }: EngagementTabProps) {
                     <div className="mt-4 text-center">
                         <p className="text-sm text-muted-foreground">Like/Dislike Ratio</p>
                         <p className="text-3xl font-bold text-blue-600">
-                            {totals.likeDislikeRatio.toFixed(1)}:1
+                            {typeof totals.likeDislikeRatio === 'number' && totals.likeDislikeRatio !== null ? totals.likeDislikeRatio.toFixed(1) : '0.0'}:1
                         </p>
                     </div>
                 </CardContent>
