@@ -43,7 +43,7 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Main panel */}
-        <div className="flex-1 rounded-2xl border-2   overflow-hidden flex flex-col" style={{ backgroundColor: '#FFFFFF' }}>
+        <div className="default-border">
           {/* <SiteHeader /> */}
           <main className="flex-1 overflow-y-auto">
             {children}
