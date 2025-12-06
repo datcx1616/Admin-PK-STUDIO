@@ -24,16 +24,22 @@ interface ContentHeaderProps {
 
 export function ContentHeader({ breadcrumbs, actions, className, tableOfContents }: ContentHeaderProps) {
     return (
-        <div className={cn(
-            "sticky top-0 z-10 bg-background",
-            // Bo tròn góc phải để thẳng hàng với layout bên trái
-            " border shadow-sm",
-            // Không dịch trái/phải để tránh lệch với cột TOC và sidebar
-            "px-6 py-2.5",
-            // Bỏ viền trái để nhìn liền mạch với khu vực bên trái
-            "border-l-0",
-            className
-        )}>
+        <div
+            className={cn(
+                "sticky top-0 z-10",
+                // Bo tròn góc phải để thẳng hàng với layout bên trái
+                // Không dịch trái/phải để tránh lệch với cột TOC và sidebar
+                "px-6 py-2.5",
+                // Bỏ viền trái để nhìn liền mạch với khu vực bên trái
+                "border-l-0",
+                className
+            )}
+            style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid rgba(0, 0, 0, 0.06)',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+            }}
+        >
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1">
                     <nav className="flex items-center space-x-2 text-sm">

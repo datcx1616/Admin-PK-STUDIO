@@ -132,7 +132,14 @@ export function ChannelDetailView({ channel, onBack }: { channel: any, onBack?: 
                         </Button>
                     )}
                     {/* Channel Header */}
-                    <Card className="border rounded-lg">
+                    <Card
+                        style={{
+                            backgroundColor: '#FFFFFF',
+                            border: '1px solid rgba(0, 0, 0, 0.06)',
+                            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                        }}
+                        className="rounded-lg"
+                    >
                         <CardHeader className="space-y-4">
                             {/* Row 1: Channel Info + Date Range */}
                             <div className="flex items-center justify-between gap-6">

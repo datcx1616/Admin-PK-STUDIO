@@ -63,7 +63,15 @@ export function ContentTab({ analytics }: ContentTabProps) {
             {/* Top Videos Grid */}
             <div className="grid grid-cols-1 gap-4">
                 {videos.map((video, index) => (
-                    <Card key={video.videoId} className="hover:shadow-lg transition-shadow">
+                    <Card
+                        key={video.videoId}
+                        className="hover:shadow-lg transition-shadow"
+                        style={{
+                            backgroundColor: '#FFFFFF',
+                            border: '1px solid rgba(0, 0, 0, 0.06)',
+                            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                        }}
+                    >
                         <CardContent className="p-0">
                             <div className="flex flex-col md:flex-row gap-4 p-4">
                                 {/* Thumbnail */}
@@ -158,7 +166,13 @@ export function ContentTab({ analytics }: ContentTabProps) {
             </div>
 
             {/* Content Summary */}
-            <Card>
+            <Card
+                style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                }}
+            >
                 <CardHeader>
                     <CardTitle>Tổng Quan Nội Dung</CardTitle>
                 </CardHeader>

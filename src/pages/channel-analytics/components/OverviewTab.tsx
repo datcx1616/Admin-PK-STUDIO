@@ -29,7 +29,13 @@ export function OverviewTab({ analytics }: OverviewTabProps) {
         <div className="space-y-6">
             {/* Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Card>
+                <Card
+                    style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(0, 0, 0, 0.06)',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                    }}
+                >
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Trung Bình Lượt Xem / Ngày
@@ -44,7 +50,13 @@ export function OverviewTab({ analytics }: OverviewTabProps) {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card
+                    style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(0, 0, 0, 0.06)',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                    }}
+                >
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Thời Lượng Xem Trung Bình
@@ -57,7 +69,13 @@ export function OverviewTab({ analytics }: OverviewTabProps) {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card
+                    style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(0, 0, 0, 0.06)',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                    }}
+                >
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Tỷ Lệ Giữ Chân
@@ -172,7 +190,13 @@ export function OverviewTab({ analytics }: OverviewTabProps) {
             </ChartCard>
 
             {/* Daily Performance Table */}
-            <Card>
+            <Card
+                style={{
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                }}
+            >
                 <CardHeader>
                     <CardTitle>Hiệu Suất Theo Ngày (7 ngày gần nhất)</CardTitle>
                 </CardHeader>

@@ -59,7 +59,11 @@ export function TeamHeaderToolbar({
                         onValueChange={(v) => v && onDateRangeChange(v)}
                         variant="outline"
                         size="sm"
-                        className="border bg-background shadow-xs"
+                        style={{
+                            backgroundColor: '#FFFFFF',
+                            border: '1px solid rgba(0, 0, 0, 0.06)',
+                            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                        }}
                         aria-label="Chọn khoảng thời gian"
                     >
                         <ToggleGroupItem value="7" className="px-4 font-semibold">7 ngày</ToggleGroupItem>

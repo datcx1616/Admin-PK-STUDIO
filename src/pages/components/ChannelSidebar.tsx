@@ -133,15 +133,29 @@ export function ChannelSidebar({
                     </Button>
                 </div>
             )}
-            <div className={cn(
-                mode === "fixed"
-                    ? cn("fixed top-0 h-full bg-background transition-all duration-300 ease-in-out z-30", side === "right" ? "right-0 border-l" : "left-0 border-r", isOpen ? "w-[300px]" : "w-0")
-                    : cn("sticky top-0 h-[calc(100vh-0px)] transition-all duration-300 ease-in-out overflow-visible", isOpen ? "bg-background w-[300px]" : "bg-transparent w-20", isOpen ? side === "right" ? "border-l bg-background" : "border-r bg-background" : "border-transparent"),
-                className
-            )}>
+            <div
+                className={cn(
+                    mode === "fixed"
+                        ? cn("fixed top-0 h-full transition-all duration-50 ease-in-out z-30", side === "right" ? "right-0" : "left-0", isOpen ? "w-[300px]" : "w-0")
+                        : cn("sticky top-0 h-[calc(100vh-0px)] transition-all duration-150 ease-in-out overflow-visible", isOpen ? "w-[300px]" : "bg-transparent w-20"),
+                    className
+                )}
+                style={isOpen ? {
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                    borderLeft: side === "right" ? '1px solid rgba(0, 0, 0, 0.06)' : '0',
+                    borderRight: side === "left" ? '1px solid rgba(0, 0, 0, 0.06)' : '0',
+                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                } : undefined}
+            >
                 <div className="flex flex-col h-full">
                     {isOpen ? (
-                        <div className="flex items-center justify-between px-5 py-3 border-b">
+                        <div
+                            className="flex items-center justify-between px-5 py-3"
+                            style={{
+                                borderBottom: '1px solid rgba(0, 0, 0, 0.06)'
+                            }}
+                        >
                             <div>
                                 <h3 className="text-gray-900 font-bold text-sm">Danh sách kênh</h3>
                                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -171,7 +185,14 @@ export function ChannelSidebar({
                         <div className="p-3 space-y-2">
                             {loading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
-                                    <div key={i} className="p-3 rounded-lg border bg-card">
+                                    <div
+                                        key={i}
+                                        className="p-3 rounded-lg"
+                                        style={{
+                                            border: '1px solid rgba(0, 0, 0, 0.06)',
+                                            backgroundColor: '#FFFFFF'
+                                        }}
+                                    >
                                         <div className="flex items-start gap-3">
                                             <Skeleton className="h-10 w-10 rounded-full" />
                                             <div className="flex-1 space-y-2">
@@ -197,9 +218,13 @@ export function ChannelSidebar({
                                             onClick={() => handleChannelClick(channel)}
                                             onKeyDown={(e) => { if (e.key === 'Enter') handleChannelClick(channel); }}
                                             className={cn(
-                                                "w-full p-1.5 rounded border bg-card hover:bg-accent/60 transition-all text-left flex flex-col gap-0.5 focus:outline-none cursor-pointer",
+                                                "w-full p-1.5 rounded hover:bg-accent/60 transition-all text-left flex flex-col gap-0.5 focus:outline-none cursor-pointer",
                                                 isSelected && "ring-1 ring-blue-500/50 bg-blue-50/30"
                                             )}
+                                            style={{
+                                                border: '1px solid rgba(0, 0, 0, 0.06)',
+                                                backgroundColor: isSelected ? undefined : '#FFFFFF'
+                                            }}
                                         >
                                             <div className="flex items-start gap-1.5">
                                                 <Checkbox

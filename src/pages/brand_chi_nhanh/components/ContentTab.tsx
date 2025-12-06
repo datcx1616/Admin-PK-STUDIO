@@ -96,7 +96,12 @@ export function ContentTab({ analytics }: ContentTabProps) {
                             {topByViews.slice(0, 10).map((video, index) => (
                                 <div
                                     key={video.videoId}
-                                    className="flex items-center gap-4 p-4 rounded-lg border hover:bg-accent/50 transition-colors"
+                                    className="flex items-center gap-4 p-4 rounded-lg hover:bg-accent/50 transition-colors"
+                                    style={{
+                                        backgroundColor: '#FFFFFF',
+                                        border: '1px solid rgba(0, 0, 0, 0.06)',
+                                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                                    }}
                                 >
                                     {/* Rank */}
                                     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">

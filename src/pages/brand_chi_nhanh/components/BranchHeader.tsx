@@ -45,7 +45,14 @@ export function BranchHeader({
     onCustomDateChange,
 }: BranchHeaderProps) {
     return (
-        <Card className="border rounded-lg">
+        <Card
+            className="rounded-lg"
+            style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid rgba(0, 0, 0, 0.06)',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+            }}
+        >
             <CardHeader className="space-y-3">
                 {/* First Row: Icon + Branch name + Code + Date range selector */}
                 <div className="flex items-center justify-between gap-6">

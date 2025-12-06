@@ -64,6 +64,27 @@ export default function DashboardOverviewPage() {
     const [syncing, setSyncing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Kiểm tra token, nếu không có thì redirect về login
+    useEffect(() => {
+        const checkToken = () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/login';
+            }
+        };
+        checkToken();
+        // Lắng nghe sự kiện storage để đồng bộ đăng xuất giữa các tab
+        const handleStorage = (e: StorageEvent) => {
+            if (e.key === 'authToken' && e.newValue === null) {
+                window.location.href = '/login';
+            }
+        };
+        window.addEventListener('storage', handleStorage);
+        return () => {
+            window.removeEventListener('storage', handleStorage);
+        };
+    }, []);
+
     const fetchDashboardData = async () => {
         try {
             setLoading(true);
@@ -150,7 +171,7 @@ export default function DashboardOverviewPage() {
 
     if (error && !stats) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+            <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
                 <div className="max-w-2xl mx-auto mt-20">
                     <Alert variant="destructive">
                         <AlertCircle className="h-4 w-4" />
@@ -179,11 +200,11 @@ export default function DashboardOverviewPage() {
     const userRole = user?.role || '';
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
             {/* Header - styled like contentHeader */}
             <div className="contentHeader flex items-center justify-between px-6 py-5 bg-white border-b border-slate-200 shadow-sm">
                 <div className="flex flex-col gap-1">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-tight">
+                    <h1 className="text-3xl font-bold bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent leading-tight">
                         Trang tổng quan
                     </h1>
                     <div className="flex items-center gap-2 text-slate-500 text-sm">
@@ -212,7 +233,7 @@ export default function DashboardOverviewPage() {
                     <Button
                         onClick={handleSyncAll}
                         disabled={syncing}
-                        className="bg-gradient-to-r from-red-600 to-red-600 hover:from-red-700 hover:to-red-700 shadow-lg shadow-blue-500/30 text-white font-medium"
+                        className="bg-linear-to-r from-red-600 to-red-600 hover:from-red-700 hover:to-red-700 shadow-lg shadow-blue-500/30 text-white font-medium"
                     >
                         <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
                         {syncing ? 'Syncing...' : 'Sync All Channels'}
@@ -247,15 +268,15 @@ export default function DashboardOverviewPage() {
                             }
                         }}
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-linear-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <CardDescription className="text-slate-600 font-medium">Chi nhánh</CardDescription>
-                                <div className="p-2.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
+                                <div className="p-2.5 bg-linear-to-br from-purple-500 to-pink-500 rounded-xl shadow-lg">
                                     <BarChart3 className="w-5 h-5 text-white" />
                                 </div>
                             </div>
-                            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            <CardTitle className="text-4xl font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                                 {stats?.summary?.totalBranches || 0}
                             </CardTitle>
                         </CardHeader>
@@ -269,15 +290,15 @@ export default function DashboardOverviewPage() {
 
                     {/* Total Teams */}
                     <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-slate-200 bg-white/80 backdrop-blur">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-linear-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <CardDescription className="text-slate-600 font-medium">Teams</CardDescription>
-                                <div className="p-2.5 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
+                                <div className="p-2.5 bg-linear-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
                                     <Users className="w-5 h-5 text-white" />
                                 </div>
                             </div>
-                            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                            <CardTitle className="text-4xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                                 {stats?.summary?.totalTeams || 0}
                             </CardTitle>
                         </CardHeader>
@@ -291,15 +312,15 @@ export default function DashboardOverviewPage() {
 
                     {/* Total Channels */}
                     <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-slate-200 bg-white/80 backdrop-blur">
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-linear-to-br from-red-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <CardDescription className="text-slate-600 font-medium">Kênh YouTube</CardDescription>
-                                <div className="p-2.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl shadow-lg">
+                                <div className="p-2.5 bg-linear-to-br from-red-500 to-orange-500 rounded-xl shadow-lg">
                                     <Youtube className="w-5 h-5 text-white" />
                                 </div>
                             </div>
-                            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                            <CardTitle className="text-4xl font-bold bg-linear-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                                 {stats?.summary?.totalChannels || 0}
                             </CardTitle>
                         </CardHeader>
@@ -313,15 +334,15 @@ export default function DashboardOverviewPage() {
 
                     {/* Total Subscribers */}
                     <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-slate-200 bg-white/80 backdrop-blur">
-                        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <CardDescription className="text-slate-600 font-medium">Subscribers</CardDescription>
-                                <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl shadow-lg">
+                                <div className="p-2.5 bg-linear-to-br from-emerald-500 to-teal-500 rounded-xl shadow-lg">
                                     <Users className="w-5 h-5 text-white" />
                                 </div>
                             </div>
-                            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                            <CardTitle className="text-4xl font-bold bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                                 {formatNumber(stats?.summary?.totalSubscribers || 0)}
                             </CardTitle>
                         </CardHeader>
@@ -335,15 +356,15 @@ export default function DashboardOverviewPage() {
 
                     {/* Total Views */}
                     <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-slate-200 bg-white/80 backdrop-blur">
-                        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-linear-to-br from-amber-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <CardDescription className="text-slate-600 font-medium">Lượt xem</CardDescription>
-                                <div className="p-2.5 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-xl shadow-lg">
+                                <div className="p-2.5 bg-linear-to-br from-amber-500 to-yellow-500 rounded-xl shadow-lg">
                                     <Eye className="w-5 h-5 text-white" />
                                 </div>
                             </div>
-                            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
+                            <CardTitle className="text-4xl font-bold bg-linear-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
                                 {formatNumber(stats?.summary?.totalViews || 0)}
                             </CardTitle>
                         </CardHeader>
@@ -357,15 +378,15 @@ export default function DashboardOverviewPage() {
 
                     {/* Total Videos */}
                     <Card className="relative overflow-hidden group hover:shadow-xl transition-all duration-300 border-slate-200 bg-white/80 backdrop-blur">
-                        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-linear-to-br from-violet-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <CardDescription className="text-slate-600 font-medium">Videos</CardDescription>
-                                <div className="p-2.5 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl shadow-lg">
+                                <div className="p-2.5 bg-linear-to-br from-violet-500 to-purple-500 rounded-xl shadow-lg">
                                     <Youtube className="w-5 h-5 text-white" />
                                 </div>
                             </div>
-                            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                            <CardTitle className="text-4xl font-bold bg-linear-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
                                 {stats?.summary?.totalVideos || 0}
                             </CardTitle>
                         </CardHeader>
@@ -394,10 +415,10 @@ export default function DashboardOverviewPage() {
                                     <div
                                         key={branch._id || index}
                                         onClick={() => navigate(`/dashboard/branch/${branch._id}`)}
-                                        className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100 hover:from-blue-50 hover:to-indigo-50 transition-all border border-slate-200 hover:border-blue-300 cursor-pointer group"
+                                        className="flex items-center justify-between p-4 rounded-xl bg-linear-to-r from-slate-50 to-slate-100 hover:from-blue-50 hover:to-indigo-50 transition-all border border-slate-200 hover:border-blue-300 cursor-pointer group"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 text-white font-bold shadow-lg">
+                                            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-linear-to-br from-blue-500 to-indigo-500 text-white font-bold shadow-lg">
                                                 {branch.name?.charAt(0) || 'B'}
                                             </div>
                                             <div>
@@ -439,10 +460,10 @@ export default function DashboardOverviewPage() {
                                                 toast.info('Channel analytics not available');
                                             }
                                         }}
-                                        className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100 hover:from-red-50 hover:to-orange-50 transition-all border border-slate-200 hover:border-red-300 cursor-pointer group"
+                                        className="flex items-center justify-between p-4 rounded-xl bg-linear-to-r from-slate-50 to-slate-100 hover:from-red-50 hover:to-orange-50 transition-all border border-slate-200 hover:border-red-300 cursor-pointer group"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-orange-500 text-white font-bold shadow-lg">
+                                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-linear-to-br from-red-500 to-orange-500 text-white font-bold shadow-lg">
                                                 #{index + 1}
                                             </div>
                                             <div>

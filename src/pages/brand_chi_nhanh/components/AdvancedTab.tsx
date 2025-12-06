@@ -37,7 +37,14 @@ export function AdvancedTab({ analytics, isLoading, onRefresh }: AdvancedTabProp
                         <CardDescription>Hiệu suất tổng thể của chi nhánh</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="rounded-md border">
+                        <div
+                            style={{
+                                backgroundColor: '#FFFFFF',
+                                border: '1px solid rgba(0, 0, 0, 0.06)',
+                                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                            }}
+                            className="rounded-md"
+                        >
                             <Table>
                                 <TableHeader>
                                     <TableRow className="bg-muted/50">

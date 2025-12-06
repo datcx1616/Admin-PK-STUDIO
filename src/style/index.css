@@ -15,6 +15,7 @@ input:focus {
   box-shadow: 0 0 0 2px #feb2b2; /* red-200 shadow */
   outline: none;
 }
+
 @import "tailwindcss";
 @import "tw-animate-css";
 

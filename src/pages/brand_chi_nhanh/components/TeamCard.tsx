@@ -14,7 +14,12 @@ interface TeamCardProps {
 export function TeamCard({ team, onClick }: TeamCardProps) {
     return (
         <Card
-            className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-blue-500"
+            className="hover:shadow-md transition-shadow cursor-pointer"
+            style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid rgba(0, 0, 0, 0.06)',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+            }}
             onClick={onClick}
         >
             <CardContent className="p-6">
@@ -54,7 +59,7 @@ export function TeamCard({ team, onClick }: TeamCardProps) {
                     </div>
                 </div>
                 {team.leader && (
-                    <div className="mt-4 pt-3 border-t">
+                    <div className="mt-4 pt-3" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}>
                         <div className="flex items-center gap-2">
                             <Avatar className="h-6 w-6">
                                 <AvatarFallback className="text-xs bg-blue-100 text-blue-700">

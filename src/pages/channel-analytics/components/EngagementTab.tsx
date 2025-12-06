@@ -30,7 +30,13 @@ export function EngagementTab({ analytics }: EngagementTabProps) {
         <div className="space-y-6">
             {/* Engagement Summary */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
+                <Card
+                    style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(0, 0, 0, 0.06)',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                    }}
+                >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Tổng Likes
@@ -47,7 +53,13 @@ export function EngagementTab({ analytics }: EngagementTabProps) {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card
+                    style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(0, 0, 0, 0.06)',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                    }}
+                >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Tổng Dislikes
@@ -64,7 +76,13 @@ export function EngagementTab({ analytics }: EngagementTabProps) {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card
+                    style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(0, 0, 0, 0.06)',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                    }}
+                >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Tổng Comments
@@ -81,7 +99,13 @@ export function EngagementTab({ analytics }: EngagementTabProps) {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card
+                    style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid rgba(0, 0, 0, 0.06)',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                    }}
+                >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Tổng Shares

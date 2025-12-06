@@ -30,9 +30,9 @@
 
 .default-border {
   background-color: #FFFFFF;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06); /* default-border, đã chuẩn hóa */
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  border-radius: 1rem;
+  border-radius: 1rem; /* default-border, đã chuẩn hóa */
   overflow: hidden;
   display: flex;
   flex-direction: column;
