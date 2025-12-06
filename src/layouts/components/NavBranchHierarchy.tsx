@@ -402,8 +402,8 @@ export function NavBranchHierarchy() {
                                                         e.preventDefault()
                                                     }}
                                                     className={cn(
-                                                        "absolute right-2 p-0.5 rounded hover:bg-accent cursor-pointer",
-                                                        "opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
+                                                        "hover:bg-[#EAEBEE]"
                                                     )}
                                                 >
                                                     <svg
@@ -509,8 +509,8 @@ export function NavBranchHierarchy() {
                                                                                     e.preventDefault()
                                                                                 }}
                                                                                 className={cn(
-                                                                                    "absolute right-2 p-0.5 rounded hover:bg-accent cursor-pointer",
-                                                                                    "opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                    "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
+                                                                                    "hover:bg-[#EAEBEE]"
                                                                                 )}
                                                                             >
                                                                                 <svg
@@ -605,8 +605,8 @@ export function NavBranchHierarchy() {
                                                                                                     e.preventDefault()
                                                                                                 }}
                                                                                                 className={cn(
-                                                                                                    "absolute right-2 p-0.5 rounded hover:bg-accent cursor-pointer",
-                                                                                                    "opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                                                    "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
+                                                                                                    "hover:bg-[#EAEBEE]"
                                                                                                 )}
                                                                                             >
                                                                                                 <svg

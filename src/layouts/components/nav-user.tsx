@@ -65,11 +65,11 @@ export function NavUser({
                         <DropdownMenuTrigger asChild>
                             <SidebarMenuButton
                                 size="sm"
-                                className="bg-transparent hover:bg-gray-100 data-[state=open]:bg-gray-200 data-[state=open]:text-gray-900 rounded-md h-8 px-2 gap-2 w-auto inline-flex"
+                                className="bg-transparent hover:bg-gray-100 data-[state=open]:bg-gray-200 data-[state=open]:text-gray-900 rounded-md h-8 px-2 gap-2 w-auto inline-flex group"
                             >
                                 <IconUser className="h-4 w-4 text-gray-700 mr-1" />
                                 <span className="text-sm text-gray-800">{displayName}</span>
-                                <IconChevronDown className="h-4 w-4 text-gray-600" />
+                                <IconChevronDown className="h-4 w-4 text-gray-600 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                             </SidebarMenuButton>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent

@@ -129,7 +129,7 @@ export function ChannelSidebar({
             {mode === "fixed" && !isOpen && (
                 <div className={cn("fixed top-20", side === "right" ? "right-4" : "left-80")} style={{ zIndex: 99999 }}>
                     <Button variant="default" size="icon" onClick={() => setIsOpen(true)} className="h-10 w-10 rounded-full shadow-2xl bg-blue-600 hover:bg-blue-700 border-0 text-white">
-                        <Menu className="h-5 w-5" />
+                        <ChevronRight className="h-5 w-5" />
                     </Button>
                 </div>
             )}
@@ -163,7 +163,7 @@ export function ChannelSidebar({
                     ) : (
                         <div className="flex items-center h-12 w-full pl-4">
                             <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)} className="h-8 w-8 rounded-md bg-transparent hover:bg-gray-100 text-gray-500">
-                                <Menu className="h-4 w-4" />
+                                <ChevronRight className="h-4 w-4" />
                             </Button>
                         </div>
                     )}
