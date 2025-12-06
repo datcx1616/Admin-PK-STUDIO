@@ -10,7 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { type BranchAnalytics } from "../types"
+import { type BranchAnalytics } from "../types/branch-analytics.types"
 
 interface AdvancedTabProps {
     analytics: BranchAnalytics | null

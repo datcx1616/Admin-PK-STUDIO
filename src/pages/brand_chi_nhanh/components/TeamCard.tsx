@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Users } from "lucide-react"
 import { formatNumber } from "../utils/formatters"
-import { type TeamWithStats } from "../types"
+import { type TeamWithStats } from "../types/branch-analytics.types"
 
 interface TeamCardProps {
     team: TeamWithStats

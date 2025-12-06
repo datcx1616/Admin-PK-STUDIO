@@ -1,83 +1,181 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart3, Activity, Clock, Users, Eye } from "lucide-react"
-import { formatNumber, formatDuration } from "../utils/formatters"
-import { MetricCard } from "./MetricCard"
-import { type BranchAnalytics } from "../types"
+// src/pages/branch-analytics/components/OverviewTab.tsx
+
+import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { formatNumber, formatWatchTime, formatDate } from "../utils/formatters";
+import type { BranchAnalyticsData } from "../types/branch-analytics.types";
+import { Eye, Clock, Users, TrendingUp, Activity } from "lucide-react";
+import { MetricCard } from "./MetricCard";
 
 interface OverviewTabProps {
-    analytics: BranchAnalytics | null
+    analytics: BranchAnalyticsData | null;
 }
 
 export function OverviewTab({ analytics }: OverviewTabProps) {
+    if (!analytics?.data?.basic) {
+        return (
+            <Card>
+                <CardContent className="p-12 text-center">
+                    <p className="text-muted-foreground">Không có dữ liệu</p>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    const { basic, engagement } = analytics.data;
+    const totals = basic.totals;
+    const dailyData = basic.dailyData || [];
+
+    // Prepare chart data
+    const chartData = dailyData.map(day => ({
+        date: formatDate(day.date),
+        views: day.views,
+        subscribers: day.subscribersNet,
+        watchTime: day.watchTimeMinutes,
+        duration: day.averageViewDuration
+    }));
+
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <MetricCard
                     icon={Eye}
-                    title="Lượt Xem"
-                    value={formatNumber(analytics?.analytics?.views || 0)}
-                    subtitle="Tổng lượt xem"
-                    gradient="bg-linear-to-br from-emerald-500 to-teal-600"
+                    title="Tổng Lượt Xem"
+                    value={formatNumber(totals.totalViews)}
+                    subtitle="Trong khoảng thời gian"
+                    gradient="bg-gradient-to-br from-blue-500 to-blue-600"
                 />
                 <MetricCard
                     icon={Clock}
                     title="Thời Gian Xem"
-                    value={formatDuration(analytics?.analytics?.watchTime || 0)}
-                    subtitle={`${Math.round((analytics?.analytics?.watchTime || 0) / 60)} phút`}
-                    gradient="bg-linear-to-br from-teal-500 to-cyan-600"
+                    value={totals.totalWatchTimeHours}
+                    subtitle={formatWatchTime(totals.totalWatchTimeMinutes)}
+                    gradient="bg-gradient-to-br from-green-500 to-green-600"
                 />
                 <MetricCard
                     icon={Users}
-                    title="Người Đăng Ký"
-                    value={
-                        analytics?.analytics?.subscribersNet !== undefined
-                            ? (analytics.analytics.subscribersNet >= 0 ? '+' : '') + formatNumber(analytics.analytics.subscribersNet)
-                            : '+0'
-                    }
-                    subtitle={`+${formatNumber(analytics?.analytics?.subscribersGained || 0)} / -${formatNumber(analytics?.analytics?.subscribersLost || 0)}`}
-                    gradient="bg-linear-to-br from-pink-500 to-rose-600"
+                    title="Subscribers Mới"
+                    value={`+${formatNumber(totals.totalSubscribersGained)}`}
+                    subtitle={`Net: ${totals.totalSubscribersNet >= 0 ? '+' : ''}${formatNumber(totals.totalSubscribersNet)}`}
+                    gradient="bg-gradient-to-br from-purple-500 to-purple-600"
+                />
+                <MetricCard
+                    icon={TrendingUp}
+                    title="Thời Lượng TB"
+                    value={`${totals.averageViewDuration.toFixed(0)}s`}
+                    subtitle={`${(totals.averageViewDuration / 60).toFixed(1)} phút`}
+                    gradient="bg-gradient-to-br from-orange-500 to-orange-600"
                 />
                 <MetricCard
                     icon={Activity}
-                    title="Thời Lượng TB"
-                    value={formatDuration(analytics?.analytics?.averageViewDuration || 0)}
-                    subtitle={`${Math.round((analytics?.analytics?.averageViewDuration || 0) / 60 * 10) / 10} phút`}
-                    gradient="bg-linear-to-br from-sky-500 to-blue-600"
+                    title="Engagement Rate"
+                    value={`${engagement.totals.engagementRate.toFixed(2)}%`}
+                    subtitle={`${formatNumber(engagement.totals.totalLikes)} likes`}
+                    gradient="bg-gradient-to-br from-pink-500 to-pink-600"
                 />
             </div>
 
+            {/* Views & Subscribers Chart */}
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5" />
-                        Chi Tiết Tăng Trưởng Người Đăng Ký
-                    </CardTitle>
+                    <CardTitle>Lượt Xem & Subscribers</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid grid-cols-3 gap-6">
-                        <div className="text-center p-4 rounded-lg bg-green-50 dark:bg-green-950">
-                            <p className="text-sm text-muted-foreground mb-2">Người đăng ký mới</p>
-                            <p className="text-3xl font-bold text-green-600">
-                                +{formatNumber(analytics?.analytics?.subscribersGained || 0)}
-                            </p>
-                        </div>
-                        <div className="text-center p-4 rounded-lg bg-red-50 dark:bg-red-950">
-                            <p className="text-sm text-muted-foreground mb-2">Người hủy đăng ký</p>
-                            <p className="text-3xl font-bold text-red-600">
-                                -{formatNumber(analytics?.analytics?.subscribersLost || 0)}
-                            </p>
-                        </div>
-                        <div className="text-center p-4 rounded-lg bg-blue-50 dark:bg-blue-950">
-                            <p className="text-sm text-muted-foreground mb-2">Thay đổi ròng</p>
-                            <p className="text-3xl font-bold text-blue-600">
-                                {analytics?.analytics?.subscribersNet !== undefined
-                                    ? (analytics.analytics.subscribersNet >= 0 ? '+' : '') + formatNumber(analytics.analytics.subscribersNet)
-                                    : '0'}
-                            </p>
-                        </div>
+                    <ResponsiveContainer width="100%" height={400}>
+                        <LineChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="date" fontSize={12} />
+                            <YAxis yAxisId="left" fontSize={12} />
+                            <YAxis yAxisId="right" orientation="right" fontSize={12} />
+                            <Tooltip />
+                            <Legend />
+                            <Line
+                                yAxisId="left"
+                                type="monotone"
+                                dataKey="views"
+                                stroke="#3b82f6"
+                                strokeWidth={2}
+                                name="Lượt xem"
+                            />
+                            <Line
+                                yAxisId="right"
+                                type="monotone"
+                                dataKey="subscribers"
+                                stroke="#8b5cf6"
+                                strokeWidth={2}
+                                name="Subscribers net"
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            {/* Watch Time Chart */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Thời Gian Xem</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={400}>
+                        <BarChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="date" fontSize={12} />
+                            <YAxis fontSize={12} />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="watchTime" fill="#10b981" name="Thời gian xem (phút)" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            {/* Daily Performance Table */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Hiệu Suất Hàng Ngày</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b">
+                                    <th className="text-left py-3 px-4">Ngày</th>
+                                    <th className="text-right py-3 px-4">Lượt Xem</th>
+                                    <th className="text-right py-3 px-4">Thời Gian Xem</th>
+                                    <th className="text-right py-3 px-4">Subs Gained</th>
+                                    <th className="text-right py-3 px-4">Subs Lost</th>
+                                    <th className="text-right py-3 px-4">Subs Net</th>
+                                    <th className="text-right py-3 px-4">Thời Lượng TB</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {dailyData.map((day, index) => (
+                                    <tr key={index} className="border-b hover:bg-accent/50">
+                                        <td className="py-3 px-4 font-medium">{formatDate(day.date)}</td>
+                                        <td className="text-right py-3 px-4">{formatNumber(day.views)}</td>
+                                        <td className="text-right py-3 px-4">{day.watchTimeHours}h</td>
+                                        <td className="text-right py-3 px-4 text-green-600">
+                                            +{formatNumber(day.subscribersGained)}
+                                        </td>
+                                        <td className="text-right py-3 px-4 text-red-600">
+                                            -{formatNumber(day.subscribersLost)}
+                                        </td>
+                                        <td className="text-right py-3 px-4">
+                                            <Badge variant={day.subscribersNet >= 0 ? "default" : "destructive"}>
+                                                {day.subscribersNet >= 0 ? '+' : ''}{formatNumber(day.subscribersNet)}
+                                            </Badge>
+                                        </td>
+                                        <td className="text-right py-3 px-4">{day.averageViewDuration}s</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </CardContent>
             </Card>
         </div>
-    )
+    );
 }

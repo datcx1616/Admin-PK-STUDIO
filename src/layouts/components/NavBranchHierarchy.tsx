@@ -540,6 +540,15 @@ export function NavBranchHierarchy() {
                                                                                 <span>Quản Lý Thành Viên</span>
                                                                             </DropdownMenuItem>
                                                                             <DropdownMenuItem
+                                                                                onClick={() => {
+                                                                                    // TODO: Implement assign editor logic here
+                                                                                    console.log('Phân công Editor cho team:', team._id)
+                                                                                }}
+                                                                            >
+                                                                                <User2 className="mr-2 h-4 w-4" />
+                                                                                <span>Phân Công Editor</span>
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuItem
                                                                                 onClick={async () => {
                                                                                     try {
                                                                                         const fullTeam = await teamsAPI.getById(team._id)

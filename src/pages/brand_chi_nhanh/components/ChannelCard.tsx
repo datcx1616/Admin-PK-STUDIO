@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Eye, Zap, Users } from "lucide-react"
 import { formatNumber } from "../utils/formatters"
-import { type ChannelWithStats } from "../types"
+import { type ChannelWithStats } from "../types/branch-analytics.types"
 
 interface ChannelCardProps {
     channel: ChannelWithStats
