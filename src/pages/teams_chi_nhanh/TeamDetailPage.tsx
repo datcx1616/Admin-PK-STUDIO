@@ -243,22 +243,16 @@ export default function TeamAnalyticsPage() {
                                 teamName={teamName}
                                 totalChannels={totalChannels}
                                 channels={channels}
-                                dateRange={dateRange}
-                                onDateRangeChange={(value) => setDateRange(value as '7' | '30' | '90' | '180')}
+                                selectedDays={parseInt(dateRange)}
+                                startDate={new Date(startDate)}
+                                endDate={new Date(endDate)}
+                                loading={loading}
+                                onDaysChange={(days) => setDateRange(days.toString() as '7' | '30' | '90' | '180')}
+                                onCustomDateChange={() => { }}
                                 onRefresh={refetch}
-                                onExportCSV={handleExportCSV}
+                                onExport={handleExportCSV}
                                 onPrint={handlePrint}
                             />
-
-                            {/* Date range display */}
-                            <div className="text-sm text-muted-foreground">
-                                Đang hiển thị dữ liệu từ <strong>{startDate}</strong> đến <strong>{endDate}</strong>
-                                {branchName !== "N/A" && (
-                                    <span className="ml-2">
-                                        • Chi nhánh: <strong>{branchName}</strong>
-                                    </span>
-                                )}
-                            </div>
 
                             {/* Loading State for Analytics */}
                             {loading && !analytics ? (

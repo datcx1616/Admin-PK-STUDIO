@@ -1,10 +1,7 @@
-// src/pages/team-analytics/components/TeamHeader.tsx
-
 import * as React from "react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-// import { DateRangePicker } from "@/pages/brand_chi_nhanh/components/DateRangePicker";
 import {
     Users,
     Calendar,
@@ -19,7 +16,6 @@ interface TeamHeaderProps {
     teamName: string;
     totalChannels: number;
     channels: Array<{ id: string; name: string }>;
-    dateRange: { startDate: string; endDate: string };
     selectedDays: number;
     startDate: Date;
     endDate: Date;
@@ -42,19 +38,21 @@ export function TeamHeader({
     teamName,
     totalChannels,
     channels,
-    dateRange,
+
     selectedDays,
-    startDate,
-    endDate,
     loading,
     onDaysChange,
-    onCustomDateChange,
     onRefresh,
     onExport,
     onPrint
 }: TeamHeaderProps) {
     return (
-        <Card className="border rounded-lg shadow-sm">
+        <Card className=" rounded-lg shadow-sm"
+            style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid rgba(0, 0, 0, 0.06)',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+            }}>
             <CardHeader className="space-y-4">
                 {/* Row 1: Team Info + Actions */}
                 <div className="flex items-start justify-between gap-4">
@@ -108,7 +106,12 @@ export function TeamHeader({
                 </div>
 
                 {/* Row 2: Channels + Date Controls */}
-                <div className="flex items-center justify-between gap-4 pt-3 border-t">
+                <div className="flex items-center justify-between gap-4 pt-3 border-t"
+                    style={{
+                        backgroundColor: '#FFFFFF',
+                        borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
+                    }}>
                     {/* Left: Channel names */}
                     <div className="flex items-center gap-2 text-sm">
                         <span className="text-muted-foreground">Kênh:</span>
@@ -145,7 +148,7 @@ export function TeamHeader({
                                     className={cn(
                                         "h-8 px-3 text-xs font-medium transition-all",
                                         selectedDays === option.value
-                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                            ? " text-primary-foreground shadow-sm"
                                             : "hover:bg-background"
                                     )}
                                     onClick={() => onDaysChange(option.value)}
@@ -154,13 +157,6 @@ export function TeamHeader({
                                 </Button>
                             ))}
                         </div>
-
-                        {/* Custom date picker */}
-                        {/* <DateRangePicker
-                            startDate={startDate}
-                            endDate={endDate}
-                            onDateChange={onCustomDateChange}
-                        /> */}
                     </div>
                 </div>
             </CardHeader>

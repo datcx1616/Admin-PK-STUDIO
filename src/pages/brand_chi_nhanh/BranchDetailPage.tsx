@@ -98,7 +98,7 @@ export default function BranchAnalyticsPage() {
                     breadcrumbs={[
                         { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                         { label: "Chi nhánh", href: "/brand" },
-                        { label: "Lỗi", icon: <Building2 className="h-4 w-4" /> },
+                        { label: "Lỗi", icon: <Users className="h-4 w-4" /> },
                     ]}
                 />
                 <div className="flex flex-1 overflow-hidden">
@@ -137,7 +137,7 @@ export default function BranchAnalyticsPage() {
                 breadcrumbs={[
                     { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                     { label: "Chi nhánh", href: "/brand" },
-                    { label: branchName, icon: <Building2 className="h-4 w-4" /> },
+                    { label: branchName, icon: <Users className="h-4 w-4" /> },
                 ]}
             />
 
