@@ -58,14 +58,10 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full overflow-hidden p-2 gap-2" style={{ backgroundColor: '#F7F7F7' }}>
-        {/* Sidebar column (fixed) */}
         <div className="w-60 h-[calc(100vh-1rem)] overflow-y-auto" style={{ backgroundColor: '#F7F7F7' }}>
           <AppSidebar />
         </div>
-
-        {/* Main panel */}
         <div className="default-border">
-          {/* <SiteHeader /> */}
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>
@@ -99,7 +95,6 @@ export default function App() {
       <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
       <Route path="/signup" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
 
-      {/* Original Dashboard */}
       <Route path="/dashboard" element={<PrivateRoute><AdminLayout><DashboardOverviewPage /></AdminLayout></PrivateRoute>} />
       <Route path="/dashboard/overview" element={<PrivateRoute><AdminLayout><DashboardOverviewPage /></AdminLayout></PrivateRoute>} />
       <Route path="/dashboard/admin-stats" element={<PrivateRoute><AdminLayout><AdminStatsPage /></AdminLayout></PrivateRoute>} />
@@ -107,31 +102,25 @@ export default function App() {
       <Route path="/dashboard/teams/:teamId" element={<PrivateRoute><AdminLayout><TeamDetailPage /></AdminLayout></PrivateRoute>} />
       <Route path="/dashboard/channels/:channelId/analytics" element={<PrivateRoute><AdminLayout><ChannelAnalyticsPage /></AdminLayout></PrivateRoute>} />
 
-      {/* Brand and Channel Management */}
       <Route path="/brand" element={<PrivateRoute><AdminLayout><BranchManagementPage /></AdminLayout></PrivateRoute>} />
       <Route path="/channels" element={<PrivateRoute><AdminLayout><ChannelManagementPage /></AdminLayout></PrivateRoute>} />
       <Route path="/channels/:channelId" element={<PrivateRoute><AdminLayout><ChannelDetailPage /></AdminLayout></PrivateRoute>} />
 
-      {/* Teams and Analytics */}
       <Route path="/teams" element={<PrivateRoute><AdminLayout><TeamsManagementPage /></AdminLayout></PrivateRoute>} />
       <Route path="/analytics" element={<PrivateRoute><AdminLayout><DetailedAnalytics /></AdminLayout></PrivateRoute>} />
 
-      {/* Roles and Video Management */}
       <Route path="/roles" element={<PrivateRoute><AdminLayout><UsersManagementPage /></AdminLayout></PrivateRoute>} />
       <Route path="/videos/create" element={<PrivateRoute><AdminLayout><CreateVideoPage /></AdminLayout></PrivateRoute>} />
       <Route path="/videos/my" element={<PrivateRoute><AdminLayout><MyVideosPage /></AdminLayout></PrivateRoute>} />
       <Route path="/videos/all" element={<PrivateRoute><AdminLayout><AllVideosPage /></AdminLayout></PrivateRoute>} />
       <Route path="/channels/my" element={<PrivateRoute><AdminLayout><MyChannelsPage /></AdminLayout></PrivateRoute>} />
 
-      {/* Home and Branch/Team Details (for chi nhánh) */}
       <Route path="/home" element={<HomePage />} />
       <Route path="/branches/:branchId" element={<PrivateRoute><AdminLayout><BranchDetailPagee /></AdminLayout></PrivateRoute>} />
       <Route path="/teams/:teamId" element={<PrivateRoute><AdminLayout><TeamDetailPagee /></AdminLayout></PrivateRoute>} />
 
-      {/* Channel Detail View (for analytics) */}
       <Route path="/channels/:channelId/analytics" element={<PrivateRoute><AdminLayout><ChannelDetailViewWrapper /></AdminLayout></PrivateRoute>} />
 
-      {/* Redirects */}
       <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
       <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
     </Routes>
