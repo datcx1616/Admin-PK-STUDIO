@@ -1,34 +1,6 @@
-// src/lib/branches-api.ts
-/**
- * Branch API Client
- * Implements all endpoints from API 4.3 Branch APIs
- */
+import axiosInstance from './axios-instance';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-/**
- * Get authorization headers
- */
-function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('authToken');
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  };
-}
-
-/**
- * Handle API errors
- */
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({
-      message: `HTTP ${response.status}: ${response.statusText}`,
-    }));
-    throw new Error(error.message || error.error || 'Request failed');
-  }
-  return response.json();
-}
 
 /**
  * Branch interfaces
@@ -131,12 +103,8 @@ export const branchesAPI = {
    * Permission: Admin, Director, Branch Director
    */
   async getAll(): Promise<Branch[]> {
-    const response = await fetch(`${API_BASE_URL}/branches`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-
-    const data = await handleResponse<BranchesResponse>(response);
+   const response = await axiosInstance.get(`${API_BASE_URL}/branches`);
+   const data = response.data;
     return data.branches || data.data || (Array.isArray(data) ? data : []);
   },
 

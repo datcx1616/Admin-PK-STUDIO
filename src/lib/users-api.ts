@@ -12,6 +12,7 @@ import type {
   UserResponse,
   UserActionResponse,
 } from '@/types/user.types';
+import axiosInstance from './api-client-axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -60,12 +61,8 @@ export const usersAPI = {
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/users?${queryString}` : '/users';
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-
-    const data = await handleResponse<UsersResponse>(response);
+    const response = await axiosInstance.get(`${API_BASE_URL}/users${endpoint}`);
+    const data = response.data;
     
     // Handle different response formats
     return data.users || data.data || (Array.isArray(data) ? data : []);
