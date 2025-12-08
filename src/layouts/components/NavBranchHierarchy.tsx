@@ -46,6 +46,7 @@ import { CreateTeamModal } from "@/pages/teams/components/CreateTeamModal"
 import { EditTeamModal } from "@/pages/teams/components/EditTeamModal"
 import { DeleteTeamDialog } from "@/pages/teams/components/DeleteTeamDialog"
 import { ManageMembersModal } from "@/pages/teams/components/ManageMembersModal"
+import { AssignEditorDialog } from "@/pages/channel/components/AssignEditorDialog"
 import type { Branch } from "@/types/branch.types"
 import type { Team } from "@/lib/teams-api"
 
@@ -141,6 +142,7 @@ export function NavBranchHierarchy() {
     const [showManageMembersModal, setShowManageMembersModal] = React.useState(false)
     const [selectedBranch, setSelectedBranch] = React.useState<Branch | null>(null)
     const [selectedTeam, setSelectedTeam] = React.useState<Team | null>(null)
+    const [showAssignEditorDialog, setShowAssignEditorDialog] = React.useState(false)
 
     const currentUser = getCurrentUser()
     const userRole = currentUser?.role
@@ -419,18 +421,24 @@ export function NavBranchHierarchy() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-48">
                                                 <DropdownMenuItem
-                                                    onClick={() => {
-                                                        setSelectedBranch(branch)
-                                                        setShowCreateTeamModal(true)
+                                                    onClick={(e) => {
+                                                        // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        setSelectedBranch(branch);
+                                                        setShowCreateTeamModal(true);
                                                     }}
                                                 >
                                                     <Plus className="mr-2 h-4 w-4" />
                                                     <span>Thêm Nhóm</span>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
-                                                    onClick={() => {
-                                                        setSelectedBranch(branch)
-                                                        setShowEditModal(true)
+                                                    onClick={(e) => {
+                                                        // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        setSelectedBranch(branch);
+                                                        setShowEditModal(true);
                                                     }}
                                                 >
                                                     <Pencil className="mr-2 h-4 w-4" />
@@ -438,9 +446,12 @@ export function NavBranchHierarchy() {
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem
-                                                    onClick={() => {
-                                                        setSelectedBranch(branch)
-                                                        setShowDeleteDialog(true)
+                                                    onClick={(e) => {
+                                                        // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        setSelectedBranch(branch);
+                                                        setShowDeleteDialog(true);
                                                     }}
                                                     className="text-red-600 focus:text-red-600"
                                                 >
@@ -526,7 +537,10 @@ export function NavBranchHierarchy() {
                                                                         </DropdownMenuTrigger>
                                                                         <DropdownMenuContent align="end" className="w-48">
                                                                             <DropdownMenuItem
-                                                                                onClick={async () => {
+                                                                                onClick={async (e) => {
+                                                                                    // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
+                                                                                    e.stopPropagation();
+                                                                                    e.preventDefault();
                                                                                     try {
                                                                                         const fullTeam = await teamsAPI.getById(team._id)
                                                                                         setSelectedTeam(fullTeam)
@@ -540,16 +554,26 @@ export function NavBranchHierarchy() {
                                                                                 <span>Quản Lý Thành Viên</span>
                                                                             </DropdownMenuItem>
                                                                             <DropdownMenuItem
-                                                                                onClick={() => {
-                                                                                    // TODO: Implement assign editor logic here
-                                                                                    console.log('Phân công Editor cho team:', team._id)
+                                                                                onClick={async (e) => {
+                                                                                    e.stopPropagation();
+                                                                                    e.preventDefault();
+                                                                                    try {
+                                                                                        const fullTeam = await teamsAPI.getById(team._id)
+                                                                                        setSelectedTeam(fullTeam)
+                                                                                        setShowAssignEditorDialog(true)
+                                                                                    } catch (error) {
+                                                                                        console.error('Error fetching team:', error)
+                                                                                    }
                                                                                 }}
                                                                             >
                                                                                 <User2 className="mr-2 h-4 w-4" />
                                                                                 <span>Phân Công Editor</span>
                                                                             </DropdownMenuItem>
                                                                             <DropdownMenuItem
-                                                                                onClick={async () => {
+                                                                                onClick={async (e) => {
+                                                                                    // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
+                                                                                    e.stopPropagation();
+                                                                                    e.preventDefault();
                                                                                     try {
                                                                                         const fullTeam = await teamsAPI.getById(team._id)
                                                                                         setSelectedTeam(fullTeam)
@@ -564,7 +588,10 @@ export function NavBranchHierarchy() {
                                                                             </DropdownMenuItem>
                                                                             <DropdownMenuSeparator />
                                                                             <DropdownMenuItem
-                                                                                onClick={async () => {
+                                                                                onClick={async (e) => {
+                                                                                    // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
+                                                                                    e.stopPropagation();
+                                                                                    e.preventDefault();
                                                                                     try {
                                                                                         const fullTeam = await teamsAPI.getById(team._id)
                                                                                         setSelectedTeam(fullTeam)
@@ -741,6 +768,7 @@ export function NavBranchHierarchy() {
                 />
             )}
 
+
             {selectedTeam && (
                 <ManageMembersModal
                     open={showManageMembersModal}
@@ -753,6 +781,47 @@ export function NavBranchHierarchy() {
                         setShowManageMembersModal(false)
                         setSelectedTeam(null)
                         fetchData()
+                    }}
+                />
+            )}
+
+            {/* Dialog phân công editor cho team cấp hai */}
+            {selectedTeam && showAssignEditorDialog && (
+                <AssignEditorDialog
+                    channel={{
+                        _id: selectedTeam._id,
+                        name: selectedTeam.name,
+                        youtubeChannelId: '',
+                        description: selectedTeam.description || '',
+                        customUrl: '',
+                        thumbnailUrl: '',
+                        subscriberCount: 0,
+                        viewCount: 0,
+                        videoCount: 0,
+                        isConnected: false,
+                        isActive: selectedTeam.isActive ?? true,
+                        team: {
+                            _id: selectedTeam._id,
+                            name: selectedTeam.name,
+                            branch: selectedTeam.branch ? {
+                                _id: selectedTeam.branch._id,
+                                name: selectedTeam.branch.name,
+                                code: selectedTeam.branch.code || ''
+                            } : undefined
+                        },
+                        assignedEditors: selectedTeam.members || [],
+                        createdAt: selectedTeam.createdAt || '',
+                        updatedAt: selectedTeam.updatedAt || '',
+                    }}
+                    isOpen={showAssignEditorDialog}
+                    onClose={() => {
+                        setShowAssignEditorDialog(false);
+                        setSelectedTeam(null);
+                    }}
+                    onSuccess={() => {
+                        setShowAssignEditorDialog(false);
+                        setSelectedTeam(null);
+                        fetchData();
                     }}
                 />
             )}
