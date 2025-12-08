@@ -1,5 +1,5 @@
 // src/layouts/components/NavBranchHierarchy.tsx
-// VERSION 14: COMPLETE - Fixed dropdown menu staying open when opening modals
+// VERSION 15: Added AssignEditorsToTeamDialog for team editor assignment
 import * as React from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { ChevronRight, Building2, Users2, User2, Plus, Pencil, Trash2, Users, Youtube } from "lucide-react"
@@ -46,7 +46,7 @@ import { CreateTeamModal } from "@/pages/teams/components/CreateTeamModal"
 import { EditTeamModal } from "@/pages/teams/components/EditTeamModal"
 import { DeleteTeamDialog } from "@/pages/teams/components/DeleteTeamDialog"
 import { ManageMembersModal } from "@/pages/teams/components/ManageMembersModal"
-import { AssignEditorDialog } from "@/pages/channel/components/AssignEditorDialog"
+import { AssignEditorsToTeamDialog } from "@/pages/teams/components/AssignEditorsToTeamDialog"
 import type { Branch } from "@/types/branch.types"
 import type { Team } from "@/lib/teams-api"
 
@@ -143,9 +143,9 @@ export function NavBranchHierarchy() {
     const [showEditTeamModal, setShowEditTeamModal] = React.useState(false)
     const [showDeleteTeamDialog, setShowDeleteTeamDialog] = React.useState(false)
     const [showManageMembersModal, setShowManageMembersModal] = React.useState(false)
+    const [showAssignEditorsDialog, setShowAssignEditorsDialog] = React.useState(false)
     const [selectedBranch, setSelectedBranch] = React.useState<Branch | null>(null)
     const [selectedTeam, setSelectedTeam] = React.useState<Team | null>(null)
-    const [showAssignEditorDialog, setShowAssignEditorDialog] = React.useState(false)
 
     const currentUser = getCurrentUser()
     const userRole = currentUser?.role
@@ -573,7 +573,7 @@ export function NavBranchHierarchy() {
                                                                                     try {
                                                                                         const fullTeam = await teamsAPI.getById(team._id)
                                                                                         setSelectedTeam(fullTeam)
-                                                                                        setShowAssignEditorDialog(true)
+                                                                                        setShowAssignEditorsDialog(true)
                                                                                     } catch (error) {
                                                                                         console.error('Error fetching team:', error)
                                                                                     }
@@ -806,24 +806,18 @@ export function NavBranchHierarchy() {
                 />
             )}
 
-            {selectedTeam && showAssignEditorDialog && (
-                <AssignEditorDialog
-                    channel={{
-                        _id: selectedTeam._id,
-                        name: selectedTeam.name,
-                        youtubeChannelId: '',
-                        description: selectedTeam.description || '',
-                        customUrl: '',
-                        thumbnailUrl: '',
-                        subscriberCount: 0,
-                        viewCount: 0,
-                        videoCount: 0,
-                        isConnected: false,
-                        isActive: selectedTeam.isActive ?? true,
-                    }}
-                    open={showAssignEditorDialog}
+            {/* NEW: Assign Editors to Team Dialog */}
+            {selectedTeam && (
+                <AssignEditorsToTeamDialog
+                    team={selectedTeam}
+                    isOpen={showAssignEditorsDialog}
                     onClose={() => {
-                        setShowAssignEditorDialog(false)
+                        setShowAssignEditorsDialog(false)
+                        setSelectedTeam(null)
+                    }}
+                    onSuccess={() => {
+                        fetchData() // Refresh hierarchy
+                        setShowAssignEditorsDialog(false)
                         setSelectedTeam(null)
                     }}
                 />

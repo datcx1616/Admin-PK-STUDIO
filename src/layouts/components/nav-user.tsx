@@ -34,8 +34,6 @@ import {
     // useSidebar,
 } from "@/components/ui/sidebar"
 
-import { useNavigate, } from "react-router-dom";
-
 export function NavUser({
     user,
 }: {
@@ -47,14 +45,19 @@ export function NavUser({
 }) {
     // const { isMobile } = useSidebar()
 
-    const navigate = useNavigate();
     const handleLogout = () => {
-
+        // 1. Xóa tất cả auth data
         localStorage.removeItem("authToken");
         localStorage.removeItem("user");
 
-        navigate("/login");
+        // 2. Xóa thêm redirect path (nếu có)
+        sessionStorage.removeItem('redirectAfterLogin');
+
+        // 3. Force reload và redirect về login
+        // Dùng window.location.href thay vì navigate để FORCE RELOAD toàn bộ app
+        window.location.href = '/login';
     };
+
     const displayName = (user?.name || "User").split(" ")[0];
 
     return (
@@ -86,13 +89,12 @@ export function NavUser({
                                     <IconUserPlus />
                                     Mời đội của bạn
                                 </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
                                 <DropdownMenuItem>
-                                    <IconPalette />
-                                    Chủ đề
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <IconSwitchHorizontal />
-                                    Chuyển tổ chức
+                                    <IconBell />
+                                    Thông báo
                                 </DropdownMenuItem>
                             </DropdownMenuGroup>
                             <DropdownMenuSeparator />
@@ -104,14 +106,29 @@ export function NavUser({
                     </DropdownMenu>
                 </SidebarMenuItem>
             </SidebarMenu>
-            <div className="flex items-center gap-1">
-                <button className="h-8 w-8 flex items-center justify-center rounded-md bg-transparent hover:bg-gray-100 text-gray-700" aria-label="Search">
-                    <IconSearch className="h-4 w-4" />
-                </button>
-                <button className="h-8 w-8 flex items-center justify-center rounded-md bg-transparent hover:bg-gray-100 text-gray-700" aria-label="Notifications">
-                    <IconBell className="h-4 w-4" />
-                </button>
-            </div>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <button className="p-1 hover:bg-gray-100 rounded-md transition-colors">
+                        <IconDotsVertical className="h-4 w-4 text-gray-600" />
+                    </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel>Tùy chọn</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                        <IconSearch className="mr-2 h-4 w-4" />
+                        <span>Tìm kiếm</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <IconPalette className="mr-2 h-4 w-4" />
+                        <span>Giao diện</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <IconSwitchHorizontal className="mr-2 h-4 w-4" />
+                        <span>Chuyển đổi</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
     )
 }

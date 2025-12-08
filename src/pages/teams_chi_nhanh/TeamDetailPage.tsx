@@ -287,29 +287,29 @@ export default function TeamAnalyticsPage() {
                                 // Analytics Tabs
                                 <Tabs defaultValue="overview" className="space-y-6">
                                     <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
-                                        <TabsList className="inline-flex h-auto items-center justify-start rounded-lg bg-muted p-1 gap-1 min-w-max">
-                                            <TabsTrigger value="overview" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                        <TabsList className="inline-flex h-auto w-full items-center justify-start rounded-lg bg-muted p-1 gap-1">
+                                            <TabsTrigger value="overview" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
                                                 📊 Tổng Quan
                                             </TabsTrigger>
-                                            <TabsTrigger value="engagement" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                            <TabsTrigger value="engagement" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
                                                 ❤️ Tương Tác
                                             </TabsTrigger>
-                                            <TabsTrigger value="revenue" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                            <TabsTrigger value="revenue" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
                                                 💰 Doanh Thu
                                             </TabsTrigger>
-                                            <TabsTrigger value="traffic" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                            <TabsTrigger value="traffic" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
                                                 📡 Traffic
                                             </TabsTrigger>
-                                            <TabsTrigger value="devices" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                            <TabsTrigger value="devices" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
                                                 📱 Thiết Bị
                                             </TabsTrigger>
-                                            <TabsTrigger value="videos" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                            <TabsTrigger value="videos" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
                                                 🎬 Videos
                                             </TabsTrigger>
-                                            <TabsTrigger value="channels" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                            <TabsTrigger value="channels" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1>">
                                                 📺 Kênh
                                             </TabsTrigger>
-                                            <TabsTrigger value="retention" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                            <TabsTrigger value="retention" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
                                                 📈 Retention
                                             </TabsTrigger>
                                         </TabsList>

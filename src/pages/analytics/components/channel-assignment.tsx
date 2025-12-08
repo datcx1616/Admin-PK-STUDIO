@@ -1,50 +1,24 @@
-import React, { useState, useEffect } from "react"
-import axios from "@/lib/axios-instance"
-import {
-    Users,
-    UserPlus,
-    UserMinus,
-    Search,
-    Calendar,
-    CheckCircle,
-    XCircle,
-    Info
-} from "lucide-react"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog"
+// src/pages/analytics/components/channel-assignment.tsx
+// FIXED VERSION - Dùng channelsAPI thay vì raw axios
+
+import { useEffect, useState } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useToast } from "@/hooks/use-toast"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Separator } from "@/components/ui/separator"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { Search, Users, CheckCircle, Info } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { channelsAPI } from "@/lib/channels-api"  // ✅ FIXED: Import channelsAPI
+import axiosInstance from "@/lib/axios-instance"  // ✅ FIXED: Dùng axiosInstance cho users
 
 interface Editor {
     _id: string
     name: string
     email: string
-    role: string
-    team?: {
-        _id: string
-        name: string
-    }
     branch?: {
         _id: string
         name: string
@@ -65,6 +39,10 @@ interface Channel {
     team?: {
         _id: string
         name: string
+        branch?: {
+            _id: string
+            name: string
+        }
     }
     assignedTo?: Array<{
         user: {
@@ -105,8 +83,8 @@ export function ChannelAssignment({ channel, isOpen, onClose, onUpdate }: Channe
     const fetchEditors = async () => {
         setLoading(true)
         try {
-            // Fetch editors in the same branch as the channel
-            const response = await axios.get('/api/users?role=editor')
+            // ✅ FIXED: Dùng axiosInstance thay vì raw axios
+            const response = await axiosInstance.get('/api/users?role=editor')
 
             // Filter editors by branch if channel has a team with branch
             let filteredEditors = response.data.data || response.data || []
@@ -152,22 +130,18 @@ export function ChannelAssignment({ channel, isOpen, onClose, onUpdate }: Channe
             const toAdd = selectedEditors.filter(id => !currentAssignments.includes(id))
             const toRemove = currentAssignments.filter(id => !selectedEditors.includes(id))
 
-            // Process additions
+            // ✅ FIXED: Process additions using channelsAPI
             console.log('➕ Adding editors:', toAdd)
             for (const editorId of toAdd) {
-                const response = await axios.post(
-                    `/api/channels/${channel._id}/assign`,
-                    { userId: editorId, role: 'editor' }
-                )
-                console.log('✅ Added editor response:', response.data)
+                await channelsAPI.assignEditor(channel._id, { userId: editorId })
+                console.log('✅ Added editor:', editorId)
             }
 
-            // Process removals
+            // ✅ FIXED: Process removals using channelsAPI
             console.log('➖ Removing editors:', toRemove)
             for (const editorId of toRemove) {
-                await axios.delete(
-                    `/api/channels/${channel._id}/members/${editorId}`
-                )
+                await channelsAPI.removeEditor(channel._id, editorId)
+                console.log('✅ Removed editor:', editorId)
             }
 
             console.log('🔄 Calling onUpdate to refresh channels...')
@@ -182,11 +156,15 @@ export function ChannelAssignment({ channel, isOpen, onClose, onUpdate }: Channe
 
             // Then close dialog
             onClose()
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error updating assignments:', error)
+
+            // ✅ FIXED: Better error handling
+            const errorMessage = error.response?.data?.message || error.message || "Không thể cập nhật phân công"
+
             toast({
                 title: "Lỗi",
-                description: "Không thể cập nhật phân công",
+                description: errorMessage,
                 variant: "destructive"
             })
         } finally {
@@ -226,97 +204,49 @@ export function ChannelAssignment({ channel, isOpen, onClose, onUpdate }: Channe
                     <div className="flex-1">
                         <h3 className="font-semibold">{channel.name}</h3>
                         <p className="text-sm text-muted-foreground">{channel.customUrl}</p>
-                        <div className="flex gap-2 mt-1">
-                            <Badge variant="secondary" className="text-xs">
-                                {channel.subscriberCount.toLocaleString()} subscribers
-                            </Badge>
-                            {channel.team && (
-                                <Badge variant="outline" className="text-xs">
-                                    {channel.team.name}
-                                </Badge>
-                            )}
+                        <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                                <Users className="h-3 w-3" />
+                                {channel.subscriberCount?.toLocaleString()} subscribers
+                            </span>
                         </div>
                     </div>
+                    {channel.channelType && (
+                        <Badge variant="secondary">{channel.channelType}</Badge>
+                    )}
                 </div>
 
-                {/* Current Assignments */}
-                {channel.assignedTo && channel.assignedTo.length > 0 && (
-                    <div>
-                        <Label className="text-sm font-medium mb-2">Đang được phân công cho:</Label>
-                        <div className="space-y-2">
-                            {channel.assignedTo.map((assignment) => (
-                                <div key={assignment.user._id} className="flex items-center justify-between p-2 bg-secondary/20 rounded-lg">
-                                    <div className="flex items-center gap-2">
-                                        <Avatar className="h-6 w-6">
-                                            <AvatarFallback className="text-xs">
-                                                {assignment.user.name.substring(0, 2).toUpperCase()}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="text-sm font-medium">{assignment.user.name}</p>
-                                            <p className="text-xs text-muted-foreground">{assignment.user.email}</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-xs text-muted-foreground">
-                                        <Calendar className="h-3 w-3 inline mr-1" />
-                                        {new Date(assignment.assignedAt).toLocaleDateString('vi-VN')}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <Separator className="my-4" />
-                    </div>
-                )}
-
-                {/* Filters */}
+                {/* Search & Filter */}
                 <div className="flex gap-2">
-                    <div className="flex-1">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                                placeholder="Tìm editor theo tên hoặc email..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10"
-                            />
-                        </div>
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Tìm kiếm editor..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-9"
+                        />
                     </div>
-                    <Select value={filterTeam} onValueChange={setFilterTeam}>
-                        <SelectTrigger className="w-48">
-                            <SelectValue placeholder="Lọc theo chi nhánh" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Tất cả chi nhánh</SelectItem>
-                            {branches.map(branch => (
-                                <SelectItem key={branch} value={branch || 'no-branch'}>
-                                    {branch || 'Chưa có chi nhánh'}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
                 </div>
 
-                {/* Editor List */}
-                <ScrollArea className="h-64 pr-4">
+                {/* Editors List */}
+                <ScrollArea className="h-[300px] border rounded-md">
                     {loading ? (
-                        <div className="flex items-center justify-center h-32">
-                            <p className="text-muted-foreground">Đang tải...</p>
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                            Đang tải danh sách editors...
                         </div>
                     ) : filteredEditors.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-32">
-                            <Users className="h-8 w-8 text-muted-foreground mb-2" />
-                            <p className="text-muted-foreground">Không tìm thấy editor nào</p>
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                            {searchQuery ? "Không tìm thấy editor nào" : "Không có editor nào trong chi nhánh này"}
                         </div>
                     ) : (
-                        <div className="space-y-2">
+                        <div className="p-2 space-y-1">
                             {filteredEditors.map((editor) => {
                                 const isAssigned = selectedEditors.includes(editor._id)
-
                                 return (
                                     <div
                                         key={editor._id}
-                                        className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${isAssigned ? 'border-primary bg-primary/5' : 'border-border hover:bg-secondary/50'
-                                            }`}
+                                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 cursor-pointer transition-colors"
                                         onClick={() => {
                                             if (isAssigned) {
                                                 setSelectedEditors(selectedEditors.filter(id => id !== editor._id))
@@ -376,12 +306,12 @@ export function ChannelAssignment({ channel, isOpen, onClose, onUpdate }: Channe
                 </Alert>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>
+                    <Button variant="outline" onClick={onClose} disabled={saving}>
                         Hủy
                     </Button>
                     <Button
                         onClick={handleAssignment}
-                        disabled={saving}
+                        disabled={saving || loading}
                     >
                         {saving ? 'Đang lưu...' : 'Lưu phân công'}
                     </Button>
