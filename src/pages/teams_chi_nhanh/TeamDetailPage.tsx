@@ -1,21 +1,8 @@
-// src/pages/team-analytics/TeamAnalyticsPage.tsx - COMPLETE WITH SIDEBAR
+// src/pages/team-analytics/TeamAnalyticsPage.tsx - COMPLETE WITH SIDEBAR AND SCROLLABLE TABS
 
 import * as React from "react";
 import { useParams } from "react-router-dom";
 import { ContentHeader } from "@/pages/components/ContentHeader";
-// Skeleton cho ContentHeader
-function SkeletonContentHeader() {
-    return (
-        <div className="px-6 pt-6 pb-2 border-b bg-background">
-            <div className="flex items-center gap-2 mb-2">
-                <Skeleton className="h-5 w-24 rounded" />
-                <Skeleton className="h-5 w-5 rounded-full" />
-                <Skeleton className="h-5 w-16 rounded" />
-            </div>
-            <Skeleton className="h-4 w-40 rounded" />
-        </div>
-    );
-}
 import { ChannelSidebar } from "@/pages/components/ChannelSidebar";
 import { ChannelDetailView } from "@/pages/channel-analytics/ChannelDetailView";
 import type { Channel } from "@/types/channel.types";
@@ -38,6 +25,20 @@ import {
     TeamChannelsTab,
     TeamRetentionTab
 } from "./components";
+
+// Skeleton cho ContentHeader
+function SkeletonContentHeader() {
+    return (
+        <div className="px-6 pt-6 pb-2 border-b bg-background">
+            <div className="flex items-center gap-2 mb-2">
+                <Skeleton className="h-5 w-24 rounded" />
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <Skeleton className="h-5 w-16 rounded" />
+            </div>
+            <Skeleton className="h-4 w-40 rounded" />
+        </div>
+    );
+}
 
 export default function TeamAnalyticsPage() {
     const { teamId } = useParams();
@@ -285,32 +286,34 @@ export default function TeamAnalyticsPage() {
                             ) : (
                                 // Analytics Tabs
                                 <Tabs defaultValue="overview" className="space-y-6">
-                                    <TabsList className="inline-flex h-auto w-full items-center justify-start rounded-lg bg-muted p-1 gap-1 flex-wrap overflow-x-auto">
-                                        <TabsTrigger value="overview" className="flex-1 min-w-[120px] rounded-md px-3 py-2.5">
-                                            📊 Tổng Quan
-                                        </TabsTrigger>
-                                        <TabsTrigger value="engagement" className="flex-1 min-w-[120px] rounded-md px-3 py-2.5">
-                                            ❤️ Tương Tác
-                                        </TabsTrigger>
-                                        <TabsTrigger value="revenue" className="flex-1 min-w-[120px] rounded-md px-3 py-2.5">
-                                            💰 Doanh Thu
-                                        </TabsTrigger>
-                                        <TabsTrigger value="traffic" className="flex-1 min-w-[120px] rounded-md px-3 py-2.5">
-                                            📡 Traffic
-                                        </TabsTrigger>
-                                        <TabsTrigger value="devices" className="flex-1 min-w-[120px] rounded-md px-3 py-2.5">
-                                            📱 Thiết Bị
-                                        </TabsTrigger>
-                                        <TabsTrigger value="videos" className="flex-1 min-w-[120px] rounded-md px-3 py-2.5">
-                                            🎬 Videos
-                                        </TabsTrigger>
-                                        <TabsTrigger value="channels" className="flex-1 min-w-[120px] rounded-md px-3 py-2.5">
-                                            📺 Kênh
-                                        </TabsTrigger>
-                                        <TabsTrigger value="retention" className="flex-1 min-w-[120px] rounded-md px-3 py-2.5">
-                                            📈 Retention
-                                        </TabsTrigger>
-                                    </TabsList>
+                                    <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+                                        <TabsList className="inline-flex h-auto items-center justify-start rounded-lg bg-muted p-1 gap-1 min-w-max">
+                                            <TabsTrigger value="overview" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                                📊 Tổng Quan
+                                            </TabsTrigger>
+                                            <TabsTrigger value="engagement" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                                ❤️ Tương Tác
+                                            </TabsTrigger>
+                                            <TabsTrigger value="revenue" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                                💰 Doanh Thu
+                                            </TabsTrigger>
+                                            <TabsTrigger value="traffic" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                                📡 Traffic
+                                            </TabsTrigger>
+                                            <TabsTrigger value="devices" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                                📱 Thiết Bị
+                                            </TabsTrigger>
+                                            <TabsTrigger value="videos" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                                🎬 Videos
+                                            </TabsTrigger>
+                                            <TabsTrigger value="channels" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                                📺 Kênh
+                                            </TabsTrigger>
+                                            <TabsTrigger value="retention" className="whitespace-nowrap rounded-md px-3 py-2.5">
+                                                📈 Retention
+                                            </TabsTrigger>
+                                        </TabsList>
+                                    </div>
 
                                     <TabsContent value="overview">
                                         <TeamOverviewTab analytics={analytics} />

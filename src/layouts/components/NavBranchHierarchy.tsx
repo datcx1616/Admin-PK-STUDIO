@@ -1,5 +1,5 @@
 // src/layouts/components/NavBranchHierarchy.tsx
-// VERSION 12: FINAL - Added spacing between items
+// VERSION 14: COMPLETE - Fixed dropdown menu staying open when opening modals
 import * as React from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { ChevronRight, Building2, Users2, User2, Plus, Pencil, Trash2, Users, Youtube } from "lucide-react"
@@ -135,6 +135,9 @@ export function NavBranchHierarchy() {
     const [expandedTeams, setExpandedTeams] = React.useState<Set<string>>(new Set())
     const [showCreateModal, setShowCreateModal] = React.useState(false)
     const [showEditModal, setShowEditModal] = React.useState(false)
+    const [openBranchDropdown, setOpenBranchDropdown] = React.useState<string | null>(null)
+    const [openTeamDropdown, setOpenTeamDropdown] = React.useState<string | null>(null)
+    const [openMemberDropdown, setOpenMemberDropdown] = React.useState<string | null>(null)
     const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
     const [showCreateTeamModal, setShowCreateTeamModal] = React.useState(false)
     const [showEditTeamModal, setShowEditTeamModal] = React.useState(false)
@@ -394,7 +397,10 @@ export function NavBranchHierarchy() {
 
                                         <span className="flex-1 wrap-break-word pr-6">{branch.name}</span>
 
-                                        <DropdownMenu>
+                                        <DropdownMenu
+                                            open={openBranchDropdown === branch._id}
+                                            onOpenChange={(open) => setOpenBranchDropdown(open ? branch._id : null)}
+                                        >
                                             <DropdownMenuTrigger asChild>
                                                 <span
                                                     role="button"
@@ -402,6 +408,7 @@ export function NavBranchHierarchy() {
                                                     onClick={(e) => {
                                                         e.stopPropagation()
                                                         e.preventDefault()
+                                                        setOpenBranchDropdown(branch._id)
                                                     }}
                                                     className={cn(
                                                         "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
@@ -422,11 +429,11 @@ export function NavBranchHierarchy() {
                                             <DropdownMenuContent align="end" className="w-48">
                                                 <DropdownMenuItem
                                                     onClick={(e) => {
-                                                        // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
-                                                        e.stopPropagation();
-                                                        e.preventDefault();
-                                                        setSelectedBranch(branch);
-                                                        setShowCreateTeamModal(true);
+                                                        e.stopPropagation()
+                                                        e.preventDefault()
+                                                        setOpenBranchDropdown(null)
+                                                        setSelectedBranch(branch)
+                                                        setShowCreateTeamModal(true)
                                                     }}
                                                 >
                                                     <Plus className="mr-2 h-4 w-4" />
@@ -434,11 +441,13 @@ export function NavBranchHierarchy() {
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     onClick={(e) => {
-                                                        // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
-                                                        e.stopPropagation();
-                                                        e.preventDefault();
-                                                        setSelectedBranch(branch);
-                                                        setShowEditModal(true);
+                                                        e.stopPropagation()
+                                                        e.preventDefault()
+                                                        setOpenBranchDropdown(null)
+                                                        setTimeout(() => {
+                                                            setSelectedBranch(branch)
+                                                            setShowEditModal(true)
+                                                        }, 0)
                                                     }}
                                                 >
                                                     <Pencil className="mr-2 h-4 w-4" />
@@ -447,11 +456,11 @@ export function NavBranchHierarchy() {
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem
                                                     onClick={(e) => {
-                                                        // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
-                                                        e.stopPropagation();
-                                                        e.preventDefault();
-                                                        setSelectedBranch(branch);
-                                                        setShowDeleteDialog(true);
+                                                        e.stopPropagation()
+                                                        e.preventDefault()
+                                                        setOpenBranchDropdown(null)
+                                                        setSelectedBranch(branch)
+                                                        setShowDeleteDialog(true)
                                                     }}
                                                     className="text-red-600 focus:text-red-600"
                                                 >
@@ -510,14 +519,17 @@ export function NavBranchHierarchy() {
 
                                                                     <span className="flex-1 truncate pr-6">{team.name}</span>
 
-                                                                    <DropdownMenu>
+                                                                    <DropdownMenu
+                                                                        open={openTeamDropdown === team._id}
+                                                                        onOpenChange={(open) => setOpenTeamDropdown(open ? team._id : null)}
+                                                                    >
                                                                         <DropdownMenuTrigger asChild>
-                                                                            <span
-                                                                                role="button"
-                                                                                tabIndex={0}
+                                                                            <button
+                                                                                type="button"
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation()
                                                                                     e.preventDefault()
+                                                                                    setOpenTeamDropdown(team._id)
                                                                                 }}
                                                                                 className={cn(
                                                                                     "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
@@ -533,14 +545,14 @@ export function NavBranchHierarchy() {
                                                                                     <circle cx="8" cy="8" r="1.5" />
                                                                                     <circle cx="8" cy="13" r="1.5" />
                                                                                 </svg>
-                                                                            </span>
+                                                                            </button>
                                                                         </DropdownMenuTrigger>
                                                                         <DropdownMenuContent align="end" className="w-48">
                                                                             <DropdownMenuItem
                                                                                 onClick={async (e) => {
-                                                                                    // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
-                                                                                    e.stopPropagation();
-                                                                                    e.preventDefault();
+                                                                                    e.stopPropagation()
+                                                                                    e.preventDefault()
+                                                                                    setOpenTeamDropdown(null)
                                                                                     try {
                                                                                         const fullTeam = await teamsAPI.getById(team._id)
                                                                                         setSelectedTeam(fullTeam)
@@ -555,8 +567,9 @@ export function NavBranchHierarchy() {
                                                                             </DropdownMenuItem>
                                                                             <DropdownMenuItem
                                                                                 onClick={async (e) => {
-                                                                                    e.stopPropagation();
-                                                                                    e.preventDefault();
+                                                                                    e.stopPropagation()
+                                                                                    e.preventDefault()
+                                                                                    setOpenTeamDropdown(null)
                                                                                     try {
                                                                                         const fullTeam = await teamsAPI.getById(team._id)
                                                                                         setSelectedTeam(fullTeam)
@@ -571,9 +584,9 @@ export function NavBranchHierarchy() {
                                                                             </DropdownMenuItem>
                                                                             <DropdownMenuItem
                                                                                 onClick={async (e) => {
-                                                                                    // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
-                                                                                    e.stopPropagation();
-                                                                                    e.preventDefault();
+                                                                                    e.stopPropagation()
+                                                                                    e.preventDefault()
+                                                                                    setOpenTeamDropdown(null)
                                                                                     try {
                                                                                         const fullTeam = await teamsAPI.getById(team._id)
                                                                                         setSelectedTeam(fullTeam)
@@ -589,9 +602,9 @@ export function NavBranchHierarchy() {
                                                                             <DropdownMenuSeparator />
                                                                             <DropdownMenuItem
                                                                                 onClick={async (e) => {
-                                                                                    // Ngăn sự kiện click lan ra ngoài để không trigger chuyển trang
-                                                                                    e.stopPropagation();
-                                                                                    e.preventDefault();
+                                                                                    e.stopPropagation()
+                                                                                    e.preventDefault()
+                                                                                    setOpenTeamDropdown(null)
                                                                                     try {
                                                                                         const fullTeam = await teamsAPI.getById(team._id)
                                                                                         setSelectedTeam(fullTeam)
@@ -631,14 +644,17 @@ export function NavBranchHierarchy() {
                                                                                         {member.name}
                                                                                     </span>
 
-                                                                                    <DropdownMenu>
+                                                                                    <DropdownMenu
+                                                                                        open={openMemberDropdown === member._id}
+                                                                                        onOpenChange={(open) => setOpenMemberDropdown(open ? member._id : null)}
+                                                                                    >
                                                                                         <DropdownMenuTrigger asChild>
-                                                                                            <span
-                                                                                                role="button"
-                                                                                                tabIndex={0}
+                                                                                            <button
+                                                                                                type="button"
                                                                                                 onClick={(e) => {
                                                                                                     e.stopPropagation()
                                                                                                     e.preventDefault()
+                                                                                                    setOpenMemberDropdown(member._id)
                                                                                                 }}
                                                                                                 className={cn(
                                                                                                     "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
@@ -654,11 +670,14 @@ export function NavBranchHierarchy() {
                                                                                                     <circle cx="8" cy="8" r="1.5" />
                                                                                                     <circle cx="8" cy="13" r="1.5" />
                                                                                                 </svg>
-                                                                                            </span>
+                                                                                            </button>
                                                                                         </DropdownMenuTrigger>
                                                                                         <DropdownMenuContent align="end" className="w-48">
                                                                                             <DropdownMenuItem
-                                                                                                onClick={() => {
+                                                                                                onClick={(e) => {
+                                                                                                    e.stopPropagation()
+                                                                                                    e.preventDefault()
+                                                                                                    setOpenMemberDropdown(null)
                                                                                                     console.log('Assign channel to member:', member._id)
                                                                                                 }}
                                                                                             >
@@ -667,7 +686,10 @@ export function NavBranchHierarchy() {
                                                                                             </DropdownMenuItem>
                                                                                             <DropdownMenuSeparator />
                                                                                             <DropdownMenuItem
-                                                                                                onClick={() => {
+                                                                                                onClick={(e) => {
+                                                                                                    e.stopPropagation()
+                                                                                                    e.preventDefault()
+                                                                                                    setOpenMemberDropdown(null)
                                                                                                     console.log('Delete member:', member._id)
                                                                                                 }}
                                                                                                 className="text-red-600 focus:text-red-600"
@@ -768,7 +790,6 @@ export function NavBranchHierarchy() {
                 />
             )}
 
-
             {selectedTeam && (
                 <ManageMembersModal
                     open={showManageMembersModal}
@@ -785,7 +806,6 @@ export function NavBranchHierarchy() {
                 />
             )}
 
-            {/* Dialog phân công editor cho team cấp hai */}
             {selectedTeam && showAssignEditorDialog && (
                 <AssignEditorDialog
                     channel={{
@@ -800,28 +820,11 @@ export function NavBranchHierarchy() {
                         videoCount: 0,
                         isConnected: false,
                         isActive: selectedTeam.isActive ?? true,
-                        team: {
-                            _id: selectedTeam._id,
-                            name: selectedTeam.name,
-                            branch: selectedTeam.branch ? {
-                                _id: selectedTeam.branch._id,
-                                name: selectedTeam.branch.name,
-                                code: selectedTeam.branch.code || ''
-                            } : undefined
-                        },
-                        assignedEditors: selectedTeam.members || [],
-                        createdAt: selectedTeam.createdAt || '',
-                        updatedAt: selectedTeam.updatedAt || '',
                     }}
-                    isOpen={showAssignEditorDialog}
+                    open={showAssignEditorDialog}
                     onClose={() => {
-                        setShowAssignEditorDialog(false);
-                        setSelectedTeam(null);
-                    }}
-                    onSuccess={() => {
-                        setShowAssignEditorDialog(false);
-                        setSelectedTeam(null);
-                        fetchData();
+                        setShowAssignEditorDialog(false)
+                        setSelectedTeam(null)
                     }}
                 />
             )}
@@ -829,20 +832,14 @@ export function NavBranchHierarchy() {
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Xác Nhận Xóa Chi Nhánh</AlertDialogTitle>
+                        <AlertDialogTitle>Xác nhận xóa chi nhánh</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Bạn có chắc chắn muốn xóa chi nhánh <strong>{selectedBranch?.name}</strong>?
-                            Hành động này không thể hoàn tác.
+                            Bạn có chắc chắn muốn xóa chi nhánh "{selectedBranch?.name}"? Hành động này không thể hoàn tác.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setSelectedBranch(null)}>
-                            Hủy
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDelete}
-                            className="bg-red-600 hover:bg-red-700"
-                        >
+                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
                             Xóa
                         </AlertDialogAction>
                     </AlertDialogFooter>
