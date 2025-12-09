@@ -477,8 +477,6 @@ export function NavBranchHierarchy() {
                                         <SidebarMenuSub className="p-0 m-0 mt-1 border-none space-y-1">
                                             {(branch.teams ?? []).map((team) => {
                                                 const isTeamExpanded = expandedTeams.has(team._id)
-                                                const hasMembers = team.members && team.members.length > 0
-
                                                 return (
                                                     <Collapsible
                                                         key={team._id}
@@ -490,7 +488,6 @@ export function NavBranchHierarchy() {
                                                                 <SidebarMenuSubButton
                                                                     className={cn(
                                                                         "group relative w-full cursor-pointer rounded-md py-1.5 pl-6 pr-2",
-                                                                        !hasMembers && "cursor-default",
                                                                         location.pathname === `/teams/${team._id}`
                                                                             ? "bg-sidebar-accent text-sidebar-accent-foreground"
                                                                             : "hover:bg-[#EAEBEE]"
@@ -501,24 +498,8 @@ export function NavBranchHierarchy() {
                                                                         }
                                                                     }}
                                                                 >
-                                                                    {hasMembers ? (
-                                                                        <div className="h-3.5 w-3.5 shrink-0 relative">
-                                                                            <Users2 className={cn(
-                                                                                "h-3.5 w-3.5 absolute inset-0 transition-opacity",
-                                                                                "group-hover:opacity-0"
-                                                                            )} />
-                                                                            <ChevronRight className={cn(
-                                                                                "h-3.5 w-3.5 absolute inset-0 transition-all",
-                                                                                "opacity-0 group-hover:opacity-100",
-                                                                                isTeamExpanded && "rotate-90 opacity-100"
-                                                                            )} />
-                                                                        </div>
-                                                                    ) : (
-                                                                        <Users2 className="h-3.5 w-3.5 shrink-0" />
-                                                                    )}
-
+                                                                    <Users2 className="h-3.5 w-3.5 shrink-0" />
                                                                     <span className="flex-1 truncate pr-6">{team.name}</span>
-
                                                                     <DropdownMenu
                                                                         open={openTeamDropdown === team._id}
                                                                         onOpenChange={(open) => setOpenTeamDropdown(open ? team._id : null)}
@@ -566,21 +547,16 @@ export function NavBranchHierarchy() {
                                                                                 <span>Quản Lý Thành Viên</span>
                                                                             </DropdownMenuItem>
                                                                             <DropdownMenuItem
-                                                                                onClick={async (e) => {
+                                                                                onClick={(e) => {
                                                                                     e.stopPropagation()
                                                                                     e.preventDefault()
                                                                                     setOpenTeamDropdown(null)
-                                                                                    try {
-                                                                                        const fullTeam = await teamsAPI.getById(team._id)
-                                                                                        setSelectedTeam(fullTeam)
-                                                                                        setShowAssignEditorsDialog(true)
-                                                                                    } catch (error) {
-                                                                                        console.error('Error fetching team:', error)
-                                                                                    }
+                                                                                    // Chức năng gán kênh cho team
+                                                                                    console.log('Assign channel to team:', team._id)
                                                                                 }}
                                                                             >
-                                                                                <User2 className="mr-2 h-4 w-4" />
-                                                                                <span>Phân Công Editor</span>
+                                                                                <Youtube className="mr-2 h-4 w-4" />
+                                                                                <span>Gán Kênh</span>
                                                                             </DropdownMenuItem>
                                                                             <DropdownMenuItem
                                                                                 onClick={async (e) => {
@@ -622,89 +598,6 @@ export function NavBranchHierarchy() {
                                                                     </DropdownMenu>
                                                                 </SidebarMenuSubButton>
                                                             </CollapsibleTrigger>
-
-                                                            {hasMembers && (
-                                                                <CollapsibleContent className="[&>div]:border-none">
-                                                                    <SidebarMenuSub className="p-0 m-0 mt-1 border-none space-y-1">
-                                                                        {(team.members ?? []).map((member) => (
-                                                                            <SidebarMenuSubItem key={member._id} className="p-0">
-                                                                                <SidebarMenuSubButton
-                                                                                    className={cn(
-                                                                                        "group relative w-full cursor-pointer rounded-md py-1.5 pl-10 pr-2",
-                                                                                        location.pathname === `/users/${member._id}`
-                                                                                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                                                                            : "hover:bg-[#EAEBEE]"
-                                                                                    )}
-                                                                                >
-                                                                                    <div className="h-3.5 w-3.5 shrink-0 relative">
-                                                                                        <User2 className="h-3.5 w-3.5 absolute inset-0" />
-                                                                                    </div>
-
-                                                                                    <span className="truncate text-xs pr-6">
-                                                                                        {member.name}
-                                                                                    </span>
-
-                                                                                    <DropdownMenu
-                                                                                        open={openMemberDropdown === member._id}
-                                                                                        onOpenChange={(open) => setOpenMemberDropdown(open ? member._id : null)}
-                                                                                    >
-                                                                                        <DropdownMenuTrigger asChild>
-                                                                                            <button
-                                                                                                type="button"
-                                                                                                onClick={(e) => {
-                                                                                                    e.stopPropagation()
-                                                                                                    e.preventDefault()
-                                                                                                    setOpenMemberDropdown(member._id)
-                                                                                                }}
-                                                                                                className={cn(
-                                                                                                    "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
-                                                                                                    "hover:bg-[#EAEBEE]"
-                                                                                                )}
-                                                                                            >
-                                                                                                <svg
-                                                                                                    className="h-3.5 w-3.5"
-                                                                                                    fill="currentColor"
-                                                                                                    viewBox="0 0 16 16"
-                                                                                                >
-                                                                                                    <circle cx="8" cy="3" r="1.5" />
-                                                                                                    <circle cx="8" cy="8" r="1.5" />
-                                                                                                    <circle cx="8" cy="13" r="1.5" />
-                                                                                                </svg>
-                                                                                            </button>
-                                                                                        </DropdownMenuTrigger>
-                                                                                        <DropdownMenuContent align="end" className="w-48">
-                                                                                            <DropdownMenuItem
-                                                                                                onClick={(e) => {
-                                                                                                    e.stopPropagation()
-                                                                                                    e.preventDefault()
-                                                                                                    setOpenMemberDropdown(null)
-                                                                                                    console.log('Assign channel to member:', member._id)
-                                                                                                }}
-                                                                                            >
-                                                                                                <Youtube className="mr-2 h-4 w-4" />
-                                                                                                <span>Gán Kênh</span>
-                                                                                            </DropdownMenuItem>
-                                                                                            <DropdownMenuSeparator />
-                                                                                            <DropdownMenuItem
-                                                                                                onClick={(e) => {
-                                                                                                    e.stopPropagation()
-                                                                                                    e.preventDefault()
-                                                                                                    setOpenMemberDropdown(null)
-                                                                                                    console.log('Delete member:', member._id)
-                                                                                                }}
-                                                                                                className="text-red-600 focus:text-red-600"
-                                                                                            >
-                                                                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                                                                <span>Xóa</span>
-                                                                                            </DropdownMenuItem>
-                                                                                        </DropdownMenuContent>
-                                                                                    </DropdownMenu>
-                                                                                </SidebarMenuSubButton>
-                                                                            </SidebarMenuSubItem>
-                                                                        ))}
-                                                                    </SidebarMenuSub>
-                                                                </CollapsibleContent>
-                                                            )}
                                                         </SidebarMenuSubItem>
                                                     </Collapsible>
                                                 )
