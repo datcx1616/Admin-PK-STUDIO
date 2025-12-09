@@ -1,3 +1,4 @@
+// src/layouts/components/app-sidebar.tsx - UNIFORM #F7F7F7 BACKGROUND
 "use client"
 
 import * as React from "react"
@@ -14,8 +15,6 @@ import {
 import {
     Youtube,
     Users,
-    Search,
-    Bell,
 } from "lucide-react";
 
 import {
@@ -29,11 +28,9 @@ import {
 } from "@/components/ui/sidebar"
 import { NavBranchHierarchy } from "@/layouts/components/NavBranchHierarchy"
 import { NavMain } from "@/layouts/components/nav-main"
-// import { NavSecondary } from "@/layouts/components/nav-secondary"
 import { NavUser } from "@/layouts/components/nav-user"
 import { Button } from "@/components/ui/button"
 
-// Helper to get user from storage
 const getUser = () => {
     try {
         const userStr = localStorage.getItem("user");
@@ -46,7 +43,6 @@ const getUser = () => {
 const getNavItems = (role: string) => {
     const items = [];
 
-    // Dashboard Overview
     if (role !== 'editor') {
         items.push({
             title: "Tổng Quan",
@@ -69,7 +65,6 @@ const getNavItems = (role: string) => {
         });
     }
 
-    // Channel management for non-editors
     if (['admin', 'director', 'branch_director', 'manager'].includes(role)) {
         items.push({
             title: "Quản Lý Kênh",
@@ -78,7 +73,6 @@ const getNavItems = (role: string) => {
         });
     }
 
-    // Teams management for non-editors
     if (role !== 'editor') {
         items.push({
             title: "Quản Lý Nhóm",
@@ -87,7 +81,6 @@ const getNavItems = (role: string) => {
         });
     }
 
-    // Editor specific items
     if (role === 'editor') {
         items.push({
             title: "Kênh Của Tôi",
@@ -101,7 +94,6 @@ const getNavItems = (role: string) => {
         });
     }
 
-    // Analytics for everyone
     items.push({
         title: "Phân Tích",
         url: "/analytics",
@@ -130,33 +122,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         if (currentUser && currentUser.role) {
             setNavMain(getNavItems(currentUser.role));
         } else {
-            // Default fallback
             setNavMain(getNavItems('guest'));
         }
     }, []);
 
-    // const navSecondary = [
-    //     { title: "Cài đặt", url: "#", icon: IconSettings },
-    //     { title: "Trợ giúp", url: "#", icon: IconHelp },
-    //     { title: "Tìm kiếm", url: "#", icon: IconSearch },
-    // ];
-
     const userData = {
         name: user?.name || "User",
         email: user?.email || "user@example.com",
-        avatar: "/avatars/shadcn.jpg", // Placeholder
+        avatar: "/avatars/shadcn.jpg",
     };
 
     const homeRoute = user?.role === 'editor' ? '/channels/my' : '/dashboard';
 
     return (
-        <Sidebar collapsible="none" className="h-full flex flex-col" style={{ backgroundColor: '#F7F7F7' }} {...props}>
-            {/* Đưa khối người dùng lên Header */}
-            <SidebarHeader className="border-b-0 p-0">
+        <Sidebar
+            collapsible="none"
+            className="h-full flex flex-col"
+            style={{ backgroundColor: '#F7F7F7' }}
+            {...props}
+        >
+            {/* Header với user info - background #F7F7F7 */}
+            <SidebarHeader className="border-b-0 p-0" style={{ backgroundColor: '#F7F7F7' }}>
                 <NavUser user={userData} />
             </SidebarHeader>
 
-            <SidebarContent className="p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {/* Content với nav items - background #F7F7F7 */}
+            <SidebarContent
+                className="p-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                style={{ backgroundColor: '#F7F7F7' }}
+            >
                 <NavMain
                     items={navMain}
                     itemClassName="hover:bg-[#EAEBEE]"
@@ -164,13 +158,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavBranchHierarchy />
             </SidebarContent>
 
-            {/* Đưa khối logo/tiêu đề xuống Footer */}
-            <SidebarFooter className="p-0">
+            {/* Footer với logo - background #F7F7F7 */}
+            <SidebarFooter className="p-0" style={{ backgroundColor: '#F7F7F7' }}>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             asChild
-                            className="bg-white hover:bg-gray-50"
+                            className="bg-[#F7F7F7] hover:bg-[#EAEBEE]"
+                            style={{ backgroundColor: '#F7F7F7' }}
                         >
                             <Button
                                 className="w-full gap-3 h-auto bg-transparent hover:bg-transparent justify-start p-0"
@@ -187,10 +182,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                         </span>
                                         <div className="flex-1" />
                                         <div className="flex items-center gap-2">
-                                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-gray-300 text-gray-500 text-lg bg-white">
+                                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-gray-300 text-gray-500 text-lg bg-[#F7F7F7]">
                                                 ?
                                             </span>
-                                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-gray-300 text-lg bg-white">
+                                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-gray-300 text-lg bg-[#F7F7F7]">
                                                 <span role='img' aria-label='smile'>😊</span>
                                             </span>
                                         </div>
