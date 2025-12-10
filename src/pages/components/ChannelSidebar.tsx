@@ -6,7 +6,7 @@
  */
 
 import * as React from "react"
-import { ChevronRight, ChevronLeft, Youtube } from "lucide-react"
+import { ChevronRight, ChevronLeft, Youtube, Plus, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -254,18 +254,31 @@ export function ChannelSidebar({
                             </div>
                         </ScrollArea>
 
-                        {/* Kết nối kênh Button */}
-                        <div className="pb-20 pt-4 border-t border-gray-200">
-                            <Button
-                                variant="outline"
-                                className="w-full h-18 text-xl"
+                        {/* Kết nối kênh Button - COMPACT */}
+                        <div className="flex justify-center px-3 py-3 pb-18 border-t border-gray-200">
+                            <button
                                 onClick={() => {
                                     // TODO: Add connect channel logic
                                     console.log('Kết nối kênh clicked');
                                 }}
+                                className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-red-500 to-rose-500 transition-all duration-300 hover:shadow-md hover:shadow-red-500/20 active:scale-[0.98]"
                             >
-                                Kết nối kênh
-                            </Button>
+                                <div className="relative flex items-center justify-center gap-1.5 px-3 py-2 transition-all duration-300">
+                                    {/* Shine effect */}
+                                    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+
+                                    {/* Plus icon */}
+                                    <Plus className="h-3.5 w-3.5 text-white transition-transform duration-300 group-hover:rotate-90" />
+
+                                    {/* Text */}
+                                    <span className="relative text-xs font-medium text-white">
+                                        Kết nối kênh
+                                    </span>
+
+                                    {/* Lightning icon */}
+                                    <Zap className="h-3 w-3 text-yellow-300 group-hover:drop-shadow-[0_0_4px_rgba(253,224,71,0.8)]" />
+                                </div>
+                            </button>
                         </div>
                     </div>
                 ) : (
