@@ -406,7 +406,7 @@ export function NavBranchHierarchy() {
                                         {branch.name}
                                     </span>
 
-                                    {/* 3. THREE DOTS MENU - Unchanged */}
+                                    {/* 3. THRE - Unchanged */}
                                     <DropdownMenu
                                         open={openBranchDropdown === branch._id}
                                         onOpenChange={(open) => setOpenBranchDropdown(open ? branch._id : null)}
