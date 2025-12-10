@@ -24,16 +24,7 @@ import { LocationTab } from "./components/LocationTab";
 import { SharingTab } from "./components/SharingTab";
 import { ChannelsTab } from "./components/ChannelsTab";
 import {
-    BarChart3,
-    Activity,
-    DollarSign,
     Users,
-    Radio,
-    Monitor,
-    Video,
-    MapPin,
-    Share2,
-    Youtube,
     AlertCircle,
     Home,
     Building2,
@@ -182,100 +173,94 @@ export default function BranchAnalyticsPage() {
                                 <Tabs defaultValue="overview" className="space-y-6">
                                     {/* TABS LIST - Modern Glass Morphism Style */}
                                     <div className="tabs-sticky-container">
+
                                         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                                            <TabsList className="inline-flex h-auto w-full items-center justify-start gap-1 p-1.5 bg-gradient-to-r from-slate-100 via-gray-50 to-slate-100 rounded-xl border border-gray-200/60 shadow-sm">
+                                            <TabsList className="inline-flex h-auto w-full items-center justify-start gap-1 p-1.5 rounded-xl">
+
                                                 {/* Overview Tab */}
                                                 <TabsTrigger
                                                     value="overview"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-blue-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-md data-[state=active]:shadow-blue-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <BarChart3 className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-blue-500" />
-                                                    <span>Tổng Quan</span>
+                                                    Tổng Quan
                                                 </TabsTrigger>
 
                                                 {/* Engagement Tab */}
                                                 <TabsTrigger
                                                     value="engagement"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-pink-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-pink-600 data-[state=active]:shadow-md data-[state=active]:shadow-pink-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <Activity className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-pink-500" />
-                                                    <span>Tương Tác</span>
+                                                    Tương Tác
                                                 </TabsTrigger>
 
                                                 {/* Revenue Tab */}
                                                 <TabsTrigger
                                                     value="revenue"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-emerald-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md data-[state=active]:shadow-emerald-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <DollarSign className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-emerald-500" />
-                                                    <span>Doanh Thu</span>
+                                                    Doanh Thu
                                                 </TabsTrigger>
 
                                                 {/* Audience Tab */}
                                                 <TabsTrigger
                                                     value="audience"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-violet-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-violet-600 data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <Users className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-violet-500" />
-                                                    <span>Khán Giả</span>
+                                                    Khán Giả
                                                 </TabsTrigger>
 
                                                 {/* Traffic Tab */}
                                                 <TabsTrigger
                                                     value="traffic"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-indigo-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md data-[state=active]:shadow-indigo-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <Radio className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-indigo-500" />
-                                                    <span>Traffic</span>
+                                                    Traffic
                                                 </TabsTrigger>
 
                                                 {/* Devices Tab */}
                                                 <TabsTrigger
                                                     value="devices"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-amber-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-md data-[state=active]:shadow-amber-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <Monitor className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-amber-500" />
-                                                    <span>Thiết Bị</span>
+                                                    Thiết Bị
                                                 </TabsTrigger>
 
                                                 {/* Content Tab */}
                                                 <TabsTrigger
                                                     value="content"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-red-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-red-600 data-[state=active]:shadow-md data-[state=active]:shadow-red-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <Video className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-red-500" />
-                                                    <span>Nội Dung</span>
+                                                    Nội Dung
                                                 </TabsTrigger>
 
                                                 {/* Location Tab */}
                                                 <TabsTrigger
                                                     value="location"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-purple-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-md data-[state=active]:shadow-purple-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <MapPin className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-purple-500" />
-                                                    <span>Vị Trí</span>
+                                                    Vị Trí
                                                 </TabsTrigger>
 
                                                 {/* Sharing Tab */}
                                                 <TabsTrigger
                                                     value="sharing"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-cyan-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-md data-[state=active]:shadow-cyan-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <Share2 className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-cyan-500" />
-                                                    <span>Chia Sẻ</span>
+                                                    Chia Sẻ
                                                 </TabsTrigger>
 
                                                 {/* Channels Tab */}
                                                 <TabsTrigger
                                                     value="channels"
-                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-rose-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-rose-600 data-[state=active]:shadow-md data-[state=active]:shadow-rose-500/10"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
                                                 >
-                                                    <Youtube className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-rose-500" />
-                                                    <span>Kênh</span>
+                                                    Kênh
                                                 </TabsTrigger>
                                             </TabsList>
                                         </div>
                                     </div>
+
+
 
                                     {/* Branch Header - Below Tabs */}
                                     <BranchHeader

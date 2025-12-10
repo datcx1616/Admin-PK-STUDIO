@@ -6,12 +6,18 @@
  */
 
 import * as React from "react"
-import { ChevronRight, ChevronLeft, Youtube, Plus, Zap } from "lucide-react"
+import { ChevronRight, ChevronLeft, Youtube, Plus, File, Users, Link, BookOpen, Languages, Download } from "lucide-react"
+import {
+    DropdownMenu,
+    DropdownMenuTrigger,
+    DropdownMenuContent,
+    DropdownMenuItem
+} from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Checkbox } from "@/components/ui/checkbox"
+// import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { channelsAPI } from "@/lib/channels-api"
 import { branchesAPI } from "@/lib/branches-api"
@@ -38,7 +44,7 @@ export function ChannelSidebar({
     const [isOpen, setIsOpen] = React.useState(true);
     const [channels, setChannels] = React.useState<Channel[]>([]);
     const [loading, setLoading] = React.useState(true);
-    const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+    // const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
     const [activeChannelId, setActiveChannelId] = React.useState<string | null>(null);
 
     // Fetch channels
@@ -76,16 +82,16 @@ export function ChannelSidebar({
         fetchChannels();
     }, [branchId, teamId]);
 
-    const toggleSelect = (id: string, checked: boolean) => {
-        setSelectedIds(prev => {
-            const next = new Set(prev);
-            if (checked) next.add(id);
-            else next.delete(id);
-            return next;
-        });
-    };
+    // const toggleSelect = (id: string, checked: boolean) => {
+    //     setSelectedIds(prev => {
+    //         const next = new Set(prev);
+    //         if (checked) next.add(id);
+    //         else next.delete(id);
+    //         return next;
+    //     });
+    // };
 
-    const clearSelection = () => setSelectedIds(new Set());
+    // const clearSelection = () => setSelectedIds(new Set());
 
     const handleChannelClick = (channel: Channel) => {
         setActiveChannelId(channel._id);
@@ -139,24 +145,9 @@ export function ChannelSidebar({
                                 <h3 className="text-sm font-semibold text-gray-900">Danh sách kênh</h3>
                                 <p className="text-xs text-gray-500 mt-0.5">
                                     {loading ? 'Đang tải...' : `${channels.length} kênh`}
-                                    {selectedIds.size > 0 && (
-                                        <span className="ml-2 text-blue-600 font-medium">
-                                            ({selectedIds.size} đã chọn)
-                                        </span>
-                                    )}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                {selectedIds.size > 0 && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={clearSelection}
-                                        className="h-7 px-2 text-xs"
-                                    >
-                                        Clear
-                                    </Button>
-                                )}
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -195,7 +186,6 @@ export function ChannelSidebar({
                                 ) : (
                                     // Channel items - MINIMAL STYLE
                                     channels.map((channel) => {
-                                        const isSelected = selectedIds.has(channel._id);
                                         const isActive = activeChannelId === channel._id;
 
                                         return (
@@ -210,20 +200,9 @@ export function ChannelSidebar({
                                                 className={cn(
                                                     "flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors",
                                                     "hover:bg-gray-50",
-                                                    isActive && "bg-blue-50 border-l-2 border-blue-600",
-                                                    isSelected && !isActive && "bg-gray-50"
+                                                    isActive && "bg-blue-50 border-l-2 border-blue-600"
                                                 )}
                                             >
-                                                {/* Checkbox */}
-                                                <Checkbox
-                                                    checked={isSelected}
-                                                    onCheckedChange={(checked) =>
-                                                        toggleSelect(channel._id, !!checked)
-                                                    }
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    className="shrink-0"
-                                                />
-
                                                 {/* Channel Icon/Avatar */}
                                                 <Avatar className="h-6 w-6 shrink-0">
                                                     <AvatarImage
@@ -254,31 +233,48 @@ export function ChannelSidebar({
                             </div>
                         </ScrollArea>
 
-                        {/* Kết nối kênh Button - COMPACT */}
-                        <div className="flex justify-center px-3 py-3 pb-18 border-t border-gray-200">
-                            <button
-                                onClick={() => {
-                                    // TODO: Add connect channel logic
-                                    console.log('Kết nối kênh clicked');
-                                }}
-                                className="group relative overflow-hidden rounded-lg bg-gradient-to-r from-red-500 to-rose-500 transition-all duration-300 hover:shadow-md hover:shadow-red-500/20 active:scale-[0.98]"
-                            >
-                                <div className="relative flex items-center justify-center gap-1.5 px-3 py-2 transition-all duration-300">
-                                    {/* Shine effect */}
-                                    <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
-
-                                    {/* Plus icon */}
-                                    <Plus className="h-3.5 w-3.5 text-white transition-transform duration-300 group-hover:rotate-90" />
-
-                                    {/* Text */}
-                                    <span className="relative text-xs font-medium text-white">
-                                        Kết nối kênh
-                                    </span>
-
-                                    {/* Lightning icon */}
-                                    <Zap className="h-3 w-3 text-yellow-300 group-hover:drop-shadow-[0_0_4px_rgba(253,224,71,0.8)]" />
-                                </div>
-                            </button>
+                        {/* Nút Add new... style giống ảnh - shadcn/ui */}
+                        <div className="flex justify-center px-3 py-3 pb-18">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full flex items-center gap-2 justify-start px-2 py-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 font-normal border-none shadow-none"
+                                        style={{ boxShadow: "none" }}
+                                    >
+                                        <span className="flex items-center justify-center rounded-full border border-dashed border-gray-300 bg-transparent mr-2" style={{ width: 24, height: 24 }}>
+                                            <Plus className="h-4 w-4 text-gray-300" />
+                                        </span>
+                                        <span className="text-base">Kết nối...</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56">
+                                    <DropdownMenuItem className="flex gap-2 items-center cursor-pointer">
+                                        <File className="h-4 w-4 text-gray-500" />
+                                        <span>Page</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="flex gap-2 items-center cursor-pointer">
+                                        <Users className="h-4 w-4 text-gray-500" />
+                                        <span>Group</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="flex gap-2 items-center cursor-pointer">
+                                        <Link className="h-4 w-4 text-gray-500" />
+                                        <span>Link to...</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="flex gap-2 items-center cursor-pointer">
+                                        <BookOpen className="h-4 w-4 text-gray-500" />
+                                        <span>OpenAPI Reference</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="flex gap-2 items-center cursor-pointer">
+                                        <Languages className="h-4 w-4 text-gray-500" />
+                                        <span>Translation</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="flex gap-2 items-center cursor-pointer">
+                                        <Download className="h-4 w-4 text-gray-500" />
+                                        <span>Import pages</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
                 ) : (

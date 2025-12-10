@@ -9,8 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
     Eye, Users, DollarSign, Clock,
-    ThumbsUp, MessageCircle, Share2, Video,
-    BarChart3, Activity, Radio, Monitor
+    ThumbsUp, MessageCircle, Share2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -108,33 +107,26 @@ export function ChannelDetailView({ channel, onBack }: { channel: any, onBack?: 
                         {/* TABS LIST - Ở TRÊN CÙNG */}
                         <div className="tabs-sticky-container">
                             <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                                <TabsList className="inline-flex h-auto w-full items-center justify-start gap-1 p-1.5 bg-gradient-to-r from-slate-100 via-gray-50 to-slate-100 rounded-xl border border-gray-200/60 shadow-sm">
-                                    <TabsTrigger value="overview" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-blue-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-md data-[state=active]:shadow-blue-500/10">
-                                        <BarChart3 className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-blue-500" />
+                                <TabsList className="inline-flex h-auto w-full items-center justify-start gap-1 p-1.5 bg-gradient-to-r from-slate-100 via-gray-50 to-slate-100 rounded-xl shadow-sm">
+                                    <TabsTrigger value="overview" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3] ">
                                         <span>Tổng Quan</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="engagement" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-pink-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-pink-600 data-[state=active]:shadow-md data-[state=active]:shadow-pink-500/10">
-                                        <Activity className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-pink-500" />
+                                    <TabsTrigger value="engagement" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3]">
                                         <span>Tương Tác</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="revenue" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-emerald-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md data-[state=active]:shadow-emerald-500/10">
-                                        <DollarSign className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-emerald-500" />
+                                    <TabsTrigger value="revenue" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3]">
                                         <span>Doanh Thu</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="audience" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-violet-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-violet-600 data-[state=active]:shadow-md data-[state=active]:shadow-violet-500/10">
-                                        <Users className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-violet-500" />
+                                    <TabsTrigger value="audience" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3] ">
                                         <span>Khán Giả</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="content" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-amber-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-md data-[state=active]:shadow-amber-500/10">
-                                        <Video className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-amber-500" />
+                                    <TabsTrigger value="content" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3]">
                                         <span>Nội Dung</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="traffic" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-indigo-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md data-[state=active]:shadow-indigo-500/10">
-                                        <Radio className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-indigo-500" />
+                                    <TabsTrigger value="traffic" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3]">
                                         <span>Nguồn Truy Cập</span>
                                     </TabsTrigger>
-                                    <TabsTrigger value="devices" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-cyan-600 hover:bg-white/60 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-md data-[state=active]:shadow-cyan-500/10">
-                                        <Monitor className="h-3.5 w-3.5 transition-transform duration-300 group-hover:scale-110 group-data-[state=active]:text-cyan-500" />
+                                    <TabsTrigger value="devices" className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3]">
                                         <span>Thiết Bị</span>
                                     </TabsTrigger>
                                 </TabsList>
@@ -234,7 +226,7 @@ export function ChannelDetailView({ channel, onBack }: { channel: any, onBack?: 
                                 <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                         <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
-                                        <Activity className="h-4 w-4 text-muted-foreground" />
+                                        {/* icon removed */}
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold">
