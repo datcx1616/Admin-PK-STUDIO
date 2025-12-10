@@ -1,0 +1,40 @@
+/* #root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+} */
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.default-border {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.06); /* default-border, đã chuẩn hóa */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border-radius: 1rem; /* default-border, đã chuẩn hóa */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
