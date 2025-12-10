@@ -158,7 +158,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavBranchHierarchy />
             </SidebarContent>
 
-            {/* Footer với logo - background #F7F7F7 */}
             <SidebarFooter className="p-0" style={{ backgroundColor: '#F7F7F7' }}>
                 <SidebarMenu>
                     <SidebarMenuItem>
