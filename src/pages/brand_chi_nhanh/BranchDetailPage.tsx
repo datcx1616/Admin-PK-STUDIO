@@ -1,4 +1,5 @@
 // src/pages/branch-analytics/BranchAnalyticsPage.tsx
+// UPDATED: Tabs moved to top with underline style
 
 import * as React from "react";
 import { useParams } from "react-router-dom";
@@ -137,7 +138,7 @@ export default function BranchAnalyticsPage() {
                 breadcrumbs={[
                     { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                     { label: "Chi nhánh", href: "/brand" },
-                    { label: branchName, icon: <Users className="h-4 w-4" /> },
+                    { label: branchName, icon: <Building2 className="h-4 w-4" /> },
                 ]}
             />
 
@@ -162,26 +163,6 @@ export default function BranchAnalyticsPage() {
                     ) : (
                         // Show Branch Analytics
                         <div className="max-w-7xl mx-auto p-6 space-y-6">
-                            {/* Branch Header */}
-                            <BranchHeader
-                                branchName={branchName}
-                                branchCode={branchCode}
-                                totalChannels={totalChannels}
-                                channelNames={channelNames}
-                                selectedDays={selectedDays}
-                                onDaysChange={handleDaysChange}
-                                onRefresh={refetch}
-                                isLoading={loading}
-                                startDate={startDate}
-                                endDate={endDate}
-                                onCustomDateChange={handleCustomDateChange}
-                            />
-
-                            {/* Date range display */}
-                            <div className="text-sm text-muted-foreground">
-                                Đang hiển thị dữ liệu từ <strong>{dateRange.startDate}</strong> đến <strong>{dateRange.endDate}</strong>
-                            </div>
-
                             {/* Loading State for Analytics */}
                             {loading && !analytics ? (
                                 <div className="space-y-6">
@@ -211,97 +192,135 @@ export default function BranchAnalyticsPage() {
                                     </AlertDescription>
                                 </Alert>
                             ) : (
-                                // Analytics Tabs
+                                // ============================================
+                                //  TABS - Moved to Top with Underline Style
+                                // ============================================
                                 <Tabs defaultValue="overview" className="space-y-6">
-                                    <TabsList className="inline-flex h-auto w-full items-center justify-start rounded-lg bg-muted p-1 gap-1 overflow-x-auto">
-                                        <TabsTrigger value="overview" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <BarChart3 className="h-4 w-4 mr-2" />
-                                            Tổng Quan
-                                        </TabsTrigger>
-                                        <TabsTrigger value="engagement" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <Activity className="h-4 w-4 mr-2" />
-                                            Tương Tác
-                                        </TabsTrigger>
-                                        <TabsTrigger value="revenue" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <DollarSign className="h-4 w-4 mr-2" />
-                                            Doanh Thu
-                                        </TabsTrigger>
-                                        <TabsTrigger value="audience" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <Users className="h-4 w-4 mr-2" />
-                                            Khán Giả
-                                        </TabsTrigger>
-                                        <TabsTrigger value="traffic" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <Radio className="h-4 w-4 mr-2" />
-                                            Traffic
-                                        </TabsTrigger>
-                                        <TabsTrigger value="devices" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <Monitor className="h-4 w-4 mr-2" />
-                                            Thiết Bị
-                                        </TabsTrigger>
-                                        <TabsTrigger value="content" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <Video className="h-4 w-4 mr-2" />
-                                            Nội Dung
-                                        </TabsTrigger>
-                                        <TabsTrigger value="location" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <MapPin className="h-4 w-4 mr-2" />
-                                            Vị Trí
-                                        </TabsTrigger>
-                                        <TabsTrigger value="sharing" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <Share2 className="h-4 w-4 mr-2" />
-                                            Chia Sẻ
-                                        </TabsTrigger>
-                                        <TabsTrigger value="channels" className="rounded-md px-3 py-2.5 whitespace-nowrap">
-                                            <Youtube className="h-4 w-4 mr-2" />
-                                            Kênh
-                                        </TabsTrigger>
-                                    </TabsList>
+                                    {/* TABS LIST - Sticky with Underline Style */}
+                                    <div className="tabs-sticky-container">
+                                        <div className="w-full overflow-x-auto">
+                                            <TabsList className="inline-flex h-auto w-full items-center justify-start bg-white rounded-none p-0 gap-0 border-t border-gray-200">
+                                                <TabsTrigger
+                                                    value="overview"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-blue-600 hover:border-gray-200 data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📊 Tổng Quan
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="engagement"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-pink-600 hover:border-gray-200 data-[state=active]:text-pink-600 data-[state=active]:border-pink-600 data-[state=active]:font-semibold"
+                                                >
+                                                    ❤️ Tương Tác
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="revenue"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-emerald-600 hover:border-gray-200 data-[state=active]:text-emerald-600 data-[state=active]:border-emerald-600 data-[state=active]:font-semibold"
+                                                >
+                                                    💰 Doanh Thu
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="audience"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-violet-600 hover:border-gray-200 data-[state=active]:text-violet-600 data-[state=active]:border-violet-600 data-[state=active]:font-semibold"
+                                                >
+                                                    👥 Khán Giả
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="traffic"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-indigo-600 hover:border-gray-200 data-[state=active]:text-indigo-600 data-[state=active]:border-indigo-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📡 Traffic
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="devices"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-amber-600 hover:border-gray-200 data-[state=active]:text-amber-600 data-[state=active]:border-amber-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📱 Thiết Bị
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="content"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-red-600 hover:border-gray-200 data-[state=active]:text-red-600 data-[state=active]:border-red-600 data-[state=active]:font-semibold"
+                                                >
+                                                    🎬 Nội Dung
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="location"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-purple-600 hover:border-gray-200 data-[state=active]:text-purple-600 data-[state=active]:border-purple-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📍 Vị Trí
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="sharing"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-cyan-600 hover:border-gray-200 data-[state=active]:text-cyan-600 data-[state=active]:border-cyan-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📤 Chia Sẻ
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="channels"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-rose-600 hover:border-gray-200 data-[state=active]:text-rose-600 data-[state=active]:border-rose-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📺 Kênh
+                                                </TabsTrigger>
+                                            </TabsList>
+                                        </div>
+                                    </div>
 
-                                    {/* Tab 1: Tổng Quan */}
+                                    {/* Branch Header - Below Tabs */}
+                                    <BranchHeader
+                                        branchName={branchName}
+                                        branchCode={branchCode}
+                                        totalChannels={totalChannels}
+                                        channelNames={channelNames}
+                                        selectedDays={selectedDays}
+                                        onDaysChange={handleDaysChange}
+                                        onRefresh={refetch}
+                                        isLoading={loading}
+                                        startDate={startDate}
+                                        endDate={endDate}
+                                        onCustomDateChange={handleCustomDateChange}
+                                    />
+
+                                    {/* Date range display */}
+                                    <div className="text-sm text-muted-foreground">
+                                        Đang hiển thị dữ liệu từ <strong>{dateRange.startDate}</strong> đến <strong>{dateRange.endDate}</strong>
+                                    </div>
+
+                                    {/* TAB CONTENTS */}
                                     <TabsContent value="overview">
                                         <OverviewTab analytics={analytics} />
                                     </TabsContent>
 
-                                    {/* Tab 2: Tương Tác */}
                                     <TabsContent value="engagement">
                                         <EngagementTab analytics={analytics} />
                                     </TabsContent>
 
-                                    {/* Tab 3: Doanh Thu */}
                                     <TabsContent value="revenue">
                                         <RevenueTab analytics={analytics} />
                                     </TabsContent>
 
-                                    {/* Tab 4: Khán Giả */}
                                     <TabsContent value="audience">
                                         <AudienceTab analytics={analytics} />
                                     </TabsContent>
 
-                                    {/* Tab 5: Traffic */}
                                     <TabsContent value="traffic">
                                         <TrafficTab analytics={analytics} />
                                     </TabsContent>
 
-                                    {/* Tab 6: Thiết Bị */}
                                     <TabsContent value="devices">
                                         <DevicesTab analytics={analytics} />
                                     </TabsContent>
 
-                                    {/* Tab 7: Nội Dung */}
                                     <TabsContent value="content">
                                         <ContentTab analytics={analytics} />
                                     </TabsContent>
 
-                                    {/* Tab 8: Vị Trí */}
                                     <TabsContent value="location">
                                         <LocationTab analytics={analytics} />
                                     </TabsContent>
 
-                                    {/* Tab 9: Chia Sẻ */}
                                     <TabsContent value="sharing">
                                         <SharingTab analytics={analytics} />
                                     </TabsContent>
 
-                                    {/* Tab 10: Kênh */}
                                     <TabsContent value="channels">
                                         <ChannelsTab analytics={analytics} />
                                     </TabsContent>

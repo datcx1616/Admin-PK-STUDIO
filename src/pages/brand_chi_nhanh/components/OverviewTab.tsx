@@ -164,7 +164,7 @@ export function OverviewTab({ analytics }: OverviewTabProps) {
                                             -{formatNumber(day.subscribersLost)}
                                         </td>
                                         <td className="text-right py-3 px-4">
-                                            <Badge variant={day.subscribersNet >= 0 ? "default" : "destructive"}>
+                                            <Badge variant={day.subscribersNet >= 0 ? "destructive" : "destructive"}>
                                                 {day.subscribersNet >= 0 ? '+' : ''}{formatNumber(day.subscribersNet)}
                                             </Badge>
                                         </td>

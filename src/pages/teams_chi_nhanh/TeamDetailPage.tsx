@@ -1,4 +1,5 @@
-// src/pages/team-analytics/TeamAnalyticsPage.tsx - COMPLETE WITH SIDEBAR AND SCROLLABLE TABS
+// src/pages/teams_chi_nhanh/TeamDetailPage.tsx
+// FIXED: TabsList now inside Tabs component
 
 import * as React from "react";
 import { useParams } from "react-router-dom";
@@ -6,7 +7,7 @@ import { ContentHeader } from "@/pages/components/ContentHeader";
 import { ChannelSidebar } from "@/pages/components/ChannelSidebar";
 import { ChannelDetailView } from "@/pages/channel-analytics/ChannelDetailView";
 import type { Channel } from "@/types/channel.types";
-import { Home, Users, BarChart3, Building2 } from "lucide-react";
+import { Home, Users, BarChart3 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,7 +51,7 @@ export default function TeamAnalyticsPage() {
     // Selected channel state
     const [selectedChannel, setSelectedChannel] = React.useState<Channel | null>(null);
 
-    // Date range state - BRANCH STYLE
+    // Date range state
     const [dateRange, setDateRange] = React.useState<'7' | '30' | '90' | '180'>('30');
 
     // Calculate actual dates from dateRange
@@ -175,7 +176,7 @@ export default function TeamAnalyticsPage() {
                 <ContentHeader
                     breadcrumbs={[
                         { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
-                        { label: "nhóm", href: "/teams" },
+                        { label: "Nhóm", href: "/teams" },
                         { label: "Lỗi", icon: <Users className="h-4 w-4" /> },
                     ]}
                 />
@@ -205,7 +206,6 @@ export default function TeamAnalyticsPage() {
     const teamName = team?.name || analytics?.data?.team?.name || "Team";
     const totalChannels = analytics?.data?.totalChannels || team?.channels?.length || 0;
     const channels = analytics?.data?.channels || [];
-    const branchName = team?.branch?.name || "N/A";
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
@@ -213,7 +213,7 @@ export default function TeamAnalyticsPage() {
             <ContentHeader
                 breadcrumbs={[
                     { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
-                    { label: "nhóm", href: "/teams" },
+                    { label: "Nhóm", href: "/teams" },
                     { label: teamName, icon: <Users className="h-4 w-4" /> },
                 ]}
             />
@@ -239,22 +239,6 @@ export default function TeamAnalyticsPage() {
                     ) : (
                         // Show Team Analytics
                         <div className="max-w-7xl mx-auto p-6 space-y-6">
-                            {/* Team Header */}
-                            <TeamHeader
-                                teamName={teamName}
-                                totalChannels={totalChannels}
-                                channels={channels}
-                                selectedDays={parseInt(dateRange)}
-                                startDate={new Date(startDate)}
-                                endDate={new Date(endDate)}
-                                loading={loading}
-                                onDaysChange={(days) => setDateRange(days.toString() as '7' | '30' | '90' | '180')}
-                                onCustomDateChange={() => { }}
-                                onRefresh={refetch}
-                                onExport={handleExportCSV}
-                                onPrint={handlePrint}
-                            />
-
                             {/* Loading State for Analytics */}
                             {loading && !analytics ? (
                                 <div className="space-y-6">
@@ -284,66 +268,112 @@ export default function TeamAnalyticsPage() {
                                     </AlertDescription>
                                 </Alert>
                             ) : (
-                                // Analytics Tabs
+                                // ============================================
+                                //  TABS - Modern White Design
+                                // ============================================
                                 <Tabs defaultValue="overview" className="space-y-6">
-                                    <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
-                                        <TabsList className="inline-flex h-auto w-full items-center justify-start rounded-lg bg-muted p-1 gap-1">
-                                            <TabsTrigger value="overview" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
-                                                📊 Tổng Quan
-                                            </TabsTrigger>
-                                            <TabsTrigger value="engagement" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
-                                                ❤️ Tương Tác
-                                            </TabsTrigger>
-                                            <TabsTrigger value="revenue" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
-                                                💰 Doanh Thu
-                                            </TabsTrigger>
-                                            <TabsTrigger value="traffic" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
-                                                📡 Traffic
-                                            </TabsTrigger>
-                                            <TabsTrigger value="devices" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
-                                                📱 Thiết Bị
-                                            </TabsTrigger>
-                                            <TabsTrigger value="videos" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
-                                                🎬 Videos
-                                            </TabsTrigger>
-                                            <TabsTrigger value="channels" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1>">
-                                                📺 Kênh
-                                            </TabsTrigger>
-                                            <TabsTrigger value="retention" className="whitespace-nowrap rounded-md px-4 py-2.5 flex-1">
-                                                📈 Retention
-                                            </TabsTrigger>
-                                        </TabsList>
+                                    {/* TABS LIST - Clean White Style */}
+                                    <div className="tabs-sticky-container">
+                                        <div className="w-full overflow-x-auto">
+                                            <TabsList className="inline-flex h-auto w-full items-center justify-start bg-white rounded-none p-0 gap-0 border-t border-gray-200">
+                                                <TabsTrigger
+                                                    value="overview"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-blue-600 hover:border-gray-200 data-[state=active]:text-blue-600 data-[state=active]:border-blue-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📊 Tổng Quan
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="engagement"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-pink-600 hover:border-gray-200 data-[state=active]:text-pink-600 data-[state=active]:border-pink-600 data-[state=active]:font-semibold"
+                                                >
+                                                    ❤️ Tương Tác
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="revenue"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-emerald-600 hover:border-gray-200 data-[state=active]:text-emerald-600 data-[state=active]:border-emerald-600 data-[state=active]:font-semibold"
+                                                >
+                                                    💰 Doanh Thu
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="traffic"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-violet-600 hover:border-gray-200 data-[state=active]:text-violet-600 data-[state=active]:border-violet-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📡 Traffic
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="devices"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-amber-600 hover:border-gray-200 data-[state=active]:text-amber-600 data-[state=active]:border-amber-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📱 Thiết Bị
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="videos"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-red-600 hover:border-gray-200 data-[state=active]:text-red-600 data-[state=active]:border-red-600 data-[state=active]:font-semibold"
+                                                >
+                                                    🎬 Videos
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="channels"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-indigo-600 hover:border-gray-200 data-[state=active]:text-indigo-600 data-[state=active]:border-indigo-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📺 Kênh
+                                                </TabsTrigger>
+                                                <TabsTrigger
+                                                    value="retention"
+                                                    className="relative whitespace-nowrap rounded-none px-4 py-3 flex-1 min-w-fit text-sm font-medium transition-all duration-200 border-t-2 border-transparent hover:text-cyan-600 hover:border-gray-200 data-[state=active]:text-cyan-600 data-[state=active]:border-cyan-600 data-[state=active]:font-semibold"
+                                                >
+                                                    📈 Retention
+                                                </TabsTrigger>
+                                            </TabsList>
+                                        </div>
                                     </div>
 
-                                    <TabsContent value="overview">
+                                    {/* Team Header - Below tabs */}
+                                    <TeamHeader
+                                        teamName={teamName}
+                                        totalChannels={totalChannels}
+                                        channels={channels}
+                                        selectedDays={parseInt(dateRange)}
+                                        startDate={new Date(startDate)}
+                                        endDate={new Date(endDate)}
+                                        loading={loading}
+                                        onDaysChange={(days) => setDateRange(days.toString() as '7' | '30' | '90' | '180')}
+                                        onCustomDateChange={() => { }}
+                                        onRefresh={refetch}
+                                        onExport={handleExportCSV}
+                                        onPrint={handlePrint}
+                                    />
+
+                                    {/* TAB CONTENTS */}
+                                    <TabsContent value="overview" className="space-y-6">
                                         <TeamOverviewTab analytics={analytics} />
                                     </TabsContent>
 
-                                    <TabsContent value="engagement">
+                                    <TabsContent value="engagement" className="space-y-6">
                                         <TeamEngagementTab analytics={analytics} />
                                     </TabsContent>
 
-                                    <TabsContent value="revenue">
+                                    <TabsContent value="revenue" className="space-y-6">
                                         <TeamRevenueTab analytics={analytics} />
                                     </TabsContent>
 
-                                    <TabsContent value="traffic">
+                                    <TabsContent value="traffic" className="space-y-6">
                                         <TeamTrafficTab analytics={analytics} />
                                     </TabsContent>
 
-                                    <TabsContent value="devices">
+                                    <TabsContent value="devices" className="space-y-6">
                                         <TeamDevicesTab analytics={analytics} />
                                     </TabsContent>
 
-                                    <TabsContent value="videos">
+                                    <TabsContent value="videos" className="space-y-6">
                                         <TeamVideosTab analytics={analytics} />
                                     </TabsContent>
 
-                                    <TabsContent value="channels">
+                                    <TabsContent value="channels" className="space-y-6">
                                         <TeamChannelsTab analytics={analytics} />
                                     </TabsContent>
 
-                                    <TabsContent value="retention">
+                                    <TabsContent value="retention" className="space-y-6">
                                         <TeamRetentionTab analytics={analytics} />
                                     </TabsContent>
                                 </Tabs>

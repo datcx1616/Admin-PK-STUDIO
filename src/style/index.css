@@ -207,9 +207,9 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
-  a:hover {
+  /* a:hover {
     color: #747bff;
-  }
+  } */
 }
 
 @theme inline {
@@ -315,5 +315,291 @@ button:focus-visible {
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.439 0 0);
+  }
+}
+
+/* ============================================
+   GITBOOK-STYLE TABS - Modern & Beautiful
+   Add to: src/style/index.css
+   ============================================ */
+
+/* Sticky Tabs Container */
+.tabs-sticky-container {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding-bottom: 1rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+/* Dark mode sticky container */
+.dark .tabs-sticky-container {
+  background: rgba(10, 10, 10, 0.8);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Tabs List - GitBook Pills Style */
+[role="tablist"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.dark [role="tablist"] {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================
+   TABS - UNDERLINE STYLE (Clean & Minimal)
+   Paste this at the END of: src/style/index.css
+   ============================================ */
+
+/* Sticky Container */
+.tabs-sticky-container {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding-bottom: 1rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.dark .tabs-sticky-container {
+  background: rgba(15, 15, 15, 0.95);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Tabs List Container */
+[role="tablist"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+}
+
+.dark [role="tablist"] {
+  background: rgba(15, 15, 15, 1);
+  border-bottom-color: rgba(55, 65, 81, 1);
+}
+
+/* Individual Tab */
+[role="tab"] {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  outline: none;
+  flex: 1;
+  min-width: fit-content;
+}
+
+.dark [role="tab"] {
+  color: rgba(156, 163, 175, 1);
+}
+
+/* Tab Hover */
+[role="tab"]:hover:not([data-state="active"]) {
+  color: #374151;
+  border-bottom-color: #e5e7eb;
+}
+
+.dark [role="tab"]:hover:not([data-state="active"]) {
+  color: rgba(229, 231, 235, 1);
+  border-bottom-color: rgba(75, 85, 99, 1);
+}
+
+/* Active Tab - Overview (Blue) */
+[role="tab"][value="overview"][data-state="active"] {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+  font-weight: 600;
+}
+
+.dark [role="tab"][value="overview"][data-state="active"] {
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+}
+
+/* Active Tab - Engagement (Pink) */
+[role="tab"][value="engagement"][data-state="active"] {
+  color: #db2777;
+  border-bottom-color: #db2777;
+  font-weight: 600;
+}
+
+.dark [role="tab"][value="engagement"][data-state="active"] {
+  color: #f472b6;
+  border-bottom-color: #f472b6;
+}
+
+/* Active Tab - Revenue (Emerald) */
+[role="tab"][value="revenue"][data-state="active"] {
+  color: #059669;
+  border-bottom-color: #059669;
+  font-weight: 600;
+}
+
+.dark [role="tab"][value="revenue"][data-state="active"] {
+  color: #34d399;
+  border-bottom-color: #34d399;
+}
+
+/* Active Tab - Traffic (Violet) */
+[role="tab"][value="traffic"][data-state="active"] {
+  color: #7c3aed;
+  border-bottom-color: #7c3aed;
+  font-weight: 600;
+}
+
+.dark [role="tab"][value="traffic"][data-state="active"] {
+  color: #a78bfa;
+  border-bottom-color: #a78bfa;
+}
+
+/* Active Tab - Devices (Amber) */
+[role="tab"][value="devices"][data-state="active"] {
+  color: #d97706;
+  border-bottom-color: #d97706;
+  font-weight: 600;
+}
+
+.dark [role="tab"][value="devices"][data-state="active"] {
+  color: #fbbf24;
+  border-bottom-color: #fbbf24;
+}
+
+/* Active Tab - Videos (Red) */
+[role="tab"][value="videos"][data-state="active"] {
+  color: #dc2626;
+  border-bottom-color: #dc2626;
+  font-weight: 600;
+}
+
+.dark [role="tab"][value="videos"][data-state="active"] {
+  color: #f87171;
+  border-bottom-color: #f87171;
+}
+
+/* Active Tab - Channels (Indigo) */
+[role="tab"][value="channels"][data-state="active"] {
+  color: #4f46e5;
+  border-bottom-color: #4f46e5;
+  font-weight: 600;
+}
+
+.dark [role="tab"][value="channels"][data-state="active"] {
+  color: #818cf8;
+  border-bottom-color: #818cf8;
+}
+
+/* Active Tab - Retention (Cyan) */
+[role="tab"][value="retention"][data-state="active"] {
+  color: #0891b2;
+  border-bottom-color: #0891b2;
+  font-weight: 600;
+}
+
+.dark [role="tab"][value="retention"][data-state="active"] {
+  color: #22d3ee;
+  border-bottom-color: #22d3ee;
+}
+
+/* Focus State (Accessibility) */
+[role="tab"]:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+/* Scrollbar */
+[role="tablist"]::-webkit-scrollbar {
+  height: 4px;
+}
+
+[role="tablist"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[role="tablist"]::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.dark [role="tablist"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[role="tablist"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dark [role="tablist"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Content Animation */
+[role="tabpanel"] {
+  animation: fadeInTab 0.2s ease-in-out;
+}
+
+@keyframes fadeInTab {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  [role="tab"] {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+    flex: 0 0 auto;
   }
 }
