@@ -51,7 +51,16 @@ export function SelectTeamDialog({
         setLoading(true);
         try {
             const data = await teamsAPI.getAll({ branchId });
-            setTeams(data);
+
+            // Fallback filter: đảm bảo chỉ hiển thị nhóm thuộc chi nhánh hiện tại
+            const filteredTeams = data.filter(team => {
+                const teamBranchId = typeof team.branch === 'string'
+                    ? team.branch
+                    : team.branch?._id;
+                return teamBranchId === branchId;
+            });
+
+            setTeams(filteredTeams);
         } catch (error) {
             console.error('Failed to fetch teams:', error);
             toast.error('Không thể tải danh sách nhóm');
