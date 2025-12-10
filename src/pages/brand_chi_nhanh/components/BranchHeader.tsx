@@ -1,10 +1,9 @@
 // src/pages/branch-analytics/components/BranchHeader.tsx
 
 import * as React from "react";
-import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Clock, RefreshCw, Download, Printer, Users } from "lucide-react";
+import { Building2, RefreshCw, Download, Printer, Youtube, Calendar, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { DateRangePicker } from "./DateRangePicker";
@@ -14,145 +13,138 @@ interface BranchHeaderProps {
     branchCode: string;
     totalChannels: number;
     channelNames: string[];
-    selectedDays: number;
-    onDaysChange: (days: number) => void;
     onRefresh: () => void;
     isLoading: boolean;
-    // ✅ NEW: Date range props
     startDate: Date;
     endDate: Date;
-    onCustomDateChange: (startDate: Date, endDate: Date) => void;
+    onDateChange: (startDate: Date, endDate: Date) => void;
 }
-
-const dayOptions = [
-    { label: "7 ngày", value: 7 },
-    { label: "30 ngày", value: 30 },
-    { label: "90 ngày", value: 90 },
-    { label: "180 ngày", value: 180 },
-];
 
 export function BranchHeader({
     branchName,
     branchCode,
     totalChannels,
     channelNames,
-    selectedDays,
-    onDaysChange,
     onRefresh,
     isLoading,
     startDate,
     endDate,
-    onCustomDateChange,
+    onDateChange,
 }: BranchHeaderProps) {
     return (
-        <Card
-            className="rounded-lg"
-            style={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid rgba(0, 0, 0, 0.06)',
-                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
-            }}
-        >
-            <CardHeader className="space-y-3">
-                {/* First Row: Icon + Branch name + Code + Date range selector */}
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-slate-100 via-gray-50 to-slate-100 border border-gray-200/60 shadow-sm">
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/5 to-transparent rounded-full -translate-y-32 translate-x-32" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-indigo-500/5 to-transparent rounded-full translate-y-24 -translate-x-24" />
+
+            <div className="relative p-5 space-y-4">
+                {/* First Row: Branch Info + Date Range */}
                 <div className="flex items-center justify-between gap-6">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                            <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold">{branchName}</h1>
-                            <Badge variant="secondary" className="mt-1">
-                                Mã: {branchCode}
-                            </Badge>
-                        </div>
-                    </div>
-                    <div className="flex flex-col items-start min-w-[340px]">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">Thời gian:</span>
-                        </div>
-                        <div className="flex items-center gap-2 w-full">
-                            <div className="flex items-center gap-1 border rounded-md p-1">
-                                {dayOptions.map((option) => (
-                                    <Button
-                                        key={option.value}
-                                        variant={selectedDays === option.value ? "secondary" : "ghost"}
-                                        size="sm"
-                                        className="h-8 px-3 text-sm"
-                                        onClick={() => onDaysChange(option.value)}
-                                    >
-                                        {option.label}
-                                    </Button>
-                                ))}
+                    {/* Left: Branch Info */}
+                    <div className="flex items-center gap-4">
+                        {/* Icon with gradient background */}
+                        <div className="relative group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl blur-sm opacity-40 group-hover:opacity-60 transition-opacity" />
+                            <div className="relative p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                                <Building2 className="h-6 w-6 text-white" />
                             </div>
-                            <DateRangePicker
-                                startDate={startDate}
-                                endDate={endDate}
-                                onDateChange={onCustomDateChange}
-                            />
+                        </div>
+
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-xl font-bold text-gray-900">{branchName}</h1>
+                                <Sparkles className="h-4 w-4 text-amber-500" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Badge className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-0 text-xs px-2 py-0.5">
+                                    {branchCode}
+                                </Badge>
+                                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                                    <Youtube className="h-3.5 w-3.5 text-red-500" />
+                                    <span className="font-medium text-gray-700">{totalChannels}</span>
+                                    <span>kênh</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    {/* Right: Date Range Selector */}
+                    <DateRangePicker
+                        startDate={startDate}
+                        endDate={endDate}
+                        onDateChange={onDateChange}
+                    />
                 </div>
 
-                {/* Second Row: Channels info + Action buttons */}
-                <div className="flex items-center justify-between gap-6 text-sm text-muted-foreground">
-                    {/* Channels list */}
+                {/* Second Row: Channels List + Actions */}
+                <div className="flex items-center justify-between gap-6 pt-3 border-t border-gray-200/60">
+                    {/* Left: Channel names */}
                     <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        <span>{totalChannels} kênh:</span>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                            <Calendar className="h-3.5 w-3.5" />
+                            <span>
+                                {startDate.toLocaleDateString('vi-VN')} - {endDate.toLocaleDateString('vi-VN')}
+                            </span>
+                        </div>
+                        <span className="text-gray-300">|</span>
                         {channelNames.length > 0 ? (
-                            <div className="flex items-center gap-1">
-                                {channelNames.slice(0, 3).map((name, idx) => (
-                                    <span key={idx} className="text-foreground font-medium">
+                            <div className="flex items-center gap-1.5 text-xs">
+                                {channelNames.slice(0, 2).map((name, idx) => (
+                                    <Badge
+                                        key={idx}
+                                        variant="outline"
+                                        className="bg-white/60 text-gray-700 border-gray-200 text-xs py-0 px-2"
+                                    >
                                         {name}
-                                        {idx < Math.min(channelNames.length, 3) - 1 && ', '}
-                                    </span>
+                                    </Badge>
                                 ))}
-                                {channelNames.length > 3 && (
-                                    <span className="text-muted-foreground">
-                                        +{channelNames.length - 3} khác
-                                    </span>
+                                {channelNames.length > 2 && (
+                                    <Badge
+                                        variant="outline"
+                                        className="bg-gray-100/80 text-gray-500 border-gray-200 text-xs py-0 px-2"
+                                    >
+                                        +{channelNames.length - 2}
+                                    </Badge>
                                 )}
                             </div>
                         ) : (
-                            <span className="text-muted-foreground">Không có kênh</span>
+                            <span className="text-xs text-gray-400">Chưa có kênh</span>
                         )}
                     </div>
 
-                    {/* Action buttons */}
+                    {/* Right: Action buttons */}
                     <div className="flex items-center gap-2">
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
                             onClick={onRefresh}
                             disabled={isLoading}
-                            className="gap-2"
+                            className="h-8 px-3 text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 gap-1.5"
                         >
-                            <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
+                            <RefreshCw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
                             Làm mới
                         </Button>
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="gap-2"
+                            className="h-8 px-3 text-xs font-medium text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 gap-1.5"
                             onClick={() => toast.info('Chức năng xuất CSV đang được phát triển')}
                         >
-                            <Download className="h-4 w-4" />
-                            Xuất CSV
+                            <Download className="h-3.5 w-3.5" />
+                            CSV
                         </Button>
                         <Button
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
-                            className="gap-2"
+                            className="h-8 px-3 text-xs font-medium text-gray-600 hover:text-violet-600 hover:bg-violet-50 gap-1.5"
                             onClick={() => window.print()}
                         >
-                            <Printer className="h-4 w-4" />
-                            In/PDF
+                            <Printer className="h-3.5 w-3.5" />
+                            In
                         </Button>
                     </div>
                 </div>
-            </CardHeader>
-        </Card>
+            </div>
+        </div>
     );
 }

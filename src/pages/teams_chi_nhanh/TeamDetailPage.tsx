@@ -356,12 +356,17 @@ export default function TeamAnalyticsPage() {
                                         teamName={teamName}
                                         totalChannels={totalChannels}
                                         channels={channels}
-                                        selectedDays={parseInt(dateRange)}
                                         startDate={new Date(startDate)}
                                         endDate={new Date(endDate)}
-                                        loading={loading}
-                                        onDaysChange={(days) => setDateRange(days.toString() as '7' | '30' | '90' | '180')}
-                                        onCustomDateChange={() => { }}
+                                        isLoading={loading}
+                                        onDateChange={(start, end) => {
+                                            // Calculate days from custom date range
+                                            const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+                                            if (days <= 7) setDateRange('7');
+                                            else if (days <= 30) setDateRange('30');
+                                            else if (days <= 90) setDateRange('90');
+                                            else setDateRange('180');
+                                        }}
                                         onRefresh={refetch}
                                         onExport={handleExportCSV}
                                         onPrint={handlePrint}

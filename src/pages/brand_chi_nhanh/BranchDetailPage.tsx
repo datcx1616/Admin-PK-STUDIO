@@ -43,10 +43,9 @@ import {
 export default function BranchAnalyticsPage() {
     const { branchId } = useParams<{ branchId: string }>();
     const { branch, loading: loadingBranch, error: branchError } = useBranch(branchId!);
-    const [selectedDays, setSelectedDays] = React.useState(30);
     const [selectedChannel, setSelectedChannel] = React.useState<Channel | null>(null);
 
-    // ✅ Use Date objects for better date handling
+    // Date range state
     const [startDate, setStartDate] = React.useState(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     );
@@ -65,25 +64,10 @@ export default function BranchAnalyticsPage() {
         autoFetch: true
     });
 
-    // ✅ Handle preset days change
-    const handleDaysChange = (days: number) => {
-        console.log('📅 Changing date range to:', days, 'days');
-        setSelectedDays(days);
-        const newEndDate = new Date();
-        const newStartDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-        setStartDate(newStartDate);
-        setEndDate(newEndDate);
-    };
-
-    // ✅ Handle custom date range change
+    // Handle date range change
     const handleCustomDateChange = (newStartDate: Date, newEndDate: Date) => {
-        console.log('📅 Custom date range:', {
-            start: newStartDate.toISOString().split('T')[0],
-            end: newEndDate.toISOString().split('T')[0]
-        });
         setStartDate(newStartDate);
         setEndDate(newEndDate);
-        setSelectedDays(0); // Clear preset selection
     };
 
     // ✅ Loading state
@@ -299,19 +283,12 @@ export default function BranchAnalyticsPage() {
                                         branchCode={branchCode}
                                         totalChannels={totalChannels}
                                         channelNames={channelNames}
-                                        selectedDays={selectedDays}
-                                        onDaysChange={handleDaysChange}
                                         onRefresh={refetch}
                                         isLoading={loading}
                                         startDate={startDate}
                                         endDate={endDate}
-                                        onCustomDateChange={handleCustomDateChange}
+                                        onDateChange={handleCustomDateChange}
                                     />
-
-                                    {/* Date range display */}
-                                    <div className="text-sm text-muted-foreground">
-                                        Đang hiển thị dữ liệu từ <strong>{dateRange.startDate}</strong> đến <strong>{dateRange.endDate}</strong>
-                                    </div>
 
                                     {/* TAB CONTENTS */}
                                     <TabsContent value="overview">
