@@ -344,11 +344,11 @@ export function NavBranchHierarchy() {
 
     return (
         <SidebarGroup className="bg-[#F7F7F7]">
-            <div className="flex items-center justify-between px-2 mb-1 group hover:bg-accent rounded transition-colors cursor-pointer">
+            <div className="flex items-center justify-between px-2 mb-1 group rounded transition-colors cursor-pointer hover:bg-[#EAEBEE]">
                 <SidebarGroupLabel className="mb-0">Tổ chức</SidebarGroupLabel>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="h-5 w-5 rounded hover:bg-accent flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 group-hover:scale-110 active:scale-95"
+                    className="h-5 w-5 rounded flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 group-hover:scale-110 active:scale-95 hover:bg-[#DEDFE3]"
                     title="Thêm chi nhánh"
                 >
                     <Plus className="h-3.5 w-3.5 transition-transform" />
@@ -378,7 +378,9 @@ export function NavBranchHierarchy() {
                                 >
                                     {/* 1. ICON - Building2 mặc định, hover thành ChevronRight nếu có team, nếu không thì luôn là Building2 */}
                                     <div
-                                        className="h-3.5 w-3.5 shrink-0 cursor-pointer flex items-center justify-center"
+                                        className={cn(
+                                            "h-3.5 w-3.5 shrink-0 cursor-pointer flex items-center justify-center transition-colors rounded"
+                                        )}
                                         onClick={(e) => {
                                             e.stopPropagation()
                                             if (hasTeams) toggleBranch(branch._id)
@@ -419,8 +421,9 @@ export function NavBranchHierarchy() {
                                                     setOpenBranchDropdown(branch._id)
                                                 }}
                                                 className={cn(
-                                                    "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
-                                                    "hover:bg-[#EAEBEE]"
+                                                    "absolute right-2 p-0.5 rounded cursor-pointer transition-opacity",
+                                                    (openBranchDropdown === branch._id ? "opacity-100 bg-[#DEDFE3]" : "opacity-0 group-hover:opacity-100"),
+                                                    "hover:bg-[#DEDFE3]"
                                                 )}
                                             >
                                                 <svg
@@ -517,8 +520,9 @@ export function NavBranchHierarchy() {
                                                                                 setOpenTeamDropdown(team._id)
                                                                             }}
                                                                             className={cn(
-                                                                                "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
-                                                                                "hover:bg-[#EAEBEE]"
+                                                                                "absolute right-2 p-0.5 rounded cursor-pointer transition-opacity",
+                                                                                (openTeamDropdown === team._id ? "opacity-100 bg-[#DEDFE3]" : "opacity-0 group-hover:opacity-100"),
+                                                                                "hover:bg-[#DEDFE3]"
                                                                             )}
                                                                         >
                                                                             <svg
