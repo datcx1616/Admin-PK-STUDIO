@@ -154,7 +154,7 @@ export default function BranchAnalyticsPage() {
                 <div className="flex items-center bg-white shrink-0">
                     {/* Sidebar header area - có thể đóng/mở */}
                     <div
-                        className={`shrink-0 flex items-center justify-between px-2 h-[42px] border-b border-gray-200 transition-all duration-300 ${isSidebarOpen ? 'w-[280px] border-r' : 'w-[40px]'
+                        className={`shrink-0 flex items-center justify-between px-2 h-[42px] border-b border-gray-200 transition-all duration-300 ${isSidebarOpen ? 'w-[230px] border-r' : 'w-[40px]'
                             }`}
                     >
                         {isSidebarOpen ? (

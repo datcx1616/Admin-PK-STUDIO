@@ -281,11 +281,11 @@ export function ChannelSidebar({
                         ? cn(
                             "fixed top-0 h-full transition-all duration-300 ease-in-out z-30",
                             side === "right" ? "right-0" : "left-0",
-                            isOpen ? "w-[280px]" : "w-0"
+                            isOpen ? "w-[230px]" : "w-0"
                         )
                         : cn(
                             "h-full transition-all duration-300 ease-in-out shrink-0 overflow-hidden",
-                            isOpen ? "w-[280px]" : "w-0"
+                            isOpen ? "w-[230px]" : "w-0"
                         ),
                     className
                 )}

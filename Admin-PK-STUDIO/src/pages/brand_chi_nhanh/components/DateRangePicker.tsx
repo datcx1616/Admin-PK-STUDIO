@@ -105,7 +105,7 @@ export function DateRangePicker({ startDate, endDate, onDateChange }: DateRangeP
                 >
                     <CalendarIcon className="h-3.5 w-3.5 text-gray-500 transition-transform duration-300 group-hover:scale-110" />
                     <span className="text-xs font-medium text-gray-700">
-                        {format(startDate, "dd MMM", { locale: vi })} - {format(endDate, "dd MMM, yyyy", { locale: vi })}
+                        {format(endDate, "dd MMM", { locale: vi })}
                     </span>
                     <ChevronRight className="h-3 w-3 text-gray-400 ml-auto transition-transform duration-300 group-hover:translate-x-0.5" />
                 </Button>
