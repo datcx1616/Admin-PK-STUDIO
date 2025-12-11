@@ -94,11 +94,16 @@ export function DateRangePicker({ startDate, endDate, onDateChange }: DateRangeP
         <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
                 <Button
+<<<<<<< HEAD
                     variant="default"
+=======
+                    variant="outline"
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                     size="sm"
                     className={cn(
                         "group relative overflow-hidden h-9 gap-2 justify-start text-left font-normal",
                         "bg-white/80 backdrop-blur-sm border-gray-200/60 hover:border-blue-300",
+<<<<<<< HEAD
                         "hover:bg-[#F7F7F7]",
                         "transition-all duration-300"
                     )}
@@ -106,6 +111,15 @@ export function DateRangePicker({ startDate, endDate, onDateChange }: DateRangeP
                     <CalendarIcon className="h-3.5 w-3.5 text-gray-500 transition-transform duration-300 group-hover:scale-110" />
                     <span className="text-xs font-medium text-gray-700">
                         {format(endDate, "dd MMM", { locale: vi })}
+=======
+                        "hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50",
+                        "transition-all duration-300"
+                    )}
+                >
+                    <CalendarIcon className="h-3.5 w-3.5 text-blue-500 transition-transform duration-300 group-hover:scale-110" />
+                    <span className="text-xs font-medium text-gray-700">
+                        {format(startDate, "dd MMM", { locale: vi })} - {format(endDate, "dd MMM, yyyy", { locale: vi })}
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                     </span>
                     <ChevronRight className="h-3 w-3 text-gray-400 ml-auto transition-transform duration-300 group-hover:translate-x-0.5" />
                 </Button>

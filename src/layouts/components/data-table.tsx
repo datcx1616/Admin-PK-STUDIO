@@ -15,7 +15,13 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
     arrayMove,
+<<<<<<< HEAD
     useSortable,
+=======
+    SortableContext,
+    useSortable,
+    verticalListSortingStrategy,
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import {

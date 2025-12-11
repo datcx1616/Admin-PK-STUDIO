@@ -10,7 +10,11 @@ import { TableOfContents, type TableOfContentsItem } from "@/pages/components/Ta
 import { cn } from "@/lib/utils"
 
 interface BreadcrumbItem {
+<<<<<<< HEAD
     label: React.ReactNode
+=======
+    label: string
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
     href?: string
     icon?: React.ReactNode
 }
@@ -36,7 +40,11 @@ export function ContentHeader({ breadcrumbs, actions, className, tableOfContents
             )}
             style={{
                 backgroundColor: '#FFFFFF',
+<<<<<<< HEAD
                 borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
+=======
+                border: '1px solid rgba(0, 0, 0, 0.06)',
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                 boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.03)'
             }}
         >

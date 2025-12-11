@@ -1,22 +1,37 @@
 // src/pages/teams_chi_nhanh/TeamDetailPage.tsx
+<<<<<<< HEAD
 // UPDATED: Tabs moved to header area, aligned with sidebar
+=======
+// FIXED: TabsList now inside Tabs component
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 
 import * as React from "react";
 import { useParams } from "react-router-dom";
 import { ContentHeader } from "@/pages/components/ContentHeader";
 import { ChannelSidebar } from "@/pages/components/ChannelSidebar";
+<<<<<<< HEAD
 import { ChannelDetailView, ChannelDetailTabsList } from "@/pages/channel-analytics/ChannelDetailView";
 import type { Channel } from "@/types/channel.types";
 import { Home, Users, ChevronLeft, ChevronRight, RefreshCw, Download, Printer } from "lucide-react";
+=======
+import { ChannelDetailView } from "@/pages/channel-analytics/ChannelDetailView";
+import type { Channel } from "@/types/channel.types";
+import { Home, Users } from "lucide-react";
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Info } from "lucide-react";
+<<<<<<< HEAD
 import { Button } from "@/components/ui/button";
 import { useTeamAnalytics } from "./hooks/useTeamAnalytics";
 import { useTeams } from "@/hooks/useTeams";
 import { DateRangePicker } from "@/pages/brand_chi_nhanh/components/DateRangePicker";
+=======
+import { useTeamAnalytics } from "./hooks/useTeamAnalytics";
+import { useTeams } from "@/hooks/useTeams";
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 import {
     TeamHeader,
     TeamOverviewTab,
@@ -53,6 +68,7 @@ export default function TeamAnalyticsPage() {
     // Selected channel state
     const [selectedChannel, setSelectedChannel] = React.useState<Channel | null>(null);
 
+<<<<<<< HEAD
     // Sidebar open/close state
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
@@ -81,6 +97,22 @@ export default function TeamAnalyticsPage() {
         setCustomStartDate(newStartDate);
         setCustomEndDate(newEndDate);
     };
+=======
+    // Date range state
+    const [dateRange, setDateRange] = React.useState<'7' | '30' | '90' | '180'>('30');
+
+    // Calculate actual dates from dateRange
+    const { startDate, endDate } = React.useMemo(() => {
+        const end = new Date();
+        const days = parseInt(dateRange);
+        const start = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+        return {
+            startDate: start.toISOString().split('T')[0],
+            endDate: end.toISOString().split('T')[0]
+        };
+    }, [dateRange]);
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 
     // Fetch analytics data
     const { analytics, loading, error, refetch } = useTeamAnalytics({
@@ -202,6 +234,10 @@ export default function TeamAnalyticsPage() {
                         side="left"
                         mode="inline"
                         onChannelSelect={setSelectedChannel}
+<<<<<<< HEAD
+=======
+                        showDialog={false}
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                     />
                     <div className="flex-1 overflow-y-auto">
                         <div className="max-w-7xl mx-auto p-6">
@@ -229,6 +265,7 @@ export default function TeamAnalyticsPage() {
                 breadcrumbs={[
                     { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                     { label: "Nhóm", href: "/teams" },
+<<<<<<< HEAD
                     {
                         label: (
                             <span
@@ -527,6 +564,196 @@ export default function TeamAnalyticsPage() {
                     </div>
                 </div>
             </Tabs>
+=======
+                    { label: teamName, icon: <Users className="h-4 w-4" /> },
+                ]}
+            />
+
+            <div className="flex flex-1 overflow-hidden">
+                {/* ChannelSidebar - Left Side */}
+                <ChannelSidebar
+                    teamId={teamId}
+                    side="left"
+                    mode="inline"
+                    onChannelSelect={setSelectedChannel}
+                    showDialog={false}
+                />
+
+                {/* Main Content Area */}
+                <div className="flex-1 overflow-y-auto">
+                    {selectedChannel ? (
+                        // Show Channel Detail View when a channel is selected
+                        <ChannelDetailView
+                            channel={selectedChannel}
+                            onBack={() => setSelectedChannel(null)}
+                        />
+                    ) : (
+                        // Show Team Analytics
+                        <div className="max-w-7xl mx-auto p-6 space-y-6">
+                            {/* Loading State for Analytics */}
+                            {loading && !analytics ? (
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        {[1, 2, 3, 4].map((i) => (
+                                            <div key={i} className="h-32 w-full bg-muted animate-pulse rounded-lg" />
+                                        ))}
+                                    </div>
+                                    <div className="h-96 w-full bg-muted animate-pulse rounded-lg" />
+                                </div>
+                            ) : error ? (
+                                // Error State for Analytics
+                                <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950">
+                                    <Info className="h-4 w-4 text-blue-600" />
+                                    <AlertDescription className="text-blue-900 dark:text-blue-100">
+                                        Team <strong>{teamName}</strong> chưa có dữ liệu analytics.
+                                        Vui lòng thêm kênh YouTube và đợi dữ liệu được đồng bộ.
+                                    </AlertDescription>
+                                </Alert>
+                            ) : !analytics ? (
+                                // No Data State
+                                <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950">
+                                    <Info className="h-4 w-4 text-blue-600" />
+                                    <AlertDescription className="text-blue-900 dark:text-blue-100">
+                                        Team <strong>{teamName}</strong> chưa có dữ liệu analytics.
+                                        Vui lòng thêm kênh YouTube và đợi dữ liệu được đồng bộ.
+                                    </AlertDescription>
+                                </Alert>
+                            ) : (
+                                // ============================================
+                                //  TABS - Modern White Design
+                                // ============================================
+                                <Tabs defaultValue="overview" className="space-y-6">
+                                    {/* TABS LIST - Modern Glass Morphism Style */}
+                                    <div className="tabs-sticky-container">
+                                        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                                            <TabsList className="inline-flex h-auto w-full items-center justify-start gap-1 p-1.5 bg-gradient-to-r from-slate-100 via-gray-50 to-slate-100 rounded-xl shadow-sm">
+                                                {/* Overview Tab */}
+                                                <TabsTrigger
+                                                    value="overview"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3] "
+                                                >
+                                                    <span>Tổng Quan</span>
+                                                </TabsTrigger>
+
+                                                {/* Engagement Tab */}
+                                                <TabsTrigger
+                                                    value="engagement"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3] "
+                                                >
+                                                    <span>Tương Tác</span>
+                                                </TabsTrigger>
+
+                                                {/* Revenue Tab */}
+                                                <TabsTrigger
+                                                    value="revenue"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3]"
+                                                >
+                                                    <span>Doanh Thu</span>
+                                                </TabsTrigger>
+
+                                                {/* Traffic Tab */}
+                                                <TabsTrigger
+                                                    value="traffic"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3] "
+                                                >
+                                                    <span>Traffic</span>
+                                                </TabsTrigger>
+
+                                                {/* Devices Tab */}
+                                                <TabsTrigger
+                                                    value="devices"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3]"
+                                                >
+                                                    <span>Thiết Bị</span>
+                                                </TabsTrigger>
+
+                                                {/* Videos Tab */}
+                                                <TabsTrigger
+                                                    value="videos"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3] "
+                                                >
+                                                    <span>Videos</span>
+                                                </TabsTrigger>
+
+                                                {/* Channels Tab */}
+                                                <TabsTrigger
+                                                    value="channels"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3] "
+                                                >
+                                                    <span>Kênh</span>
+                                                </TabsTrigger>
+
+                                                {/* Retention Tab */}
+                                                <TabsTrigger
+                                                    value="retention"
+                                                    className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 data-[state=active]:!bg-[#DEDFE3] "
+                                                >
+                                                    <span>Retention</span>
+                                                </TabsTrigger>
+                                            </TabsList>
+                                        </div>
+                                    </div>
+
+                                    {/* Team Header - Below tabs */}
+                                    <TeamHeader
+                                        teamName={teamName}
+                                        totalChannels={totalChannels}
+                                        channels={channels}
+                                        startDate={new Date(startDate)}
+                                        endDate={new Date(endDate)}
+                                        isLoading={loading}
+                                        onDateChange={(start, end) => {
+                                            // Calculate days from custom date range
+                                            const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+                                            if (days <= 7) setDateRange('7');
+                                            else if (days <= 30) setDateRange('30');
+                                            else if (days <= 90) setDateRange('90');
+                                            else setDateRange('180');
+                                        }}
+                                        onRefresh={refetch}
+                                        onExport={handleExportCSV}
+                                        onPrint={handlePrint}
+                                    />
+
+                                    {/* TAB CONTENTS */}
+                                    <TabsContent value="overview" className="space-y-6">
+                                        <TeamOverviewTab analytics={analytics} />
+                                    </TabsContent>
+
+                                    <TabsContent value="engagement" className="space-y-6">
+                                        <TeamEngagementTab analytics={analytics} />
+                                    </TabsContent>
+
+                                    <TabsContent value="revenue" className="space-y-6">
+                                        <TeamRevenueTab analytics={analytics} />
+                                    </TabsContent>
+
+                                    <TabsContent value="traffic" className="space-y-6">
+                                        <TeamTrafficTab analytics={analytics} />
+                                    </TabsContent>
+
+                                    <TabsContent value="devices" className="space-y-6">
+                                        <TeamDevicesTab analytics={analytics} />
+                                    </TabsContent>
+
+                                    <TabsContent value="videos" className="space-y-6">
+                                        <TeamVideosTab analytics={analytics} />
+                                    </TabsContent>
+
+                                    <TabsContent value="channels" className="space-y-6">
+                                        <TeamChannelsTab analytics={analytics} />
+                                    </TabsContent>
+
+                                    <TabsContent value="retention" className="space-y-6">
+                                        <TeamRetentionTab analytics={analytics} />
+                                    </TabsContent>
+                                </Tabs>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
         </div>
     );
 }

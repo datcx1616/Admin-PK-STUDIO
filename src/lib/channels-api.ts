@@ -155,6 +155,7 @@ export const channelsAPI = {
    * POST /api/channels/:id/assign
    * Assign editor to channel
    * Permission: Admin, Director, Branch Director, Manager
+<<<<<<< HEAD
    * Backend requires: { userId, role }
    */
   async assignEditor(channelId: string, editorData: AssignEditorRequest): Promise<Channel> {
@@ -168,6 +169,20 @@ export const channelsAPI = {
     console.log('📤 [API] Request body:', requestBody);
     console.log('🔗 [API] URL:', `${API_BASE_URL}/channels/${channelId}/assign`);
 
+=======
+   */
+  async assignEditor(channelId: string, editorData: AssignEditorRequest): Promise<Channel> {
+    console.log('🔄 [API] Assigning editor:', { channelId, userId: editorData.userId });
+    
+    const requestBody = {
+      userId: editorData.userId
+      // Backend only expects userId, not role
+    };
+    
+    console.log('📤 [API] Request body:', requestBody);
+    console.log('🔗 [API] URL:', `${API_BASE_URL}/channels/${channelId}/assign`);
+    
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
     const response = await axiosInstance.post(`${API_BASE_URL}/channels/${channelId}/assign`, requestBody);
     const data = response.data;
     if (!data.channel && !data.data) {

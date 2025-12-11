@@ -344,11 +344,19 @@ export function NavBranchHierarchy() {
 
     return (
         <SidebarGroup className="bg-[#F7F7F7]">
+<<<<<<< HEAD
             <div className="flex items-center justify-between px-2 mb-1 group rounded transition-colors cursor-pointer hover:bg-[#EAEBEE]">
                 <SidebarGroupLabel className="mb-0">Tổ chức</SidebarGroupLabel>
                 <button
                     onClick={() => setShowCreateModal(true)}
                     className="h-5 w-5 rounded flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 group-hover:scale-110 active:scale-95 hover:bg-[#DEDFE3]"
+=======
+            <div className="flex items-center justify-between px-2 mb-1 group hover:bg-accent rounded transition-colors cursor-pointer">
+                <SidebarGroupLabel className="mb-0">Tổ chức</SidebarGroupLabel>
+                <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="h-5 w-5 rounded hover:bg-accent flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 group-hover:scale-110 active:scale-95"
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                     title="Thêm chi nhánh"
                 >
                     <Plus className="h-3.5 w-3.5 transition-transform" />
@@ -376,6 +384,7 @@ export function NavBranchHierarchy() {
                                     onMouseEnter={() => setIsHoveredBranchId(branch._id)}
                                     onMouseLeave={() => setIsHoveredBranchId(null)}
                                 >
+<<<<<<< HEAD
                                     {/* 1. ICON - Building2 mặc định, hover thành ChevronRight nếu có team, nếu không thì luôn là Building2 */}
                                     <div
                                         className={cn(
@@ -394,6 +403,24 @@ export function NavBranchHierarchy() {
                                             )} style={{ color: 'oklch(0.145 0 0)' }} />
                                         ) : (
                                             <Building2 className="h-3.5 w-3.5 shrink-0" style={{ color: 'oklch(0.145 0 0)' }} />
+=======
+                                    {/* 1. ICON - Building2 mặc định, hover thành ChevronRight, cả hai đều có thể click để mở/collapse cấp 2 */}
+                                    <div
+                                        className="h-3.5 w-3.5 shrink-0 cursor-pointer flex items-center justify-center"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            toggleBranch(branch._id)
+                                        }}
+                                        title="Mở/đóng chi nhánh"
+                                    >
+                                        {isHoveredBranchId === branch._id ? (
+                                            <ChevronRight className={cn(
+                                                "h-3.5 w-3.5 transition-transform duration-200",
+                                                expandedBranches.has(branch._id) && "rotate-90"
+                                            )} />
+                                        ) : (
+                                            <Building2 className="h-3.5 w-3.5 shrink-0" />
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                                         )}
                                     </div>
 
@@ -406,7 +433,11 @@ export function NavBranchHierarchy() {
                                         {branch.name}
                                     </span>
 
+<<<<<<< HEAD
                                     {/* 3. THRE - Unchanged */}
+=======
+                                    {/* 3. THREE DOTS MENU - Unchanged */}
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                                     <DropdownMenu
                                         open={openBranchDropdown === branch._id}
                                         onOpenChange={(open) => setOpenBranchDropdown(open ? branch._id : null)}
@@ -421,9 +452,14 @@ export function NavBranchHierarchy() {
                                                     setOpenBranchDropdown(branch._id)
                                                 }}
                                                 className={cn(
+<<<<<<< HEAD
                                                     "absolute right-2 p-0.5 rounded cursor-pointer transition-opacity",
                                                     (openBranchDropdown === branch._id ? "opacity-100 bg-[#DEDFE3]" : "opacity-0 group-hover:opacity-100"),
                                                     "hover:bg-[#DEDFE3]"
+=======
+                                                    "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
+                                                    "hover:bg-[#EAEBEE]"
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                                                 )}
                                             >
                                                 <svg
@@ -494,18 +530,31 @@ export function NavBranchHierarchy() {
                                                         onOpenChange={() => toggleTeam(team._id)}
                                                     >
                                                         <SidebarMenuSubItem className="p-0">
+<<<<<<< HEAD
                                                             {/* TEAM ITEM - chỉnh cỡ chữ giống branch */}
                                                             <SidebarMenuSubButton
                                                                 className={cn(
                                                                     "group h-auto py-1.5 px-2 pl-6 relative rounded-md w-full flex items-center gap-2",
+=======
+                                                            {/* TEAM ITEM - Keep original structure for now */}
+                                                            <SidebarMenuSubButton
+                                                                className={cn(
+                                                                    "group relative w-full cursor-pointer rounded-md py-1.5 pl-6 pr-2",
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                                                                     location.pathname === `/teams/${team._id}`
                                                                         ? "bg-[#DEDFE3]"
                                                                         : "hover:bg-[#EAEBEE]"
                                                                 )}
+<<<<<<< HEAD
                                                                 style={{ fontFamily: 'gitbook-content-font, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji', fontSize: '16px', lineHeight: '24px', fontWeight: 360, fontStyle: 'normal', color: 'oklch(0.145 0 0)' }}
                                                                 onClick={() => navigate(`/teams/${team._id}`)}
                                                             >
                                                                 <Users2 className="h-3.5 w-3.5 shrink-0" style={{ color: 'oklch(0.145 0 0)' }} />
+=======
+                                                                onClick={() => navigate(`/teams/${team._id}`)}
+                                                            >
+                                                                <Users2 className="h-3.5 w-3.5 shrink-0" />
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                                                                 <span className="flex-1 truncate pr-6">{team.name}</span>
                                                                 <DropdownMenu
                                                                     open={openTeamDropdown === team._id}
@@ -520,9 +569,14 @@ export function NavBranchHierarchy() {
                                                                                 setOpenTeamDropdown(team._id)
                                                                             }}
                                                                             className={cn(
+<<<<<<< HEAD
                                                                                 "absolute right-2 p-0.5 rounded cursor-pointer transition-opacity",
                                                                                 (openTeamDropdown === team._id ? "opacity-100 bg-[#DEDFE3]" : "opacity-0 group-hover:opacity-100"),
                                                                                 "hover:bg-[#DEDFE3]"
+=======
+                                                                                "absolute right-2 p-0.5 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
+                                                                                "hover:bg-[#EAEBEE]"
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                                                                             )}
                                                                         >
                                                                             <svg

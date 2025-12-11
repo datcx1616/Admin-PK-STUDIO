@@ -18,8 +18,11 @@ interface TeamHeaderProps {
     onDateChange: (startDate: Date, endDate: Date) => void;
     onExport?: () => void;
     onPrint?: () => void;
+<<<<<<< HEAD
     /** Ẩn DateRangePicker nếu được render ở header area */
     showDatePicker?: boolean;
+=======
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 }
 
 export function TeamHeader({
@@ -33,7 +36,10 @@ export function TeamHeader({
     onDateChange,
     onExport,
     onPrint,
+<<<<<<< HEAD
     showDatePicker = true,
+=======
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 }: TeamHeaderProps) {
     return (
         <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-slate-100 via-gray-50 to-slate-100 border border-gray-200/60 shadow-sm">
@@ -72,6 +78,7 @@ export function TeamHeader({
                         </div>
                     </div>
 
+<<<<<<< HEAD
                     {/* Right: Date Range Selector - Ẩn nếu showDatePicker = false */}
                     {showDatePicker && (
                         <DateRangePicker
@@ -80,6 +87,14 @@ export function TeamHeader({
                             onDateChange={onDateChange}
                         />
                     )}
+=======
+                    {/* Right: Date Range Selector */}
+                    <DateRangePicker
+                        startDate={startDate}
+                        endDate={endDate}
+                        onDateChange={onDateChange}
+                    />
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                 </div>
 
                 {/* Second Row: Channels List + Actions */}

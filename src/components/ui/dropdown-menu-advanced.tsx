@@ -13,6 +13,7 @@ export function DropdownMenuAdvanced() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
+<<<<<<< HEAD
                 <button
                     className="relative rounded w-8 h-7 flex items-center justify-center pb-3"
                     style={{
@@ -26,6 +27,9 @@ export function DropdownMenuAdvanced() {
                         color: "rgb(107, 114, 128)",
                     }}
                 >
+=======
+                <button className="relative rounded-lg w-8 h-7 hover:bg-gray-100  p-0 flex items-center justify-center pb-3">
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                     <span className="text-2xl">...</span>
                 </button>
             </DropdownMenuTrigger>

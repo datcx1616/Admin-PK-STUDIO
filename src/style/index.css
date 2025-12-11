@@ -442,7 +442,11 @@ button:focus-visible {
 
 /* Tab Hover */
 [role="tab"]:hover:not([data-state="active"]) {
+<<<<<<< HEAD
   background-color: #F7F7F7;
+=======
+  background-color: #DEDFE3;
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
   color: #374151;
   border-bottom-color: #e5e7eb;
 }

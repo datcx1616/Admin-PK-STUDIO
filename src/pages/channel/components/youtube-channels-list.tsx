@@ -140,7 +140,11 @@ export function YouTubeChannelsList({ onRefetchRequest }: YouTubeChannelsListPro
             const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
             // Thêm timestamp để tránh cache
             const timestamp = new Date().getTime()
+<<<<<<< HEAD
             const response = await axiosInstance.get<ApiResponse>(
+=======
+            const response = await axios.get<ApiResponse>(
+>>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                 `${API_URL}/channels/my-channels?_t=${timestamp}`,
                 {
                     headers: {
