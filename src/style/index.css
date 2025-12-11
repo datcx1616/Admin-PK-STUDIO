@@ -1,0 +1,511 @@
+/* Tab active background color for analytics tabs */
+/* Default input style: red border and shadow on focus */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input:not([type]) {
+  border: 2px solid #e2e8f0; /* gray-200 */
+  box-shadow: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input:focus {
+  border-color: #e53e3e; /* red-600 */
+  box-shadow: 0 0 0 2px #feb2b2; /* red-200 shadow */
+  outline: none;
+}
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* ============================================================================
+   CUSTOM SCROLLBAR STYLING
+   ============================================================================ */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #cbd5e1, #94a3b8);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #64748b, #475569);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(to bottom, #334155, #1e293b);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
+}
+
+*:hover {
+  scrollbar-color: #64748b transparent;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #475569, #334155);
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #64748b, #475569);
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(to bottom, #94a3b8, #64748b);
+    background-clip: padding-box;
+  }
+
+  * {
+    scrollbar-color: #475569 transparent;
+  }
+
+  *:hover {
+    scrollbar-color: #64748b transparent;
+  }
+}
+
+/* Smooth scrollbar animation */
+html {
+  scroll-behavior: smooth;
+}
+/* Scrollbar utilities */
+.scrollbar{scrollbar-gutter:stable!important}
+.scrollbar::-webkit-scrollbar{width:6px!important;height:6px!important}
+.scrollbar::-webkit-scrollbar-track{background-color:transparent!important}
+.scrollbar::-webkit-scrollbar-thumb{background-color:transparent!important;border-radius:4px!important}
+.scrollbar:hover::-webkit-scrollbar-thumb{background-color:var(--sp-color-bg-standout-side-active)!important}
+.no-scrollbar{scrollbar-width:none!important}
+.no-scrollbar::-webkit-scrollbar{display:none!important} */
+/* Custom scrollbar - light color
+::-webkit-scrollbar {
+  width: 12px;
+  background: #e0e0e0;
+}
+::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+/* Firefox */
+html {
+  scrollbar-color: #bdbdbd #e0e0e0;
+  scrollbar-width: thin;
+}
+
+@custom-variant dark (&:is(.dark *));
+:root {
+  font-family: gitbook-content-font, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  line-height: 1.5;
+  font-weight: 360;
+  font-style: normal;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: #EAEBEE; /* Màu hover sidebar theo yêu cầu */
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+a {
+  font-weight: 500;
+  text-decoration: inherit;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button {
+  /* border-radius: 8px; */
+  /* border: 1px solid transparent; */
+  /* padding: 0.6em 1.2em; */
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  /* transition: border-color 0.25s; */
+}
+/* button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+} */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  /* a:hover {
+    color: #747bff;
+  } */
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  /* --color-primary: var(--primary); */
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    font-style: normal;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-weight: 360;
+    font-style: normal;
+  }
+
+  :root {
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+  }
+ 
+  .dark {
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.439 0 0);
+  }
+}
+
+/* ============================================
+   GITBOOK-STYLE TABS - Modern & Beautiful
+   Add to: src/style/index.css
+   ============================================ */
+
+/* Sticky Tabs Container */
+.tabs-sticky-container {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding-bottom: 1rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  /* border-bottom: 1px solid rgba(0, 0, 0, 0.06); */
+  transition: all 0.2s ease;
+}
+
+/* Dark mode sticky container */
+.dark .tabs-sticky-container {
+  background: rgba(248, 245, 245, 0.8);
+  /* border-bottom-color: rgba(255, 255, 255, 0.06); */
+}
+
+/* Tabs List - GitBook Pills Style */
+[role="tablist"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.dark [role="tablist"] {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================
+   TABS - UNDERLINE STYLE (Clean & Minimal)
+   Paste this at the END of: src/style/index.css
+   ============================================ */
+
+/* Sticky Container */
+.tabs-sticky-container {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding-bottom: 1rem;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  /* border-bottom: 1px solid rgba(0, 0, 0, 0.06); */
+  transition: all 0.2s ease;
+}
+
+.dark .tabs-sticky-container {
+  background: rgba(15, 15, 15, 0.95);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Tabs List Container */
+[role="tablist"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  background: #ffffff;
+  /* border-bottom: 1px solid #e5e7eb; */
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+}
+
+.dark [role="tablist"] {
+  background: rgba(15, 15, 15, 1);
+  border-bottom-color: rgba(55, 65, 81, 1);
+}
+
+/* Individual Tab */
+[role="tab"] {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  /* padding: 0.75rem 1rem; */
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  /* border-bottom: 2px solid transparent;
+  border-radius: 0; */
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  outline: none;
+  flex: 1;
+  min-width: fit-content;
+}
+
+.dark [role="tab"] {
+  color: rgba(156, 163, 175, 1);
+}
+
+/* Tab Hover */
+[role="tab"]:hover:not([data-state="active"]) {
+  background-color: #F7F7F7;
+  color: #374151;
+  border-bottom-color: #e5e7eb;
+}
+
+.dark [role="tab"]:hover:not([data-state="active"]) {
+  color: rgba(229, 231, 235, 1);
+  border-bottom-color: rgba(75, 85, 99, 1);
+}
+
+/* Focus State (Accessibility) */
+[role="tab"]:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+/* Scrollbar */
+[role="tablist"]::-webkit-scrollbar {
+  height: 4px;
+}
+
+[role="tablist"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[role="tablist"]::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.dark [role="tablist"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[role="tablist"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.dark [role="tablist"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Content Animation */
+[role="tabpanel"] {
+  animation: fadeInTab 0.2s ease-in-out;
+}
+
+@keyframes fadeInTab {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  [role="tab"] {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+    flex: 0 0 auto;
+  }
+}
