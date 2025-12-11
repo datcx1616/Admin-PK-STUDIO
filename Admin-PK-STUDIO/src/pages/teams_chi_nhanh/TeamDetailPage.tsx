@@ -239,9 +239,8 @@ export default function TeamAnalyticsPage() {
                 <div className="flex items-center bg-white shrink-0">
                     {/* Sidebar header area - có thể đóng/mở */}
                     <div
-                        className={`shrink-0 flex items-center justify-between px-2 h-[42px] border-b border-gray-200 transition-all duration-300 ${
-                            isSidebarOpen ? 'w-[280px] border-r' : 'w-[40px]'
-                        }`}
+                        className={`shrink-0 flex items-center justify-between px-2 h-[42px] border-b border-gray-200 transition-all duration-300 ${isSidebarOpen ? 'w-[280px] border-r' : 'w-[40px]'
+                            }`}
                     >
                         {isSidebarOpen ? (
                             <>
@@ -292,49 +291,49 @@ export default function TeamAnalyticsPage() {
                                 <TabsList className="inline-flex h-auto items-center justify-start gap-1 p-1 bg-transparent">
                                     <TabsTrigger
                                         value="overview"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Tổng Quan
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="engagement"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Tương Tác
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="revenue"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Doanh Thu
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="traffic"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Traffic
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="devices"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Thiết Bị
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="videos"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Videos
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="channels"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Kênh
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="retention"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Retention
                                     </TabsTrigger>
@@ -443,7 +442,7 @@ export default function TeamAnalyticsPage() {
                                     // Analytics Content
                                     <div className="space-y-6">
                                         {/* Team Header */}
-                                        <TeamHeader
+                                        {/* <TeamHeader
                                             teamName={teamName}
                                             totalChannels={totalChannels}
                                             channels={channels}
@@ -455,7 +454,7 @@ export default function TeamAnalyticsPage() {
                                             onExport={handleExportCSV}
                                             onPrint={handlePrint}
                                             showDatePicker={false}
-                                        />
+                                        /> */}
 
                                         {/* TAB CONTENTS */}
                                         <TabsContent value="overview" className="mt-0">

@@ -275,7 +275,7 @@ export function ChannelDetailView({
                 <div className="max-w-7xl mx-auto p-6 space-y-6">
                     <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
                         {/* CHANNEL HEADER - Hiển thị thông tin kênh */}
-                        <ChannelHeader
+                        {/* <ChannelHeader
                             channel={channel}
                             startDate={startDate}
                             endDate={endDate}
@@ -285,7 +285,7 @@ export function ChannelDetailView({
                             quotaUsed={analytics.meta?.quotaUsed}
                             processingTimeMs={analytics.meta?.processingTimeMs}
                             showDatePicker={false}
-                        />
+                        /> */}
 
                         {/* TAB CONTENTS */}
                         {renderTabContents()}
@@ -339,7 +339,7 @@ export function ChannelDetailTabsList({
                         value="overview"
                         onClick={() => onTabChange("overview")}
                         data-state={activeTab === "overview" ? "active" : "inactive"}
-                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                     >
                         Tổng Quan
                     </TabsTrigger>
@@ -347,7 +347,7 @@ export function ChannelDetailTabsList({
                         value="engagement"
                         onClick={() => onTabChange("engagement")}
                         data-state={activeTab === "engagement" ? "active" : "inactive"}
-                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                     >
                         Tương Tác
                     </TabsTrigger>
@@ -355,7 +355,7 @@ export function ChannelDetailTabsList({
                         value="revenue"
                         onClick={() => onTabChange("revenue")}
                         data-state={activeTab === "revenue" ? "active" : "inactive"}
-                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                     >
                         Doanh Thu
                     </TabsTrigger>
@@ -363,7 +363,7 @@ export function ChannelDetailTabsList({
                         value="audience"
                         onClick={() => onTabChange("audience")}
                         data-state={activeTab === "audience" ? "active" : "inactive"}
-                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                     >
                         Khán Giả
                     </TabsTrigger>
@@ -371,7 +371,7 @@ export function ChannelDetailTabsList({
                         value="content"
                         onClick={() => onTabChange("content")}
                         data-state={activeTab === "content" ? "active" : "inactive"}
-                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                     >
                         Nội Dung
                     </TabsTrigger>
@@ -379,7 +379,7 @@ export function ChannelDetailTabsList({
                         value="traffic"
                         onClick={() => onTabChange("traffic")}
                         data-state={activeTab === "traffic" ? "active" : "inactive"}
-                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                     >
                         Traffic
                     </TabsTrigger>
@@ -387,7 +387,7 @@ export function ChannelDetailTabsList({
                         value="devices"
                         onClick={() => onTabChange("devices")}
                         data-state={activeTab === "devices" ? "active" : "inactive"}
-                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                     >
                         Thiết Bị
                     </TabsTrigger>

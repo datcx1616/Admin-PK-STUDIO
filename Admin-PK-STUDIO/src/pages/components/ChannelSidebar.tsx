@@ -436,7 +436,7 @@ export function ChannelSidebar({
                         </ScrollArea>
 
                         {/* Nút Kết nối kênh YouTube */}
-                        <div className="flex justify-center px-3 py-3 pb-18">
+                        <div className="flex justify-center px-3 py-3 pb-4">
                             <Button
                                 variant="ghost"
                                 onClick={handleConnectChannel}
@@ -451,9 +451,9 @@ export function ChannelSidebar({
                                         <Plus className="h-4 w-4 text-gray-400" />
                                     )}
                                 </span>
-                                <Youtube className="h-4 w-4 text-red-500 mr-1" />
+                                {/* <Youtube className="h-4 w-4 text-red-500 mr-1" /> */}
                                 <span className="text-sm">
-                                    {connectingChannel ? 'Đang kết nối...' : 'Kết nối kênh'}
+                                    {connectingChannel ? 'Đang kết nối...' : 'Kết nối kênh...'}
                                 </span>
                             </Button>
                         </div>

@@ -135,9 +135,8 @@ export default function BranchAnalyticsPage() {
                 <div className="flex items-center bg-white shrink-0">
                     {/* Sidebar header area - có thể đóng/mở */}
                     <div
-                        className={`shrink-0 flex items-center justify-between px-2 h-[42px] border-b border-gray-200 transition-all duration-300 ${
-                            isSidebarOpen ? 'w-[280px] border-r' : 'w-[40px]'
-                        }`}
+                        className={`shrink-0 flex items-center justify-between px-2 h-[42px] border-b border-gray-200 transition-all duration-300 ${isSidebarOpen ? 'w-[280px] border-r' : 'w-[40px]'
+                            }`}
                     >
                         {isSidebarOpen ? (
                             <>
@@ -188,61 +187,61 @@ export default function BranchAnalyticsPage() {
                                 <TabsList className="inline-flex h-auto items-center justify-start gap-1 p-1 bg-transparent">
                                     <TabsTrigger
                                         value="overview"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Tổng Quan
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="engagement"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Tương Tác
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="revenue"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Doanh Thu
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="audience"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Khán Giả
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="traffic"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Traffic
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="devices"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Thiết Bị
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="content"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Nội Dung
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="location"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Vị Trí
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="sharing"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Chia Sẻ
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="channels"
-                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#DEDFE3]"
+                                        className="group relative flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100 data-[state=active]:!bg-[#F7F7F7]"
                                     >
                                         Kênh
                                     </TabsTrigger>
@@ -350,14 +349,14 @@ export default function BranchAnalyticsPage() {
                                     // Analytics Content
                                     <div className="space-y-6">
                                         {/* Branch Header */}
-                                        <BranchHeader
+                                        {/* <BranchHeader
                                             branchName={branchName}
                                             branchCode={branchCode}
                                             totalChannels={totalChannels}
                                             channelNames={channelNames}
                                             startDate={startDate}
                                             endDate={endDate}
-                                        />
+                                        /> */}
 
                                         {/* TAB CONTENTS */}
                                         <TabsContent value="overview" className="mt-0">
