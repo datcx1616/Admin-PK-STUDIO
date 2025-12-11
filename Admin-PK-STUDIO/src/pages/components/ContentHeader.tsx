@@ -10,7 +10,7 @@ import { TableOfContents, type TableOfContentsItem } from "@/pages/components/Ta
 import { cn } from "@/lib/utils"
 
 interface BreadcrumbItem {
-    label: string
+    label: React.ReactNode
     href?: string
     icon?: React.ReactNode
 }

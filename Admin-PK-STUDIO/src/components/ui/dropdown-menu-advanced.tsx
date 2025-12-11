@@ -13,7 +13,19 @@ export function DropdownMenuAdvanced() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="relative rounded w-8 h-7 p-0 flex items-center justify-center pb-3">
+                <button
+                    className="relative rounded w-8 h-7 flex items-center justify-center pb-3"
+                    style={{
+                        fontFamily: `gitbook-content-font, ui-sans-serif, system-ui, sans-serif,
+      "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji"`,
+                        fontStyle: "normal",
+                        fontWeight: 500,
+                        fontSize: "14px",
+                        lineHeight: "20px",
+                        color: "rgb(107, 114, 128)",
+                    }}
+                >
                     <span className="text-2xl">...</span>
                 </button>
             </DropdownMenuTrigger>

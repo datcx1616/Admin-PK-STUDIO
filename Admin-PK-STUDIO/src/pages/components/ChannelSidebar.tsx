@@ -368,9 +368,10 @@ export function ChannelSidebar({
                                                     if (e.key === 'Enter') handleChannelClick(channel);
                                                 }}
                                                 className={cn(
-                                                    "group flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors",
-                                                    "hover:bg-gray-50",
-                                                    isActive && "bg-blue-50 border-l-2 border-blue-600"
+                                                    "group flex items-center gap-3 px-6 py-1.5 mx-2 cursor-pointer transition-colors my-1 rounded-lg",
+                                                    isActive
+                                                        ? "bg-[#F7F7F7]"
+                                                        : "hover:bg-[#F7F7F7]"
                                                 )}
                                             >
                                                 {/* Channel Icon/Avatar */}
@@ -387,10 +388,7 @@ export function ChannelSidebar({
                                                 {/* Channel Name - ONLY TEXT */}
                                                 <span
                                                     className={cn(
-                                                        "text-sm truncate flex-1",
-                                                        isActive
-                                                            ? "text-blue-700 font-medium"
-                                                            : "text-gray-700"
+                                                        "text-sm truncate flex-1 text-gray-700"
                                                     )}
                                                     title={channel.name}
                                                 >
@@ -403,7 +401,7 @@ export function ChannelSidebar({
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                                            className="h-6 w-6 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity shrink-0 hover:bg-[#DEDFE3] focus:bg-[#DEDFE3] active:bg-[#DEDFE3]"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
                                                             <MoreHorizontal className="h-4 w-4 text-gray-500" />
