@@ -10,11 +10,27 @@
  */
 
 import * as React from "react"
-import { ChevronRight, ChevronLeft, Youtube, Plus } from "lucide-react"
+import { ChevronRight, ChevronLeft, Youtube, Plus, MoreHorizontal, UserPlus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import { channelsAPI } from "@/lib/channels-api"
 import { branchesAPI } from "@/lib/branches-api"
@@ -22,6 +38,7 @@ import type { Channel } from "@/types/channel.types"
 import { toast } from "sonner"
 import { youtubeApi } from "@/lib/youtubeApi"
 import { SelectTeamDialog } from "./SelectTeamDialog"
+import { AssignEditorDialog } from "./AssignEditorDialog"
 
 interface ChannelSidebarProps {
     branchId?: string
@@ -33,6 +50,12 @@ interface ChannelSidebarProps {
     mode?: "fixed" | "inline"
     onChannelSelect?: (channel: Channel) => void;
     showDialog?: boolean;
+    /** Chiều cao header để đồng bộ với content area */
+    headerHeight?: number;
+    /** Controlled open state từ parent */
+    isOpen?: boolean;
+    /** Callback khi toggle đóng/mở */
+    onToggle?: (isOpen: boolean) => void;
 }
 
 export function ChannelSidebar({
@@ -44,8 +67,23 @@ export function ChannelSidebar({
     side = "left",
     mode = "inline",
     onChannelSelect,
+    headerHeight = 57,
+    isOpen: controlledIsOpen,
+    onToggle,
 }: ChannelSidebarProps) {
-    const [isOpen, setIsOpen] = React.useState(true);
+    // Internal state khi không có controlled state
+    const [internalIsOpen, setInternalIsOpen] = React.useState(true);
+
+    // Sử dụng controlled state nếu có, nếu không dùng internal state
+    const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+
+    const handleToggle = (newState: boolean) => {
+        if (onToggle) {
+            onToggle(newState);
+        } else {
+            setInternalIsOpen(newState);
+        }
+    };
     const [channels, setChannels] = React.useState<Channel[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [activeChannelId, setActiveChannelId] = React.useState<string | null>(null);
@@ -53,6 +91,12 @@ export function ChannelSidebar({
     // State cho dialog chọn nhóm (khi ở chi nhánh)
     const [showSelectTeamDialog, setShowSelectTeamDialog] = React.useState(false);
     const [connectingChannel, setConnectingChannel] = React.useState(false);
+
+    // State cho dropdown menu actions
+    const [showAssignEditorDialog, setShowAssignEditorDialog] = React.useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+    const [selectedChannelForAction, setSelectedChannelForAction] = React.useState<Channel | null>(null);
+    const [deletingChannel, setDeletingChannel] = React.useState(false);
 
     // Fetch channels
     React.useEffect(() => {
@@ -180,6 +224,50 @@ export function ChannelSidebar({
         }
     };
 
+    /**
+     * Mở dialog gán editor cho kênh
+     */
+    const handleAssignEditor = (channel: Channel, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setSelectedChannelForAction(channel);
+        setShowAssignEditorDialog(true);
+    };
+
+    /**
+     * Mở dialog xác nhận xóa kênh
+     */
+    const handleDeleteChannel = (channel: Channel, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setSelectedChannelForAction(channel);
+        setShowDeleteDialog(true);
+    };
+
+    /**
+     * Xác nhận xóa kênh
+     */
+    const confirmDeleteChannel = async () => {
+        if (!selectedChannelForAction) return;
+
+        setDeletingChannel(true);
+        try {
+            await channelsAPI.delete(selectedChannelForAction._id);
+            toast.success(`Đã xóa kênh "${selectedChannelForAction.name}"`);
+            // Reload danh sách kênh
+            await refetchChannels();
+            // Reset active channel nếu đang xem kênh bị xóa
+            if (activeChannelId === selectedChannelForAction._id) {
+                setActiveChannelId(null);
+            }
+        } catch (error) {
+            console.error('Delete channel error:', error);
+            toast.error('Không thể xóa kênh');
+        } finally {
+            setDeletingChannel(false);
+            setShowDeleteDialog(false);
+            setSelectedChannelForAction(null);
+        }
+    };
+
     return (
         <>
             {/* Toggle button khi đóng (fixed mode) */}
@@ -188,7 +276,7 @@ export function ChannelSidebar({
                     <Button
                         variant="default"
                         size="icon"
-                        onClick={() => setIsOpen(true)}
+                        onClick={() => handleToggle(true)}
                         className="h-10 w-10 rounded-full shadow-2xl bg-blue-600 hover:bg-blue-700"
                     >
                         <ChevronRight className="h-5 w-5" />
@@ -206,8 +294,8 @@ export function ChannelSidebar({
                             isOpen ? "w-[280px]" : "w-0"
                         )
                         : cn(
-                            "sticky top-0 h-[calc(100vh-0px)] transition-all duration-300 ease-in-out",
-                            isOpen ? "w-[280px]" : "w-16"  // ✅ CHANGED: w-0 → w-16 (show toggle button)
+                            "h-full transition-all duration-300 ease-in-out shrink-0 overflow-hidden",
+                            isOpen ? "w-[280px]" : "w-0"
                         ),
                     className
                 )}
@@ -219,20 +307,21 @@ export function ChannelSidebar({
             >
                 {isOpen ? (
                     <div className="flex flex-col h-full">
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-900">Danh sách kênh</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                    {loading ? 'Đang tải...' : `${channels.length} kênh`}
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-2">
+                        {/* Header - Ẩn khi headerHeight = 0 (header được render ở parent) */}
+                        {headerHeight > 0 && (
+                            <div
+                                className="flex items-center justify-between px-2 shrink-0"
+                                style={{ height: headerHeight }}
+                            >
+                                <div className="flex items-center gap-1">
+                                    <h3 className="text-sm font-semibold text-gray-900">Danh sách kênh</h3>
+                                    <span className="text-xs text-gray-500">({loading ? '...' : channels.length})</span>
+                                </div>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => setIsOpen(false)}
-                                    className="h-7 w-7 text-gray-500 hover:text-gray-700"
+                                    onClick={() => handleToggle(false)}
+                                    className="h-6 w-6 text-gray-500 hover:text-gray-700"
                                 >
                                     {side === "right" ? (
                                         <ChevronRight className="h-4 w-4" />
@@ -241,7 +330,10 @@ export function ChannelSidebar({
                                     )}
                                 </Button>
                             </div>
-                        </div>
+                        )}
+
+                        {/* Border line dưới header - chỉ hiển thị khi có header */}
+                        {headerHeight > 0 && <div className="border-b border-gray-200" />}
 
                         {/* Channel List */}
                         <ScrollArea className="flex-1">
@@ -278,7 +370,7 @@ export function ChannelSidebar({
                                                     if (e.key === 'Enter') handleChannelClick(channel);
                                                 }}
                                                 className={cn(
-                                                    "flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors",
+                                                    "group flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors",
                                                     "hover:bg-gray-50",
                                                     isActive && "bg-blue-50 border-l-2 border-blue-600"
                                                 )}
@@ -306,6 +398,36 @@ export function ChannelSidebar({
                                                 >
                                                     {channel.name}
                                                 </span>
+
+                                                {/* Dropdown Menu - 3 dots */}
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="w-48">
+                                                        <DropdownMenuItem
+                                                            onClick={(e) => handleAssignEditor(channel, e as unknown as React.MouseEvent)}
+                                                            className="cursor-pointer"
+                                                        >
+                                                            <UserPlus className="h-4 w-4 mr-2 text-blue-600" />
+                                                            <span>Gán cho Editor</span>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={(e) => handleDeleteChannel(channel, e as unknown as React.MouseEvent)}
+                                                            className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                                                        >
+                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                            <span>Xóa kênh</span>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
                                             </div>
                                         );
                                     })
@@ -336,33 +458,14 @@ export function ChannelSidebar({
                             </Button>
                         </div>
                     </div>
-                ) : (
-                    // ✅ CLOSED STATE - Show toggle button at TOP-LEFT
-                    <div className="flex flex-col h-full">
-                        <div className="flex items-start pt-3 pl-4">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setIsOpen(true)}
-                                className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                title="Mở danh sách kênh"
-                            >
-                                {side === "right" ? (
-                                    <ChevronLeft className="h-4 w-4" />
-                                ) : (
-                                    <ChevronRight className="h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                ) : null}
             </div>
 
             {/* Overlay for mobile (fixed mode) */}
             {mode === "fixed" && isOpen && (
                 <div
                     className="fixed inset-0 bg-black/20 z-20 lg:hidden"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => handleToggle(false)}
                 />
             )}
 
@@ -376,6 +479,59 @@ export function ChannelSidebar({
                     onTeamSelect={handleTeamSelected}
                 />
             )}
+
+            {/* Dialog gán editor cho kênh */}
+            <AssignEditorDialog
+                isOpen={showAssignEditorDialog}
+                onClose={() => {
+                    setShowAssignEditorDialog(false);
+                    setSelectedChannelForAction(null);
+                }}
+                channel={selectedChannelForAction}
+                onSuccess={() => {
+                    setShowAssignEditorDialog(false);
+                    setSelectedChannelForAction(null);
+                    refetchChannels();
+                }}
+            />
+
+            {/* Dialog xác nhận xóa kênh */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Xác nhận xóa kênh</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Bạn có chắc chắn muốn xóa kênh <strong>"{selectedChannelForAction?.name}"</strong>?
+                            <br />
+                            Hành động này không thể hoàn tác.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel
+                            onClick={() => {
+                                setShowDeleteDialog(false);
+                                setSelectedChannelForAction(null);
+                            }}
+                        >
+                            Hủy
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDeleteChannel}
+                            disabled={deletingChannel}
+                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                        >
+                            {deletingChannel ? (
+                                <>
+                                    <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                    Đang xóa...
+                                </>
+                            ) : (
+                                'Xóa kênh'
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }

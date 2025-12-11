@@ -17,7 +17,7 @@ import {
     IconMovie,
     IconLink
 } from "@tabler/icons-react";
-import { apiClient } from "@/lib/api-client";
+import { channelsAPI } from "@/lib/channels-api";
 import { toast } from "sonner";
 import { SiteHeader } from "@/pages/channels/components/site-header";
 
@@ -38,20 +38,20 @@ export default function MyChannelsPage() {
 
         const fetchChannels = async () => {
             try {
-                console.log('🔄 Fetching channels for current user...');
-                // Use getChannels which already filters by user role in backend
-                const response = await apiClient.getChannels();
-                console.log('✅ Channels response:', response);
+                console.log('🔄 Fetching MY channels (assigned to current user)...');
+                // Sử dụng API /channels/my-channels để lấy kênh được gán cho user hiện tại
+                const response = await channelsAPI.getMyChannels();
+                console.log('✅ My Channels response:', response);
 
-                if (response?.data) {
-                    setChannels(response.data);
-                    console.log(`📺 Found ${response.data.length} channels`);
-                } else if (Array.isArray(response)) {
+                if (Array.isArray(response)) {
                     setChannels(response);
-                    console.log(`📺 Found ${response.length} channels`);
+                    console.log(`📺 Found ${response.length} assigned channels`);
+                } else if (response?.data) {
+                    setChannels(response.data);
+                    console.log(`📺 Found ${response.data.length} assigned channels`);
                 }
             } catch (error: any) {
-                console.error("❌ Failed to fetch channels", error);
+                console.error("❌ Failed to fetch my channels", error);
                 if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
                     toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
                     setTimeout(() => navigate('/login'), 2000);

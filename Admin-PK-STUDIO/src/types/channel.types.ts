@@ -78,6 +78,7 @@ export interface UpdateChannelRequest {
 
 export interface AssignEditorRequest {
   userId: string;
+  role?: 'editor' | 'manager' | 'viewer';
 }
 
 export interface MoveChannelRequest {

@@ -50,7 +50,7 @@ export const usersAPI = {
    */
   async getAll(filters?: UserFilters): Promise<User[]> {
     const queryParams = new URLSearchParams();
-    
+
     if (filters?.role) queryParams.append('role', filters.role);
     if (filters?.branchId) queryParams.append('branchId', filters.branchId);
     if (filters?.teamId) queryParams.append('teamId', filters.teamId);
@@ -60,13 +60,19 @@ export const usersAPI = {
     const queryString = queryParams.toString();
     const endpoint = queryString ? `/users?${queryString}` : '/users';
 
+    console.log('🔄 [UsersAPI] Fetching users with filters:', filters);
+    console.log('🔗 [UsersAPI] API URL:', `${API_BASE_URL}${endpoint}`);
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
 
     const data = await handleResponse<UsersResponse>(response);
-    
+
+    console.log('✅ [UsersAPI] Response:', data);
+    console.log('📊 [UsersAPI] Total users returned:', (data.users || data.data || (Array.isArray(data) ? data : [])).length);
+
     // Handle different response formats
     return data.users || data.data || (Array.isArray(data) ? data : []);
   },
