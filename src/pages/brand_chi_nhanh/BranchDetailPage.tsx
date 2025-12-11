@@ -1,5 +1,4 @@
-// src/pages/branch-analytics/BranchAnalyticsPage.tsx
-// UPDATED: Tabs moved to top with underline style
+
 
 import * as React from "react";
 import { useParams } from "react-router-dom";
