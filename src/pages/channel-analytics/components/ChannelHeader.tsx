@@ -24,11 +24,8 @@ interface ChannelHeaderProps {
     isLoading: boolean;
     quotaUsed?: number;
     processingTimeMs?: number;
-<<<<<<< HEAD
     /** Ẩn DateRangePicker nếu được render ở header area */
     showDatePicker?: boolean;
-=======
->>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 }
 
 export function ChannelHeader({
@@ -40,10 +37,7 @@ export function ChannelHeader({
     isLoading,
     quotaUsed,
     processingTimeMs,
-<<<<<<< HEAD
     showDatePicker = true,
-=======
->>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 }: ChannelHeaderProps) {
     const handleExportCSV = () => {
         toast.info('Chức năng xuất CSV đang được phát triển');
@@ -103,7 +97,6 @@ export function ChannelHeader({
                         </div>
                     </div>
 
-<<<<<<< HEAD
                     {/* Right: Date Range Selector - Ẩn nếu showDatePicker = false */}
                     {showDatePicker && (
                         <DateRangePicker
@@ -112,14 +105,6 @@ export function ChannelHeader({
                             onDateChange={onDateChange}
                         />
                     )}
-=======
-                    {/* Right: Date Range Selector */}
-                    <DateRangePicker
-                        startDate={startDate}
-                        endDate={endDate}
-                        onDateChange={onDateChange}
-                    />
->>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
                 </div>
 
                 {/* Second Row: Metadata + Actions */}

@@ -27,15 +27,11 @@ interface ChannelAnalytics {
 }
 
 export const youtubeApi = {
-<<<<<<< HEAD
     /**
      * Login YouTube OAuth
      * @param teamId - Optional teamId để tự động gán kênh vào team sau khi kết nối
      */
     login: async (teamId?: string): Promise<void> => {
-=======
-    login: async (): Promise<void> => {
->>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
         try {
             const token = getAuthToken();
 
@@ -47,7 +43,6 @@ export const youtubeApi = {
 
             console.log('📡 Calling /api/youtube/auth...');
 
-<<<<<<< HEAD
             // Lưu teamId vào localStorage để backend callback có thể sử dụng
             if (teamId) {
                 localStorage.setItem('pendingTeamId', teamId);
@@ -59,10 +54,6 @@ export const youtubeApi = {
             // Gọi API với token và teamId (nếu có)
             const params = teamId ? { teamId } : {};
             const response = await axiosInstance.get<AuthResponse>(`${API_URL}/auth`, { params });
-=======
-            // Gọi API với token
-            const response = await axiosInstance.get<AuthResponse>(`${API_URL}/auth`);
->>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 
             console.log('✅ Response:', response.data);
 
@@ -75,7 +66,6 @@ export const youtubeApi = {
             console.log('🚀 Mở popup OAuth...');
 
             // Hiển thị hướng dẫn trước khi mở popup
-<<<<<<< HEAD
             const instruction = teamId
                 ? `
 📺 HƯỚNG DẪN KẾT NỐI KÊNH YOUTUBE
@@ -95,9 +85,6 @@ Bạn sẽ thực hiện các bước sau:
 Click OK để bắt đầu!
                 `.trim()
                 : `
-=======
-            const instruction = `
->>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 📺 HƯỚNG DẪN KẾT NỐI KÊNH YOUTUBE
 
 Bạn sẽ thực hiện các bước sau:
@@ -108,20 +95,12 @@ Bạn sẽ thực hiện các bước sau:
 4️⃣ Chọn Team để gán kênh vào
 5️⃣ Hoàn tất! ✅
 
-<<<<<<< HEAD
 ⚠️ QUAN TRỌNG:
-=======
-⚠️ QUAN TRỌNG: 
->>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 - Đừng đóng popup trước khi thấy thông báo "Kết nối thành công"
 - Popup sẽ tự động đóng sau khi hoàn tất
 
 Click OK để bắt đầu!
-<<<<<<< HEAD
                 `.trim();
-=======
-            `.trim();
->>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
 
             if (!confirm(instruction)) {
                 return;

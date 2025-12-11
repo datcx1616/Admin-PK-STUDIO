@@ -1,8 +1,4 @@
-// src/lib/channels-api.ts
-/**
- * Channel API Client
- * Implements all endpoints from API 4.5 Channel APIs
- */
+
 
 import axiosInstance from './axios-instance';
 import type {
@@ -21,9 +17,7 @@ import type {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-/**
- * Get authorization headers
- */
+
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('authToken');
   return {
@@ -32,9 +26,6 @@ function getAuthHeaders(): HeadersInit {
   };
 }
 
-/**
- * Handle API errors
- */
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = await response.json().catch(() => ({
@@ -155,7 +146,6 @@ export const channelsAPI = {
    * POST /api/channels/:id/assign
    * Assign editor to channel
    * Permission: Admin, Director, Branch Director, Manager
-<<<<<<< HEAD
    * Backend requires: { userId, role }
    */
   async assignEditor(channelId: string, editorData: AssignEditorRequest): Promise<Channel> {
@@ -169,20 +159,6 @@ export const channelsAPI = {
     console.log('📤 [API] Request body:', requestBody);
     console.log('🔗 [API] URL:', `${API_BASE_URL}/channels/${channelId}/assign`);
 
-=======
-   */
-  async assignEditor(channelId: string, editorData: AssignEditorRequest): Promise<Channel> {
-    console.log('🔄 [API] Assigning editor:', { channelId, userId: editorData.userId });
-    
-    const requestBody = {
-      userId: editorData.userId
-      // Backend only expects userId, not role
-    };
-    
-    console.log('📤 [API] Request body:', requestBody);
-    console.log('🔗 [API] URL:', `${API_BASE_URL}/channels/${channelId}/assign`);
-    
->>>>>>> 197243bb845fd7ef1139096c146e88c0013330f8
     const response = await axiosInstance.post(`${API_BASE_URL}/channels/${channelId}/assign`, requestBody);
     const data = response.data;
     if (!data.channel && !data.data) {
