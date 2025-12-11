@@ -1,13 +1,3 @@
-// src/pages/components/ChannelSidebar.tsx
-/**
- * REDESIGNED - Minimal Sidebar
- * Chỉ hiển thị: Checkbox + Icon + Tên kênh
- * Style giống: Editor, Markdown, Images & media...
- *
- * UPDATED: Thêm chức năng kết nối kênh YouTube
- * - Khi ở chi nhánh: Hiện dialog chọn nhóm trước → sau đó mở OAuth
- * - Khi ở nhóm: Mở OAuth trực tiếp với teamId
- */
 
 import * as React from "react"
 import { ChevronRight, ChevronLeft, Youtube, Plus, MoreHorizontal, UserPlus, Trash2 } from "lucide-react"
