@@ -125,7 +125,26 @@ export default function BranchAnalyticsPage() {
                 breadcrumbs={[
                     { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                     { label: "Chi nhánh", href: "/brand" },
-                    { label: branchName, icon: <Building2 className="h-4 w-4" /> },
+                    {
+                        label: (
+                            <span
+                                style={{
+                                    fontFamily: `gitbook-content-font, ui-sans-serif, system-ui, sans-serif,
+          "Apple Color Emoji", "Segoe UI Emoji",
+          "Segoe UI Symbol", "Noto Color Emoji"`,
+                                    fontStyle: "normal",
+                                    fontWeight: 500,
+                                    fontSize: "14px",
+                                    lineHeight: "20px",
+                                    color: "rgb(107, 114, 128)",
+                                }}
+                            >
+                                {branchName}
+                            </span>
+                        ),
+                        // icon: <Building2 className="h-4 w-4" />
+                    }
+
                 ]}
             />
 
@@ -141,7 +160,21 @@ export default function BranchAnalyticsPage() {
                         {isSidebarOpen ? (
                             <>
                                 <div className="flex items-center gap-1">
-                                    <h3 className="text-xs font-semibold text-gray-900">Danh sách kênh</h3>
+                                    <h3
+                                        style={{
+                                            fontFamily: `gitbook-content-font, ui-sans-serif, system-ui, sans-serif,
+            "Apple Color Emoji", "Segoe UI Emoji",
+            "Segoe UI Symbol", "Noto Color Emoji"`,
+                                            fontStyle: "normal",
+                                            fontWeight: 500,
+                                            fontSize: "14px",
+                                            lineHeight: "20px",
+                                            color: "rgb(107, 114, 128)",
+                                        }}
+                                    >
+                                        Danh sách kênh
+                                    </h3>
+
                                 </div>
                                 <Button
                                     variant="ghost"
@@ -255,7 +288,7 @@ export default function BranchAnalyticsPage() {
                                     size="icon"
                                     onClick={refetch}
                                     disabled={loading}
-                                    className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                                    className="h-8 w-8 text-gray-500  hover:bg-[#F7F7F7]"
                                     title="Làm mới"
                                 >
                                     <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -263,7 +296,7 @@ export default function BranchAnalyticsPage() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50"
+                                    className="h-8 w-8 text-gray-500 hover:bg-[#F7F7F7]"
                                     title="Xuất CSV"
                                 >
                                     <Download className="h-4 w-4" />
@@ -272,7 +305,7 @@ export default function BranchAnalyticsPage() {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => window.print()}
-                                    className="h-8 w-8 text-gray-500 hover:text-violet-600 hover:bg-violet-50"
+                                    className="h-8 w-8 text-gray-500 hover:bg-[#F7F7F7]"
                                     title="In"
                                 >
                                     <Printer className="h-4 w-4" />

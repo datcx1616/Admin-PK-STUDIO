@@ -304,7 +304,15 @@ export function ChannelSidebar({
                                 style={{ height: headerHeight }}
                             >
                                 <div className="flex items-center gap-1">
-                                    <h3 className="text-sm font-semibold text-gray-900">Danh sách kênh</h3>
+                                    <h3
+                                        className="font-medium text-[14px] leading-[20px]"
+                                        style={{ color: "rgb(59,69,85) !important" }}
+                                    >
+                                        Danh sách kênh
+                                    </h3>
+
+
+
                                     <span className="text-xs text-gray-500">({loading ? '...' : channels.length})</span>
                                 </div>
                                 <Button

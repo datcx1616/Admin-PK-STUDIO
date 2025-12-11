@@ -94,7 +94,7 @@ export function DateRangePicker({ startDate, endDate, onDateChange }: DateRangeP
         <Popover open={isOpen} onOpenChange={setIsOpen}>
             <PopoverTrigger asChild>
                 <Button
-                    variant="outline"
+                    variant="default"
                     size="sm"
                     className={cn(
                         "group relative overflow-hidden h-9 gap-2 justify-start text-left font-normal",

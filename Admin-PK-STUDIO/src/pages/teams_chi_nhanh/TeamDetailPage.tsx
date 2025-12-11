@@ -229,7 +229,26 @@ export default function TeamAnalyticsPage() {
                 breadcrumbs={[
                     { label: "Trang chủ", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
                     { label: "Nhóm", href: "/teams" },
-                    { label: teamName, icon: <Users className="h-4 w-4" /> },
+                    {
+                        label: (
+                            <span
+                                style={{
+                                    fontFamily: `gitbook-content-font, ui-sans-serif, system-ui, sans-serif,
+          "Apple Color Emoji", "Segoe UI Emoji",
+          "Segoe UI Symbol", "Noto Color Emoji"`,
+                                    fontStyle: "normal",
+                                    fontWeight: 500,
+                                    fontSize: "14px",
+                                    lineHeight: "20px",
+                                    color: "rgb(107, 114, 128)",
+                                }}
+                            >
+                                {teamName}
+                            </span>
+                        ),
+                        // icon: <Users className="h-4 w-4" />
+                    }
+
                 ]}
             />
 
@@ -245,7 +264,20 @@ export default function TeamAnalyticsPage() {
                         {isSidebarOpen ? (
                             <>
                                 <div className="flex items-center gap-1">
-                                    <h3 className="text-xs font-semibold text-gray-900">Danh sách kênh</h3>
+                                    <h3
+                                        style={{
+                                            fontFamily: `gitbook-content-font, ui-sans-serif, system-ui, sans-serif,
+            "Apple Color Emoji", "Segoe UI Emoji",
+            "Segoe UI Symbol", "Noto Color Emoji"`,
+                                            fontStyle: "normal",
+                                            fontWeight: 500,
+                                            fontSize: "14px",
+                                            lineHeight: "20px",
+                                            color: "rgb(107, 114, 128)",
+                                        }}
+                                    >
+                                        Danh sách kênh
+                                    </h3>
                                 </div>
                                 <Button
                                     variant="ghost"
@@ -347,7 +379,7 @@ export default function TeamAnalyticsPage() {
                                     size="icon"
                                     onClick={refetch}
                                     disabled={loading}
-                                    className="h-8 w-8 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+                                    className="h-8 w-8 text-gray-500 hover:bg-[#F7F7F7]"
                                     title="Làm mới"
                                 >
                                     <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -355,7 +387,7 @@ export default function TeamAnalyticsPage() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50"
+                                    className="h-8 w-8 text-gray-500 hover:bg-[#F7F7F7]"
                                     title="Xuất CSV"
                                     onClick={handleExportCSV}
                                 >
@@ -365,7 +397,7 @@ export default function TeamAnalyticsPage() {
                                     variant="ghost"
                                     size="icon"
                                     onClick={handlePrint}
-                                    className="h-8 w-8 text-gray-500 hover:text-violet-600 hover:bg-violet-50"
+                                    className="h-8 w-8 text-gray-500 hover:bg-[#F7F7F7]"
                                     title="In"
                                 >
                                     <Printer className="h-4 w-4" />
